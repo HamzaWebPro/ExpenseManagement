@@ -1,4 +1,14 @@
-export default function Page() {
-  return <h1>Home page!</h1>
+import React from 'react'
+import Counter from './Count'
+
+
+
+const page = () => {
+  return (
+    <div>
+      <Counter />
+    </div>
+  )
 }
- 
+
+export default page
