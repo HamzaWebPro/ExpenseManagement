@@ -13,7 +13,11 @@ const LoginPage = async () => {
   // Vars
   const mode = await getServerMode()
 
-  return <Login mode={mode} />
+
+  return  <div className='flex flex-col justify-center items-center min-bs-[100dvh] p-6'>
+  <Login mode={mode} />
+</div>
+ 
 }
 
 export default LoginPage

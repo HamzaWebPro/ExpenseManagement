@@ -68,7 +68,8 @@ const Logo = ({ color }) => {
         transitionDuration={transitionDuration}
         isBreakpointReached={isBreakpointReached}
       >
-        {themeConfig.templateName}
+        {/* {themeConfig.templateName} */}
+        Admin Panel
       </LogoText>
     </div>
   )

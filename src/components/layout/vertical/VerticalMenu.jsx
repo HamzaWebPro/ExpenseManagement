@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Component Imports
-import { Menu, MenuItem } from '@menu/vertical-menu'
+import { Menu, SubMenu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -52,21 +52,49 @@ const VerticalMenu = ({ scrollMenu }) => {
         popoutMenuOffset={{ mainAxis: 23 }}
         menuItemStyles={menuItemStyles(verticalNavOptions, theme)}
         renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
-        renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
+        renderExpandedMenuItemIcon={{ icon: <i className='text-xs tabler-circle' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
-      >
+      > 
         <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
-          Home
+          Dashboard
         </MenuItem>
-        <MenuItem href='/about' icon={<i className='tabler-info-circle' />}>
-          About
-        </MenuItem>
+
+        <SubMenu label="Users" icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            <MenuItem href={`/table`}>All Users</MenuItem>
+            <MenuItem href={`/about`}>Add User</MenuItem>
+        </SubMenu>
+
+        <MenuSection label="Others">
+
+          <SubMenu icon={<i className='menu-icon icon-base ti tabler-components' />} label="Lavel 1">
+              <MenuItem>Lavel 2</MenuItem>
+              <SubMenu label="Lavel 2">
+                <MenuItem>Lavel 3</MenuItem>
+                <MenuItem>Lavel 3</MenuItem>
+              </SubMenu>
+          </SubMenu>
+          
+          <MenuItem href='/about' icon={<i className='menu-icon icon-base ti tabler-table' />}>
+            About
+          </MenuItem>
+
+        {/* <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem> */}
+        </MenuSection>
+ 
+
+        <SubMenu label="Admin" icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            <MenuItem href={`/user/list`}>All Admin</MenuItem>
+            <MenuItem href={`/user/view`}>Add Admin</MenuItem>
+        </SubMenu>
+
+
+        
       </Menu>
       {/* <Menu
           popoutMenuOffset={{ mainAxis: 23 }}
           menuItemStyles={menuItemStyles(verticalNavOptions, theme)}
           renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
-          renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
+          renderExpandedMenuItemIcon={{ icon: <i className='text-xs tabler-circle' /> }}
           menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
         >
           <GenerateVerticalMenu menuData={menuData(dictionary)} />
