@@ -3,6 +3,8 @@
 // React Imports
 import { useEffect, useRef } from 'react'
 
+import Image from 'next/image'
+
 // Third-party Imports
 import styled from '@emotion/styled'
 
@@ -14,8 +16,10 @@ import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
+
 import { useSettings } from '@core/hooks/useSettings'
-import Image from 'next/image'
+
+
 
 const LogoText = styled.span`
   color: ${({ color }) => color ?? 'var(--mui-palette-text-primary)'};
