@@ -12,12 +12,13 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
+
 import ReduxProvider from './_ReduxProvider'
 
 export const metadata = {
-  title: 'Admin Dashboard',
+  title: 'Expmanager Dashboard',
   description:
-    'Admin Dashboard Template - made by Abubakker'
+    'EXPMANAGER POWERED BY BYTELIBERTY'
 }
 
 const RootLayout = async props => {
@@ -29,12 +30,12 @@ const RootLayout = async props => {
 
   return (
     <html id='__next' lang='en' dir={direction} suppressHydrationWarning>
+      
       <body className='flex flex-col flex-auto is-full min-bs-full'>
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
         <ReduxProvider>
         {children}
         </ReduxProvider>
-    
       </body>
     </html>
   )

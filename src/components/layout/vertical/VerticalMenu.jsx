@@ -54,41 +54,74 @@ const VerticalMenu = ({ scrollMenu }) => {
         renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
         renderExpandedMenuItemIcon={{ icon: <i className='text-xs tabler-circle' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
-      > 
-        <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
-          Dashboard
-        </MenuItem>
-
-        <SubMenu label="Users" icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            <MenuItem href={`/table`}>All Users</MenuItem>
-            <MenuItem href={`/about`}>Add User</MenuItem>
-        </SubMenu>
-
-        <MenuSection label="Others">
-
-          <SubMenu icon={<i className='menu-icon icon-base ti tabler-components' />} label="Lavel 1">
-              <MenuItem>Lavel 2</MenuItem>
-              <SubMenu label="Lavel 2">
-                <MenuItem>Lavel 3</MenuItem>
-                <MenuItem>Lavel 3</MenuItem>
-              </SubMenu>
-          </SubMenu>
-          
-          <MenuItem href='/about' icon={<i className='menu-icon icon-base ti tabler-table' />}>
-            About
+      >
+        {/* superadmin part start */}
+        <MenuSection label='Super Admin'>
+          <MenuItem href='/superadmin_dashboard' icon={<i className='tabler-smart-home' />}>
+            Dashboard
           </MenuItem>
 
-        {/* <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem> */}
+          <SubMenu label='Admin Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            <MenuItem href={`/all_admins`}>All Admins</MenuItem>
+            <MenuItem href={`/add_admin`}>Add Admin</MenuItem>
+          </SubMenu>
+          <MenuItem href='/all_managers' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            All Managers
+          </MenuItem>
+          <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            All Users
+          </MenuItem>
         </MenuSection>
- 
+        {/* superadmin part end */}
 
-        <SubMenu label="Admin" icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            <MenuItem href={`/user/list`}>All Admin</MenuItem>
-            <MenuItem href={`/user/view`}>Add Admin</MenuItem>
-        </SubMenu>
+        {/* admin part start */}
+        <MenuSection label='Admin'>
+          <MenuItem href='/admin_dashboard' icon={<i className='tabler-smart-home' />}>
+            Dashboard
+          </MenuItem>
 
+          <SubMenu label='Manager Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            <MenuItem href={`/all_managers`}>All Managers</MenuItem>
+            <MenuItem href={`/add_manager`}>Add Manager</MenuItem>
+          </SubMenu>
+          <MenuItem href='/add_expense_admin' icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}>
+            Add Expense
+          </MenuItem>
+          <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            All Users
+          </MenuItem>
+        </MenuSection>
+        {/* admin part end */}
+        {/* manager part start */}
+        <MenuSection label='Manager'>
+          <MenuItem href='/manager_dashboard' icon={<i className='tabler-smart-home' />}>
+            Dashboard
+          </MenuItem>
 
-        
+          <SubMenu label='Product Management' icon={<i className='menu-icon icon-base ti tabler-shopping-bag' />}>
+            <MenuItem href={`/all_products`}>All Products</MenuItem>
+            <MenuItem href={`/add_product`}>Add Products</MenuItem>
+          </SubMenu>
+          <SubMenu label='User Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            <MenuItem href={`/all_users`}>All Users</MenuItem>
+            <MenuItem href={`/add_user`}>Add User</MenuItem>
+          </SubMenu>
+          <MenuItem href='/add_expense_manager' icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}>
+            Add Expense
+          </MenuItem>
+          <MenuItem href='/daily_financial_entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+            Daily Financial Entry
+          </MenuItem>
+        </MenuSection>
+        {/* manager part end */}
+        {/* user part start */}
+        <MenuSection label='User'>
+          <MenuItem href='/user_dashboard' icon={<i className='tabler-smart-home' />}>
+            Dashboard
+          </MenuItem>
+        </MenuSection>
+        {/* user part end */}
+        {/* <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem> */}
       </Menu>
       {/* <Menu
           popoutMenuOffset={{ mainAxis: 23 }}
@@ -104,3 +137,11 @@ const VerticalMenu = ({ scrollMenu }) => {
 }
 
 export default VerticalMenu
+
+// <SubMenu icon={<i className='menu-icon icon-base ti tabler-components' />} label='Lavel 1'>
+// <MenuItem>Lavel 2</MenuItem>
+// <SubMenu label='Lavel 2'>
+//   <MenuItem>Lavel 3</MenuItem>
+//   <MenuItem>Lavel 3</MenuItem>
+// </SubMenu>
+// </SubMenu>
