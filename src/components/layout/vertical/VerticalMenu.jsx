@@ -105,6 +105,7 @@ const VerticalMenu = ({ scrollMenu }) => {
           <SubMenu label='User Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
             <MenuItem href={`/all_users`}>All Users</MenuItem>
             <MenuItem href={`/add_user`}>Add User</MenuItem>
+            <MenuItem href={`/manage_user_percentage`}>Manage User Percentage</MenuItem>
           </SubMenu>
           <MenuItem href='/add_expense_manager' icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}>
             Add Expense

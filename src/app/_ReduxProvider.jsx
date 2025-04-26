@@ -7,6 +7,9 @@ import { Provider } from "react-redux";
 import { store } from "./_Store";
 
 const ReduxProvider = ({ children }) => {
+
+
+  
   return (
     <Provider store={store}>
       {children}
