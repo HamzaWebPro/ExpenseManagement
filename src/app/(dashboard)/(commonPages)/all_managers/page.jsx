@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
+
 import CardHeader from '@mui/material/CardHeader'
+
 import TablePagination from '@mui/material/TablePagination'
 
 // Third-party Imports
@@ -34,26 +36,22 @@ import ChevronRight from '@menu/svg/ChevronRight'
 // Style Imports
 import styles from '@core/styles/table.module.css'
 
-
 const defaultData = [
-    {
-      id: 1,
-      avatar: '8.png',
-      fullName: "Korrie O'Crevy",
-      email: 'kocrevy0@thetimes.co.uk',
-      city: 'Krasnosilka',
-      password:"123098",
-      start_date: '09/23/2016',
- contactNumber:"+305349856745",
- gender:"Male",
-      age: 61,
-      experience: '1 Year',
-      status: 2
-    },
-   
-    
-  ]
-  
+  {
+    id: 1,
+    avatar: '8.png',
+    fullName: "Korrie O'Crevy",
+    email: 'kocrevy0@thetimes.co.uk',
+    city: 'Krasnosilka',
+    password: '123098',
+    start_date: '09/23/2016',
+    contactNumber: '+305349856745',
+    gender: 'Male',
+    age: 61,
+    experience: '1 Year',
+    status: 2
+  }
+]
 
 // Column Definitions
 const columnHelper = createColumnHelper()
@@ -124,9 +122,7 @@ const page = () => {
       columnHelper.accessor('start_date', {
         cell: info => info.getValue(),
         header: 'Assign Date'
-      }),
-     
-      
+      })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -198,7 +194,6 @@ const page = () => {
                               desc: <ChevronRight fontSize='1.25rem' className='rotate-90' />
                             }[header.column.getIsSorted()] ?? null}
                           </div>
-                          
                         </>
                       )}
                     </th>
@@ -242,7 +237,5 @@ const page = () => {
     </Card>
   )
 }
- 
+
 export default page
-
-
