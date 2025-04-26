@@ -36,18 +36,7 @@ import { toast } from 'react-toastify'
 
 // Components Imports
 import CustomTextField from '@core/components/mui/TextField'
-import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
-  getPaginationRowModel,
-  getSortedRowModel,
-  flexRender,
-  createColumnHelper
-} from '@tanstack/react-table'
+
 
 
 
