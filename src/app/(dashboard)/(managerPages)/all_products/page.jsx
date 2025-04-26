@@ -83,7 +83,7 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
   return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 }
 
-const page = () => {
+const Page = () => {
   // States
   const [columnFilters, setColumnFilters] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -227,6 +227,6 @@ const page = () => {
   )
 }
  
-export default page
+export default Page
 
 
