@@ -13,6 +13,18 @@ import TablePagination from '@mui/material/TablePagination'
 import Button from '@mui/material/Button'
 
 import classnames from 'classnames'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+  createColumnHelper
+} from '@tanstack/react-table'
 
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
