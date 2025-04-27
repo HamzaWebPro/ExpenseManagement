@@ -1,9 +1,13 @@
 'use client'
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+
 import CryptoJS from 'crypto-js'
-import { dbGetAll, dbAdd, dbDelete } from '@/utils/db'
+
 import Cookies from 'js-cookie'
+
+import { dbGetAll, dbAdd, dbDelete } from '@/utils/db'
+
 
 const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_VITE_ENCRYPTION_KEY
 
