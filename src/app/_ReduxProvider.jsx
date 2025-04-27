@@ -1,18 +1,16 @@
-"use client";
+// _ReduxProvider.jsx
+'use client'
 
-import React from "react";
-
-import { Provider } from "react-redux";
-
-import { store } from "./_Store";
+import { useEffect } from 'react'
+import { Provider } from 'react-redux'
+import store from './_Store'
 
 const ReduxProvider = ({ children }) => {
-  return (
-    <Provider store={store}>
-      {children}
-     
-    </Provider>
-  );
-};
+  useEffect(() => {
+    store.dispatch({ type: 'APP_READY' })
+  }, [])
 
-export default ReduxProvider;
+  return <Provider store={store}>{children}</Provider>
+}
+
+export default ReduxProvider

@@ -10,6 +10,9 @@ const nextConfig = {
         locale: false
       }
     ]
+  },
+  experimental: {
+    middleware: true
   }
 }
 
