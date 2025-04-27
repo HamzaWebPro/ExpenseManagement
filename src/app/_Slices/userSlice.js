@@ -28,6 +28,7 @@ function decryptDataObject(encryptedString) {
     return decrypted.toString(CryptoJS.enc.Utf8)
   } catch (error) {
     console.error('Decryption failed:', error)
+
     return null
   }
 }
@@ -35,7 +36,7 @@ function decryptDataObject(encryptedString) {
 export const fetchItems = createAsyncThunk('user/fetchItems', async () => {
 
   return await dbGetAll()
-  
+
 })
 
 // Slice
@@ -45,6 +46,7 @@ export const userSlice = createSlice({
   initialState: {
     items: [],
     status: 'idle'
+    
   },
   reducers: {
     addItem: (state, action) => {
