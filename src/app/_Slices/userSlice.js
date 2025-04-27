@@ -33,11 +33,14 @@ function decryptDataObject(encryptedString) {
 }
 
 export const fetchItems = createAsyncThunk('user/fetchItems', async () => {
+
   return await dbGetAll()
+  
 })
 
 // Slice
 export const userSlice = createSlice({
+
   name: 'user',
   initialState: {
     items: [],

@@ -17,6 +17,10 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 
+import axios from 'axios'
+
+import { useDispatch } from 'react-redux'
+
 // Component Imports
 import Logo from '@components/layout/shared/Logo'
 import CustomTextField from '@core/components/mui/TextField'
@@ -26,8 +30,8 @@ import themeConfig from '@configs/themeConfig'
 
 // Styled Component Imports
 import AuthIllustrationWrapper from './AuthIllustrationWrapper'
-import axios from 'axios'
-import { useDispatch } from 'react-redux'
+
+
 import { addItem } from '@/app/_Slices/userSlice'
 
 const Login = () => {
@@ -71,7 +75,9 @@ const Login = () => {
     }
 
     setErrors(tempErrors)
+
     return isValid
+
   }
 
   const encodeCredentials = (username, password) => {
@@ -83,7 +89,9 @@ const Login = () => {
     e.preventDefault()
 
     if (!validate()) {
+
       return
+      
     }
     try {
       const response = await axios.post(
