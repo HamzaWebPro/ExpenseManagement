@@ -1,52 +1,21 @@
 'use client'
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
 import CryptoJS from 'crypto-js'
-
-import Cookies from 'js-cookie'
-
 import { dbGetAll, dbAdd, dbDelete } from '@/utils/db'
-
-
-const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_VITE_ENCRYPTION_KEY
-
-function decryptDataObject(encryptedString) {
-  if (!encryptedString) return null
-
-  try {
-    const [ivBase64, encryptedBase64] = encryptedString.split(':')
-    const key = CryptoJS.SHA256(ENCRYPTION_KEY)
-    const iv = CryptoJS.enc.Base64.parse(ivBase64)
-
-    const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
-    })
-
-    return decrypted.toString(CryptoJS.enc.Utf8)
-  } catch (error) {
-    console.error('Decryption failed:', error)
-
-    return null
-  }
-}
+import Cookies from 'js-cookie'
+import decryptDataObject from '@/@menu/utils/decrypt'
 
 export const fetchItems = createAsyncThunk('user/fetchItems', async () => {
-
   return await dbGetAll()
-
 })
 
 // Slice
 export const userSlice = createSlice({
-
   name: 'user',
   initialState: {
     items: [],
     status: 'idle'
-    
   },
   reducers: {
     addItem: (state, action) => {

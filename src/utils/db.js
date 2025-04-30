@@ -20,46 +20,25 @@ if (typeof window !== 'undefined' && typeof indexedDB !== 'undefined') {
 }
 
 export const dbAdd = async item => {
-
-  if (!dbPromise) 
-    
-    return
-  
+  if (!dbPromise) return
   const db = await dbPromise
-
   await db.add(STORE_NAME, item)
-
 }
 
 export const dbGetAll = async () => {
-
-  if (!dbPromise) 
-
-    return 
-  
-  []
-  const db 
-  = await dbPromise
-
-  return 
-  
-  db.getAll(STORE_NAME)
+  if (!dbPromise) return []
+  const db = await dbPromise
+  return db.getAll(STORE_NAME)
 }
 
 export const dbUpdate = async item => {
-  if (!dbPromise) 
-    
-    return
-
+  if (!dbPromise) return
   const db = await dbPromise
   await db.put(STORE_NAME, item)
 }
 
 export const dbDelete = async id => {
-  if (!dbPromise) 
-    
-    return
-
+  if (!dbPromise) return
   const db = await dbPromise
   await db.delete(STORE_NAME, id)
 }
