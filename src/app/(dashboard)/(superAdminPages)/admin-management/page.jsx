@@ -147,7 +147,7 @@ const AdminManagement = () => {
       amount: '',
       address: '',
       telephone: '',
-      status: '',
+      status: 'inactive',
       imageObj: []
     }
   })
@@ -160,7 +160,6 @@ const AdminManagement = () => {
     const newAdmin = {
       ...formData,
       role: 'admin',
-      status: formData.status || 'inactive',
       addBy: 'superAdmin'
     }
 
@@ -595,6 +594,30 @@ const AdminManagement = () => {
                   />
                 </Grid>
 
+                {/* status */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='status'
+                    control={control}
+                    rules={{ required: 'Status is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        select
+                        label='Status'
+                        error={!!errors.status}
+                        helperText={errors.status?.message}
+                        SelectProps={{ native: true }}
+                      >
+                        <option value=''>Select Status</option>
+                        <option value='active'>Active</option>
+                        <option value='inactive'>Inactive</option>
+                      </CustomTextField>
+                    )}
+                  />
+                </Grid>
+
                 {/* Address */}
                 <Grid item xs={12}>
                   <Controller
@@ -699,13 +722,16 @@ const AdminManagement = () => {
             )}
           </table>
         </div>
-        <CSVLink filename='all_admin_report' data={data} target=''>
-          export all admin data
-        </CSVLink>
 
         {/* Pagination */}
         <TablePagination
-          component={() => <TablePaginationComponent table={table} />}
+          component={() => (
+            <TablePaginationComponent table={table}>
+              <CSVLink filename='all_admin' data={data}>
+                Download All
+              </CSVLink>
+            </TablePaginationComponent>
+          )}
           count={table.getFilteredRowModel().rows.length}
           rowsPerPage={table.getState().pagination.pageSize}
           page={table.getState().pagination.pageIndex}

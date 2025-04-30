@@ -80,10 +80,10 @@ const VerticalMenu = ({ scrollMenu }) => {
                 Admin Management
               </MenuItem>
 
-              <MenuItem href='/all_managers' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+              <MenuItem href='/all-managers' icon={<i className='menu-icon icon-base ti tabler-users' />}>
                 All Managers
               </MenuItem>
-              <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+              <MenuItem href='/all-users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
                 All Users
               </MenuItem>
             </MenuSection>
@@ -95,13 +95,13 @@ const VerticalMenu = ({ scrollMenu }) => {
           /* admin part start */
           role === 'admin' && (
             <MenuSection label='Admin'>
-              <MenuItem href='/admin_dashboard' icon={<i className='tabler-smart-home' />}>
+              <MenuItem href='/admin-dashboard' icon={<i className='tabler-smart-home' />}>
                 Dashboard
               </MenuItem>
 
               <SubMenu label='Manager Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                <MenuItem href={`/all_managers`}>All Managers</MenuItem>
-                <MenuItem href={`/add_manager`}>Add Manager</MenuItem>
+                <MenuItem href={`/all-managers`}>All Managers</MenuItem>
+                <MenuItem href={`/add-manager`}>Add Manager</MenuItem>
               </SubMenu>
               <MenuItem
                 href='/add_expense_admin'
@@ -120,25 +120,25 @@ const VerticalMenu = ({ scrollMenu }) => {
           /* manager part start */
           role === 'manager' && (
             <MenuSection label='Manager'>
-              <MenuItem href='/manager_dashboard' icon={<i className='tabler-smart-home' />}>
+              <MenuItem href='/manager-dashboard' icon={<i className='tabler-smart-home' />}>
                 Dashboard
               </MenuItem>
 
               <SubMenu label='Product Management' icon={<i className='menu-icon icon-base ti tabler-shopping-bag' />}>
-                <MenuItem href={`/all_products`}>All Products</MenuItem>
-                <MenuItem href={`/add_product`}>Add Products</MenuItem>
+                <MenuItem href={`/all-products`}>All Products</MenuItem>
+                <MenuItem href={`/add-product`}>Add Products</MenuItem>
               </SubMenu>
               <SubMenu label='User Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                <MenuItem href={`/all_users`}>All Users</MenuItem>
-                <MenuItem href={`/add_user`}>Add User</MenuItem>
+                <MenuItem href={`/all-users`}>All Users</MenuItem>
+                <MenuItem href={`/add-user`}>Add User</MenuItem>
               </SubMenu>
               <MenuItem
-                href='/add_expense_manager'
+                href='/add-expense-manager'
                 icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}
               >
                 Add Expense
               </MenuItem>
-              <MenuItem href='/daily_financial_entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+              <MenuItem href='/daily_financial-entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
                 Daily Financial Entry
               </MenuItem>
             </MenuSection>
@@ -149,7 +149,7 @@ const VerticalMenu = ({ scrollMenu }) => {
           /* user part start */
           role === 'manager' && (
             <MenuSection label='User'>
-              <MenuItem href='/user_dashboard' icon={<i className='tabler-smart-home' />}>
+              <MenuItem href='/user-dashboard' icon={<i className='tabler-smart-home' />}>
                 Dashboard
               </MenuItem>
             </MenuSection>
