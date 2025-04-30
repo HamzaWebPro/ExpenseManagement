@@ -1,3 +1,5 @@
+'use client'
+
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
 
@@ -16,6 +18,9 @@ import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNav
 // Style Imports
 import menuItemStyles from '@core/styles/vertical/menuItemStyles'
 import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
+import Cookies from 'js-cookie'
+import { useEffect, useState } from 'react'
+import decryptDataObject from '@/@menu/utils/decrypt'
 
 const RenderExpandIcon = ({ open, transitionDuration }) => (
   <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
@@ -24,6 +29,14 @@ const RenderExpandIcon = ({ open, transitionDuration }) => (
 )
 
 const VerticalMenu = ({ scrollMenu }) => {
+  const [role, setRole] = useState('')
+  // cookies
+  useEffect(() => {
+    const sessionToken = Cookies.get('sessionToken')
+    const data = JSON.parse(decryptDataObject(sessionToken))?.role
+    setRole(data)
+  }, [])
+
   // Hooks
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
@@ -55,72 +68,94 @@ const VerticalMenu = ({ scrollMenu }) => {
         renderExpandedMenuItemIcon={{ icon: <i className='text-xs tabler-circle' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        {/* superadmin part start */}
-        <MenuSection label='Super Admin'>
-          <MenuItem href='/superadmin_dashboard' icon={<i className='tabler-smart-home' />}>
-            Dashboard
-          </MenuItem>
+        {
+          /* superadmin part start */
 
-          <SubMenu label='Admin Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            <MenuItem href={`/all_admins`}>All Admins</MenuItem>
-            <MenuItem href={`/add_admin`}>Add Admin</MenuItem>
-          </SubMenu>
-          <MenuItem href='/all_managers' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            All Managers
-          </MenuItem>
-          <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            All Users
-          </MenuItem>
-        </MenuSection>
-        {/* superadmin part end */}
+          role === 'superAdmin' && (
+            <MenuSection label='Super Admin'>
+              <MenuItem href='/superadmin-dashboard' icon={<i className='tabler-smart-home' />}>
+                Dashboard
+              </MenuItem>
+              <MenuItem href='/admin-management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                Admin Management
+              </MenuItem>
 
-        {/* admin part start */}
-        <MenuSection label='Admin'>
-          <MenuItem href='/admin_dashboard' icon={<i className='tabler-smart-home' />}>
-            Dashboard
-          </MenuItem>
+              <MenuItem href='/all_managers' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                All Managers
+              </MenuItem>
+              <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                All Users
+              </MenuItem>
+            </MenuSection>
+          )
+          /* superadmin part end */
+        }
 
-          <SubMenu label='Manager Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            <MenuItem href={`/all_managers`}>All Managers</MenuItem>
-            <MenuItem href={`/add_manager`}>Add Manager</MenuItem>
-          </SubMenu>
-          <MenuItem href='/add_expense_admin' icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}>
-            Add Expense
-          </MenuItem>
-          <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            All Users
-          </MenuItem>
-        </MenuSection>
-        {/* admin part end */}
-        {/* manager part start */}
-        <MenuSection label='Manager'>
-          <MenuItem href='/manager_dashboard' icon={<i className='tabler-smart-home' />}>
-            Dashboard
-          </MenuItem>
+        {
+          /* admin part start */
+          role === 'admin' && (
+            <MenuSection label='Admin'>
+              <MenuItem href='/admin_dashboard' icon={<i className='tabler-smart-home' />}>
+                Dashboard
+              </MenuItem>
 
-          <SubMenu label='Product Management' icon={<i className='menu-icon icon-base ti tabler-shopping-bag' />}>
-            <MenuItem href={`/all_products`}>All Products</MenuItem>
-            <MenuItem href={`/add_product`}>Add Products</MenuItem>
-          </SubMenu>
-          <SubMenu label='User Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            <MenuItem href={`/all_users`}>All Users</MenuItem>
-            <MenuItem href={`/add_user`}>Add User</MenuItem>
-          </SubMenu>
-          <MenuItem href='/add_expense_manager' icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}>
-            Add Expense
-          </MenuItem>
-          <MenuItem href='/daily_financial_entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-            Daily Financial Entry
-          </MenuItem>
-        </MenuSection>
-        {/* manager part end */}
-        {/* user part start */}
-        <MenuSection label='User'>
-          <MenuItem href='/user_dashboard' icon={<i className='tabler-smart-home' />}>
-            Dashboard
-          </MenuItem>
-        </MenuSection>
-        {/* user part end */}
+              <SubMenu label='Manager Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                <MenuItem href={`/all_managers`}>All Managers</MenuItem>
+                <MenuItem href={`/add_manager`}>Add Manager</MenuItem>
+              </SubMenu>
+              <MenuItem
+                href='/add_expense_admin'
+                icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}
+              >
+                Add Expense
+              </MenuItem>
+              <MenuItem href='/all_users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                All Users
+              </MenuItem>
+            </MenuSection>
+          )
+          /* admin part end */
+        }
+        {
+          /* manager part start */
+          role === 'manager' && (
+            <MenuSection label='Manager'>
+              <MenuItem href='/manager_dashboard' icon={<i className='tabler-smart-home' />}>
+                Dashboard
+              </MenuItem>
+
+              <SubMenu label='Product Management' icon={<i className='menu-icon icon-base ti tabler-shopping-bag' />}>
+                <MenuItem href={`/all_products`}>All Products</MenuItem>
+                <MenuItem href={`/add_product`}>Add Products</MenuItem>
+              </SubMenu>
+              <SubMenu label='User Management' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                <MenuItem href={`/all_users`}>All Users</MenuItem>
+                <MenuItem href={`/add_user`}>Add User</MenuItem>
+              </SubMenu>
+              <MenuItem
+                href='/add_expense_manager'
+                icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}
+              >
+                Add Expense
+              </MenuItem>
+              <MenuItem href='/daily_financial_entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+                Daily Financial Entry
+              </MenuItem>
+            </MenuSection>
+          )
+          /* manager part end */
+        }
+        {
+          /* user part start */
+          role === 'manager' && (
+            <MenuSection label='User'>
+              <MenuItem href='/user_dashboard' icon={<i className='tabler-smart-home' />}>
+                Dashboard
+              </MenuItem>
+            </MenuSection>
+          )
+          /* user part end */
+        }
         {/* <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem> */}
       </Menu>
       {/* <Menu

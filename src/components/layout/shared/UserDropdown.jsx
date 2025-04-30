@@ -22,6 +22,7 @@ import Button from '@mui/material/Button'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
+import Cookies from 'js-cookie'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -61,8 +62,20 @@ const UserDropdown = () => {
   }
 
   const handleUserLogout = async () => {
-    // Redirect to login page
-    router.push('/login')
+    try {
+      // Clear Redux store
+      // if (settings && settings.dispatch) {
+      //   settings.dispatch(deleteItem(settings.items?.[0]?.id))
+      // }
+
+      // Remove cookie
+      Cookies.remove('sessionToken', { path: '/' })
+
+      // Redirect to login page
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
   }
 
   return (
@@ -96,7 +109,7 @@ const UserDropdown = () => {
             style={{
               transformOrigin: placement === 'bottom-end' ? 'right top' : 'left top'
             }}
-          > 
+          >
             <Paper className={settings.skin === 'bordered' ? 'border shadow-none' : 'shadow-lg'}>
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
@@ -110,7 +123,7 @@ const UserDropdown = () => {
                     </div>
                   </div>
                   <Divider className='mlb-1' />
-             
+
                   <MenuItem className='gap-3 mli-2' onClick={e => handleDropdownClose(e, '/user-account')}>
                     <i className='tabler-user' />
                     <Typography color='text.primary'>My Profile</Typography>

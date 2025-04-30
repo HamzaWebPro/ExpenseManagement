@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -29,11 +29,14 @@ import AuthIllustrationWrapper from './AuthIllustrationWrapper'
 import axios from 'axios'
 import { useDispatch } from 'react-redux'
 import { addItem } from '@/app/_Slices/userSlice'
+import decryptDataObject from '@/@menu/utils/decrypt'
+import { toast } from 'react-toastify'
 
 const Login = () => {
   const loginToken = process.env.NEXT_PUBLIC_VITE_LOGIN_TOKEN
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const dispatch = useDispatch()
+  const router = useRouter()
 
   // States
   const [values, setValues] = useState({ email: '', password: '' })
@@ -82,32 +85,54 @@ const Login = () => {
   const loginHandler = async e => {
     e.preventDefault()
 
+    console.log(values)
+
     if (!validate()) {
       return
-    }
-    try {
-      const response = await axios.post(
-        `${baseUrl}/backend/authentication/login`,
-        {
-          email: 'superAdmin@gmail.com',
-          password: '12345678'
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Basic ${encodeCredentials('user', loginToken)}`
+    } else {
+      try {
+        const response = await axios.post(
+          `${baseUrl}/backend/authentication/login`,
+          {
+            email: values.email,
+            password: values.password
           },
-          maxBodyLength: Infinity
-        }
-      )
+          // {
+          //   email: 'superAdmin@gmail.com',
+          //   password: '12345678'
+          // },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Basic ${encodeCredentials('user', loginToken)}`
+            },
+            maxBodyLength: Infinity
+          }
+        )
+        const userRole = JSON.parse(decryptDataObject(response?.data?.success?.info))?.role || ''
 
-      if (response?.data?.success?.info) {
-        console.log('Login API response:', response.data)
-        dispatch(addItem(response.data.success.info))
+        if (userRole) {
+          console.log('Login API response:', response.data)
+          await dispatch(addItem(response.data.success.info))
+
+          if (userRole === 'admin') {
+            router.push('/admin-dashboard')
+          } else if (userRole === 'superAdmin') {
+            router.push('/superadmin-dashboard')
+          } else if (userRole === 'manager') {
+            router.push('/manager-dashboard')
+          } else if (userRole === 'user') {
+            router.push('/user-dashboard')
+          } else {
+            router.push('/home')
+          }
+          toast.success('login success')
+          return
+        }
+      } catch (error) {
+        console.error('Login error:', error.response ? error.response.data : error.message)
+        toast.error('Login failed. Please check your credentials.')
       }
-    } catch (error) {
-      console.error('Login error:', error.response ? error.response.data : error.message)
-      setErrorMessage('Login failed. Please check your credentials.')
     }
   }
 

@@ -1,5 +1,5 @@
-// middleware.js
 import { NextResponse } from 'next/server'
+import decryptDataObject from './@menu/utils/decrypt'
 
 const PUBLIC_ROUTES = ['/login', '/registration']
 
@@ -8,14 +8,17 @@ export function middleware(request) {
   const sessionToken = request.cookies.get('sessionToken')?.value
 
   console.log('pathname:', pathname)
-  console.log('sessionToken:', sessionToken)
 
-  if (sessionToken && PUBLIC_ROUTES.includes(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url))
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return NextResponse.next()
   }
 
-  if (!sessionToken && !PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith('/_next') && !pathname.includes('.')) {
+  if (!sessionToken && !pathname.startsWith('/_next') && !pathname.includes('.')) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (sessionToken) {
+    return NextResponse.next()
   }
 
   return NextResponse.next()
