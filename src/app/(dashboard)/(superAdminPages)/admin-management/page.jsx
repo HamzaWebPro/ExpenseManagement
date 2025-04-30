@@ -55,35 +55,7 @@ import decryptDataObject from '@/@menu/utils/decrypt'
 import { Box, Typography } from '@mui/material'
 import formatDate from '@/@menu/utils/formatDate'
 
-// Sample Data
-const defaultData = [
-  {
-    id: 1,
-    uname: 'admin1',
-    email: 'admin1@example.com',
-    password: 'password123',
-    franchiseAmount: '5000',
-    status: 'Active',
-    telephone: '1234567890',
-    address: '123 Admin St',
-    designation: 'Super Admin',
-    imageObj: [{ url: '/images/avatars/1.png' }],
-    start_date: '09/23/2023'
-  },
-  {
-    id: 2,
-    uname: 'admin2',
-    email: 'admin2@example.com',
-    password: 'password123',
-    franchiseAmount: '3000',
-    status: 'Inactive',
-    telephone: '9876543210',
-    address: '456 Admin Ave',
-    designation: 'Regional Admin',
-    imageObj: [{ url: '/images/avatars/2.png' }],
-    start_date: '05/15/2023'
-  }
-]
+
 
 // Column Helper
 const columnHelper = createColumnHelper()
