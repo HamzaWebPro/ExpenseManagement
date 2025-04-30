@@ -2,6 +2,7 @@
 
 // React Imports
 import { useState, useEffect, useMemo } from 'react'
+import { CSVLink, CSVDownload } from 'react-csv'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -54,8 +55,6 @@ import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import { Box, Typography } from '@mui/material'
 import formatDate from '@/@menu/utils/formatDate'
-
-
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -292,7 +291,7 @@ const AdminManagement = () => {
 
     try {
       const response = await axios.post(
-       ` ${baseUrl}/backend/authentication/destroy`,
+        ` ${baseUrl}/backend/authentication/destroy`,
         { email, addBy: 'superAdmin' },
         {
           headers: {
@@ -403,572 +402,182 @@ const AdminManagement = () => {
   })
 
   return (
-    <Card>
-      <CardHeader
-        title='Admin Management'
-        action={
-          <div className='flex items-center gap-4'>
-            <DebouncedInput
-              value={globalFilter ?? ''}
-              onChange={value => setGlobalFilter(String(value))}
-              placeholder='Search admins...'
-              className='min-is-[200px]'
-            />
-            <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
-              {showAddForm ? 'Hide Form' : 'Add Admin'}
-            </Button>
-          </div>
-        }
-      />
+    <>
+      <Card>
+        <CardHeader
+          title='Admin Management'
+          action={
+            <div className='flex items-center gap-4'>
+              <DebouncedInput
+                value={globalFilter ?? ''}
+                onChange={value => setGlobalFilter(String(value))}
+                placeholder='Search admins...'
+                className='min-is-[200px]'
+              />
+              <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
+                {showAddForm ? 'Hide Form' : 'Add Admin'}
+              </Button>
+            </div>
+          }
+        />
 
-      {/* Add Admin Form */}
-      {showAddForm && (
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid container spacing={4}>
-              {/* Admin Name */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='uname'
-                  control={control}
-                  rules={{ required: 'Username is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Admin Name'
-                      placeholder='Enter admin name'
-                      error={!!errors.uname}
-                      helperText={errors.uname?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Email */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='email'
-                  control={control}
-                  rules={{
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      type='email'
-                      label='Admin Email'
-                      placeholder='Enter admin email'
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Password */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='password'
-                  control={control}
-                  rules={{
-                    required: 'Password is required',
-                    minLength: {
-                      value: 6,
-                      message: 'Password must be at least 6 characters'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      type={isPasswordShown ? 'text' : 'password'}
-                      label='Admin Password'
-                      placeholder='Enter password'
-                      error={!!errors.password}
-                      helperText={errors.password?.message}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position='end'>
-                            <IconButton
-                              edge='end'
-                              onClick={handleClickShowPassword}
-                              onMouseDown={e => e.preventDefault()}
-                              aria-label='toggle password visibility'
-                            >
-                              {isPasswordShown ? <IconEyeOff /> : <IconEye />}
-                            </IconButton>
-                          </InputAdornment>
-                        )
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Franchise Amount */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='amount'
-                  control={control}
-                  rules={{
-                    required: 'Franchise amount is required',
-                    pattern: {
-                      value: /^[0-9]+$/,
-                      message: 'Please enter a valid number'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Franchise Amount'
-                      placeholder='Enter amount'
-                      type='number'
-                      error={!!errors.amount}
-                      helperText={errors.amount?.message}
-                      InputProps={{
-                        startAdornment: <InputAdornment position='start'>$</InputAdornment>
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Telephone */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='telephone'
-                  control={control}
-                  rules={{
-                    pattern: {
-                      value: /^[0-9]{10,15}$/,
-                      message: 'Please enter a valid phone number'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Telephone'
-                      placeholder='Admin Phone Number'
-                      error={!!errors.telephone}
-                      helperText={errors.telephone?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Image Upload */}
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='imageObj'
-                  control={control}
-                  rules={{
-                    required: 'Please upload an image'
-                  }}
-                  render={({ field: { onChange } }) => (
-                    <CustomImageUploadField
-                      fullWidth
-                      label='Upload Image'
-                      error={!!errors.imageObj}
-                      helperText={errors.imageObj?.message}
-                      onChange={e => {
-                        const file = e.target.files[0]
-                        if (file) {
-                          const reader = new FileReader()
-                          reader.onloadend = () => {
-                            const imageDataUrl = reader.result
-                            setImagePreview(imageDataUrl)
-                            onChange([imageDataUrl])
-                          }
-                          reader.readAsDataURL(file)
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Address */}
-              <Grid item xs={12}>
-                <Controller
-                  name='address'
-                  control={control}
-                  rules={{ required: 'Address is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Address'
-                      placeholder='Enter address'
-                      multiline
-                      rows={3}
-                      error={!!errors.address}
-                      helperText={errors.address?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Designation */}
-              <Grid item xs={12}>
-                <Controller
-                  name='designation'
-                  control={control}
-                  rules={{ required: 'Designation is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Designation'
-                      placeholder='Enter designation'
-                      error={!!errors.designation}
-                      helperText={errors.designation?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              {/* Buttons */}
-              <Grid item xs={12} className='flex gap-4'>
-                <Button variant='contained' type='submit'>
-                  Add Admin
-                </Button>
-                <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
-                  Reset
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        </CardContent>
-      )}
-
-      {/* Admins Table */}
-      <div className='overflow-x-auto'>
-        <table className={styles.table}>
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id} style={{ width: header.getSize() }}>
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={classnames('flex items-center', {
-                          'cursor-pointer select-none': header.column.getCanSort()
-                        })}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{
-                          asc: <ChevronRight fontSize='1.25rem' className='-rotate-90' />,
-                          desc: <ChevronRight fontSize='1.25rem' className='rotate-90' />
-                        }[header.column.getIsSorted()] ?? null}
-                      </div>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          {table.getFilteredRowModel().rows.length === 0 ? (
-            <tbody>
-              <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  No admins found
-                </td>
-              </tr>
-            </tbody>
-          ) : (
-            <tbody>
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className='p-3'>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          )}
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <TablePagination
-        component={() => <TablePaginationComponent table={table} />}
-        count={table.getFilteredRowModel().rows.length}
-        rowsPerPage={table.getState().pagination.pageSize}
-        page={table.getState().pagination.pageIndex}
-        onPageChange={(_, page) => table.setPageIndex(page)}
-      />
-
-      {/* View Admin Dialog */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth='md' fullWidth>
-        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Admin Details</DialogTitle>
-        <DialogContent>
-          {selectedAdmin && (
-            <Box className='p-4'>
-              <Grid container spacing={3}>
+        {/* Add Admin Form */}
+        {showAddForm && (
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={4}>
+                {/* Admin Name */}
                 <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Admin Name
-                    </Typography>
-                    <Typography variant='body1'>{selectedAdmin?.uname}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Email
-                    </Typography>
-                    <Typography variant='body1'>{selectedAdmin.email}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Designation
-                    </Typography>
-                    <Typography variant='body1'>{selectedAdmin.designation}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Status
-                    </Typography>
-                    <Typography variant='body1'>{selectedAdmin.status}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Franchise Amount
-                    </Typography>
-                    <Typography variant='body1'>${selectedAdmin?.amount}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Telephone
-                    </Typography>
-                    <Typography variant='body1'>{selectedAdmin.telephone}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Address
-                    </Typography>
-                    <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap' }}>
-                      {selectedAdmin.address}
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Created Time
-                    </Typography>
-                    <Typography variant='body1'>{formatDate(selectedAdmin.createdAt)}</Typography>
-                  </Box>
-                </Grid>
-                {selectedAdmin.imageObj?.[0]?.url && (
-                  <Grid item xs={12} sm={6} className='flex items-center justify-center'>
-                    <Box
-                      border={1}
-                      borderColor='divider'
-                      p={2}
-                      borderRadius={2}
-                      display='flex'
-                      justifyContent='center'
-                      alignItems='center'
-                      bgcolor='background.paper'
-                    >
-                      <img
-                        src={selectedAdmin.imageObj[0].url}
-                        alt='Admin'
-                        style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain' }}
+                  <Controller
+                    name='uname'
+                    control={control}
+                    rules={{ required: 'Username is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Admin Name'
+                        placeholder='Enter admin name'
+                        error={!!errors.uname}
+                        helperText={errors.uname?.message}
                       />
-                    </Box>
-                  </Grid>
-                )}
-              </Grid>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' color='primary' onClick={() => setViewDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+                    )}
+                  />
+                </Grid>
 
-      {/* Edit Admin Dialog */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth='md' fullWidth>
-        <DialogTitle>Edit Admin</DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleSubmit(handleUpdateAdmin)}>
-            <Grid container spacing={4} className='p-4'>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='uname'
-                  control={control}
-                  rules={{ required: 'Username is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Admin Name'
-                      placeholder='Enter admin name'
-                      error={!!errors.uname}
-                      helperText={errors.uname?.message}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='email'
-                  control={control}
-                  rules={{
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      type='email'
-                      label='Email'
-                      placeholder='Enter admin email'
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='password'
-                  control={control}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      type={isPasswordShown ? 'text' : 'password'}
-                      label='Password'
-                      placeholder='Enter new password (leave blank to keep current)'
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position='end'>
-                            <IconButton
-                              edge='end'
-                              onClick={handleClickShowPassword}
-                              onMouseDown={e => e.preventDefault()}
-                              aria-label='toggle password visibility'
-                            >
-                              {isPasswordShown ? <IconEyeOff /> : <IconEye />}
-                            </IconButton>
-                          </InputAdornment>
-                        )
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='amount'
-                  control={control}
-                  rules={{
-                    required: 'Franchise amount is required',
-                    pattern: {
-                      value: /^[0-9]+$/,
-                      message: 'Please enter a valid number'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Franchise Amount'
-                      placeholder='Enter amount'
-                      type='number'
-                      error={!!errors.amount}
-                      helperText={errors.amount?.message}
-                      InputProps={{
-                        startAdornment: <InputAdornment position='start'>$</InputAdornment>
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='status'
-                  control={control}
-                  rules={{ required: 'Status is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      select
-                      label='Status'
-                      error={!!errors.status}
-                      helperText={errors.status?.message}
-                      SelectProps={{ native: true }}
-                    >
-                      <option value=''>Select Status</option>
-                      <option value='active'>Active</option>
-                      <option value='inactive'>Inactive</option>
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='telephone'
-                  control={control}
-                  rules={{
-                    pattern: {
-                      value: /^[0-9]{10,15}$/,
-                      message: 'Please enter a valid phone number'
-                    }
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Telephone'
-                      placeholder='Phone number'
-                      error={!!errors.telephone}
-                      helperText={errors.telephone?.message}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='imageObj'
-                  control={control}
-                  render={({ field: { onChange } }) => (
-                    <div className='flex flex-col gap-2'>
+                {/* Email */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='email'
+                    control={control}
+                    rules={{
+                      required: 'Email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email address'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type='email'
+                        label='Admin Email'
+                        placeholder='Enter admin email'
+                        error={!!errors.email}
+                        helperText={errors.email?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Password */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='password'
+                    control={control}
+                    rules={{
+                      required: 'Password is required',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type={isPasswordShown ? 'text' : 'password'}
+                        label='Admin Password'
+                        placeholder='Enter password'
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                edge='end'
+                                onClick={handleClickShowPassword}
+                                onMouseDown={e => e.preventDefault()}
+                                aria-label='toggle password visibility'
+                              >
+                                {isPasswordShown ? <IconEyeOff /> : <IconEye />}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Franchise Amount */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='amount'
+                    control={control}
+                    rules={{
+                      required: 'Franchise amount is required',
+                      pattern: {
+                        value: /^[0-9]+$/,
+                        message: 'Please enter a valid number'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Franchise Amount'
+                        placeholder='Enter amount'
+                        type='number'
+                        error={!!errors.amount}
+                        helperText={errors.amount?.message}
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Telephone */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='telephone'
+                    control={control}
+                    rules={{
+                      pattern: {
+                        value: /^[0-9]{10,15}$/,
+                        message: 'Please enter a valid phone number'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Telephone'
+                        placeholder='Admin Phone Number'
+                        error={!!errors.telephone}
+                        helperText={errors.telephone?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Image Upload */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='imageObj'
+                    control={control}
+                    rules={{
+                      required: 'Please upload an image'
+                    }}
+                    render={({ field: { onChange } }) => (
                       <CustomImageUploadField
                         fullWidth
                         label='Upload Image'
+                        error={!!errors.imageObj}
+                        helperText={errors.imageObj?.message}
                         onChange={e => {
                           const file = e.target.files[0]
                           if (file) {
@@ -976,80 +585,475 @@ const AdminManagement = () => {
                             reader.onloadend = () => {
                               const imageDataUrl = reader.result
                               setImagePreview(imageDataUrl)
-                              onChange([{ url: imageDataUrl }])
+                              onChange([imageDataUrl])
                             }
                             reader.readAsDataURL(file)
                           }
                         }}
                       />
-                      {(imagePreview || (selectedAdmin?.imageObj?.[0]?.url && !imagePreview)) && (
-                        <div className='mt-2'>
-                          <img
-                            src={imagePreview || selectedAdmin.imageObj[0].url}
-                            alt='Preview'
-                            className='max-h-[100px] max-w-full object-contain'
-                          />
+                    )}
+                  />
+                </Grid>
+
+                {/* Address */}
+                <Grid item xs={12}>
+                  <Controller
+                    name='address'
+                    control={control}
+                    rules={{ required: 'Address is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Address'
+                        placeholder='Enter address'
+                        multiline
+                        rows={3}
+                        error={!!errors.address}
+                        helperText={errors.address?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Designation */}
+                <Grid item xs={12}>
+                  <Controller
+                    name='designation'
+                    control={control}
+                    rules={{ required: 'Designation is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Designation'
+                        placeholder='Enter designation'
+                        error={!!errors.designation}
+                        helperText={errors.designation?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Buttons */}
+                <Grid item xs={12} className='flex gap-4'>
+                  <Button variant='contained' type='submit'>
+                    Add Admin
+                  </Button>
+                  <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
+                    Reset
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          </CardContent>
+        )}
+
+        {/* Admins Table */}
+        <div className='overflow-x-auto'>
+          <table className={styles.table}>
+            <thead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id} style={{ width: header.getSize() }}>
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={classnames('flex items-center', {
+                            'cursor-pointer select-none': header.column.getCanSort()
+                          })}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {{
+                            asc: <ChevronRight fontSize='1.25rem' className='-rotate-90' />,
+                            desc: <ChevronRight fontSize='1.25rem' className='rotate-90' />
+                          }[header.column.getIsSorted()] ?? null}
                         </div>
                       )}
-                    </div>
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            {table.getFilteredRowModel().rows.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    No admins found
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody>
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id} className='p-3'>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            )}
+          </table>
+        </div>
+        <CSVLink filename='all_admin_report' data={data} target=''>
+          export all admin data
+        </CSVLink>
+
+        {/* Pagination */}
+        <TablePagination
+          component={() => <TablePaginationComponent table={table} />}
+          count={table.getFilteredRowModel().rows.length}
+          rowsPerPage={table.getState().pagination.pageSize}
+          page={table.getState().pagination.pageIndex}
+          onPageChange={(_, page) => table.setPageIndex(page)}
+        />
+
+        {/* View Admin Dialog */}
+        <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth='md' fullWidth>
+          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Admin Details</DialogTitle>
+          <DialogContent>
+            {selectedAdmin && (
+              <Box className='p-4'>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Admin Name
+                      </Typography>
+                      <Typography variant='body1'>{selectedAdmin?.uname}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Email
+                      </Typography>
+                      <Typography variant='body1'>{selectedAdmin.email}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Designation
+                      </Typography>
+                      <Typography variant='body1'>{selectedAdmin.designation}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Status
+                      </Typography>
+                      <Typography variant='body1'>{selectedAdmin.status}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Franchise Amount
+                      </Typography>
+                      <Typography variant='body1'>${selectedAdmin?.amount}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Telephone
+                      </Typography>
+                      <Typography variant='body1'>{selectedAdmin.telephone}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Address
+                      </Typography>
+                      <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap' }}>
+                        {selectedAdmin.address}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Created Time
+                      </Typography>
+                      <Typography variant='body1'>{formatDate(selectedAdmin.createdAt)}</Typography>
+                    </Box>
+                  </Grid>
+                  {selectedAdmin.imageObj?.[0]?.url && (
+                    <Grid item xs={12} sm={6} className='flex items-center justify-center'>
+                      <Box
+                        border={1}
+                        borderColor='divider'
+                        p={2}
+                        borderRadius={2}
+                        display='flex'
+                        justifyContent='center'
+                        alignItems='center'
+                        bgcolor='background.paper'
+                      >
+                        <img
+                          src={selectedAdmin.imageObj[0].url}
+                          alt='Admin'
+                          style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain' }}
+                        />
+                      </Box>
+                    </Grid>
                   )}
-                />
+                </Grid>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button variant='contained' color='primary' onClick={() => setViewDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Edit Admin Dialog */}
+        <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth='md' fullWidth>
+          <DialogTitle>Edit Admin</DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit(handleUpdateAdmin)}>
+              <Grid container spacing={4} className='p-4'>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='uname'
+                    control={control}
+                    rules={{ required: 'Username is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Admin Name'
+                        placeholder='Enter admin name'
+                        error={!!errors.uname}
+                        helperText={errors.uname?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='email'
+                    control={control}
+                    rules={{
+                      required: 'Email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email address'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type='email'
+                        label='Email'
+                        placeholder='Enter admin email'
+                        error={!!errors.email}
+                        helperText={errors.email?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='password'
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type={isPasswordShown ? 'text' : 'password'}
+                        label='Password'
+                        placeholder='Enter new password (leave blank to keep current)'
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                edge='end'
+                                onClick={handleClickShowPassword}
+                                onMouseDown={e => e.preventDefault()}
+                                aria-label='toggle password visibility'
+                              >
+                                {isPasswordShown ? <IconEyeOff /> : <IconEye />}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='amount'
+                    control={control}
+                    rules={{
+                      required: 'Franchise amount is required',
+                      pattern: {
+                        value: /^[0-9]+$/,
+                        message: 'Please enter a valid number'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Franchise Amount'
+                        placeholder='Enter amount'
+                        type='number'
+                        error={!!errors.amount}
+                        helperText={errors.amount?.message}
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='status'
+                    control={control}
+                    rules={{ required: 'Status is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        select
+                        label='Status'
+                        error={!!errors.status}
+                        helperText={errors.status?.message}
+                        SelectProps={{ native: true }}
+                      >
+                        <option value=''>Select Status</option>
+                        <option value='active'>Active</option>
+                        <option value='inactive'>Inactive</option>
+                      </CustomTextField>
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='telephone'
+                    control={control}
+                    rules={{
+                      pattern: {
+                        value: /^[0-9]{10,15}$/,
+                        message: 'Please enter a valid phone number'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Telephone'
+                        placeholder='Phone number'
+                        error={!!errors.telephone}
+                        helperText={errors.telephone?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='imageObj'
+                    control={control}
+                    render={({ field: { onChange } }) => (
+                      <div className='flex flex-col gap-2'>
+                        <CustomImageUploadField
+                          fullWidth
+                          label='Upload Image'
+                          onChange={e => {
+                            const file = e.target.files[0]
+                            if (file) {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                const imageDataUrl = reader.result
+                                setImagePreview(imageDataUrl)
+                                onChange([{ url: imageDataUrl }])
+                              }
+                              reader.readAsDataURL(file)
+                            }
+                          }}
+                        />
+                        {(imagePreview || (selectedAdmin?.imageObj?.[0]?.url && !imagePreview)) && (
+                          <div className='mt-2'>
+                            <img
+                              src={imagePreview || selectedAdmin.imageObj[0].url}
+                              alt='Preview'
+                              className='max-h-[100px] max-w-full object-contain'
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name='address'
+                    control={control}
+                    rules={{ required: 'Address is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Address'
+                        placeholder='Enter address'
+                        multiline
+                        rows={3}
+                        error={!!errors.address}
+                        helperText={errors.address?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name='designation'
+                    control={control}
+                    rules={{ required: 'Designation is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Designation'
+                        placeholder='Enter designation'
+                        error={!!errors.designation}
+                        helperText={errors.designation?.message}
+                      />
+                    )}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <Controller
-                  name='address'
-                  control={control}
-                  rules={{ required: 'Address is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Address'
-                      placeholder='Enter address'
-                      multiline
-                      rows={3}
-                      error={!!errors.address}
-                      helperText={errors.address?.message}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Controller
-                  name='designation'
-                  control={control}
-                  rules={{ required: 'Designation is required' }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      {...field}
-                      fullWidth
-                      label='Designation'
-                      placeholder='Enter designation'
-                      error={!!errors.designation}
-                      helperText={errors.designation?.message}
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </form>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setEditDialogOpen(false)
-              setImagePreview('')
-            }}
-          >
-            Cancel
-          </Button>
-          <Button variant='contained' onClick={handleSubmit(handleUpdateAdmin)}>
-            Save Changes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
+            </form>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setEditDialogOpen(false)
+                setImagePreview('')
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant='contained' onClick={handleSubmit(handleUpdateAdmin)}>
+              Save Changes
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Card>
+    </>
   )
 }
 
-export default AdminManagement
+export default AdminManagement
