@@ -121,7 +121,7 @@ const AdminManagement = () => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
-  const [data, setData] = useState(defaultData)
+  const [data, setData] = useState([])
   const [columnFilters, setColumnFilters] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
