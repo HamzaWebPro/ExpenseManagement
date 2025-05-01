@@ -147,7 +147,7 @@ const Login = () => {
           </Link>
           <div className='flex flex-col gap-1 mbe-6'>
           
-            <Typography>Please sign-in to your account and start the adventure</Typography>
+            <Typography className='text-center'>Please sign-in to your account and start the adventure</Typography>
           </div>
           <form noValidate autoComplete='off' onSubmit={loginHandler} className='flex flex-col gap-6'>
             <CustomTextField
@@ -189,11 +189,11 @@ const Login = () => {
                 {errorMessage}
               </Typography>
             )}
-            <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-1'>
+            <div className='flex flex-wrap items-center justify-center gap-x-3 gap-y-1'>
              
-              <Typography className='text-end' color='primary.main' component={Link} href='/pages/auth/register-v1'>
-                Forgot password?
-              </Typography> Please Contact with Admin.
+              <Typography className='text-end' color='primary.main'>
+                Forgot password? 
+              </Typography> <Typography>Please Contact with Admin.</Typography>
             </div>
             <Button fullWidth variant='contained' type='submit'>
               Login
