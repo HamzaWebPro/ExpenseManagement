@@ -146,7 +146,7 @@ const Login = () => {
             <Logo />
           </Link>
           <div className='flex flex-col gap-1 mbe-6'>
-            <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
+          
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
           <form noValidate autoComplete='off' onSubmit={loginHandler} className='flex flex-col gap-6'>
@@ -190,10 +190,10 @@ const Login = () => {
               </Typography>
             )}
             <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-1'>
-              <FormControlLabel control={<Checkbox />} label='Remember me' />
+             
               <Typography className='text-end' color='primary.main' component={Link} href='/pages/auth/register-v1'>
                 Forgot password?
-              </Typography>
+              </Typography> Please Contact with Admin.
             </div>
             <Button fullWidth variant='contained' type='submit'>
               Login

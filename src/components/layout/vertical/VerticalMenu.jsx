@@ -2,7 +2,7 @@
 
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
-
+import { useEffect, useState } from 'react'
 // Third-party Imports
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
@@ -19,7 +19,7 @@ import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNav
 import menuItemStyles from '@core/styles/vertical/menuItemStyles'
 import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
 import Cookies from 'js-cookie'
-import { useEffect, useState } from 'react'
+
 import decryptDataObject from '@/@menu/utils/decrypt'
 
 const RenderExpandIcon = ({ open, transitionDuration }) => (
@@ -30,7 +30,7 @@ const RenderExpandIcon = ({ open, transitionDuration }) => (
 
 const VerticalMenu = ({ scrollMenu }) => {
   const [role, setRole] = useState('')
-  // cookies
+  // get user role
   useEffect(() => {
     const sessionToken = Cookies.get('sessionToken')
     const data = JSON.parse(decryptDataObject(sessionToken))?.role
@@ -138,7 +138,7 @@ const VerticalMenu = ({ scrollMenu }) => {
               >
                 Add Expense
               </MenuItem>
-              <MenuItem href='/daily_financial-entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
+              <MenuItem href='/daily-financial-entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
                 Daily Financial Entry
               </MenuItem>
             </MenuSection>
@@ -147,7 +147,7 @@ const VerticalMenu = ({ scrollMenu }) => {
         }
         {
           /* user part start */
-          role === 'manager' && (
+          role === 'user' && (
             <MenuSection label='User'>
               <MenuItem href='/user-dashboard' icon={<i className='tabler-smart-home' />}>
                 Dashboard

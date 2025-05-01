@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
@@ -23,6 +23,7 @@ import Button from '@mui/material/Button'
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
 import Cookies from 'js-cookie'
+import decryptDataObject from '@/@menu/utils/decrypt'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -37,7 +38,7 @@ const BadgeContentSpan = styled('span')({
 const UserDropdown = () => {
   // States
   const [open, setOpen] = useState(false)
-
+  const [userData, setUserData] = useState('')
   // Refs
   const anchorRef = useRef(null)
 
@@ -78,8 +79,16 @@ const UserDropdown = () => {
     }
   }
 
+  // get login user data
+  useEffect(() => {
+    const sessionToken = Cookies.get('sessionToken')
+    const data = JSON.parse(decryptDataObject(sessionToken))
+    setUserData(data)
+  }, [])
+
   return (
     <>
+   
       <Badge
         ref={anchorRef}
         overlap='circular'
@@ -89,8 +98,8 @@ const UserDropdown = () => {
       >
         <Avatar
           ref={anchorRef}
-          alt='John Doe'
-          src='/images/avatars/1.png'
+          alt={userData.uname}
+          src={userData.photoURL}
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
         />
@@ -114,12 +123,12 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
                   <div className='flex items-center gap-2 plb-2 pli-6' tabIndex={-1}>
-                    <Avatar alt='John Doe' src='/images/avatars/1.png' />
+                    <Avatar alt={userData.uname} src={userData.photoURL} />
                     <div className='flex flex-col items-start'>
                       <Typography className='font-medium' color='text.primary'>
-                        John Doe
+                      {userData.uname}
                       </Typography>
-                      <Typography variant='caption'>admin@vuexy.com</Typography>
+                      <Typography variant='caption'>{userData.email}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />

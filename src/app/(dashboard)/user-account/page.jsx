@@ -2,7 +2,7 @@
  
 // React Imports
 import { useState } from 'react'
-
+import { useEffect, useRef } from 'react'
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 import Card from '@mui/material/Card'
@@ -11,7 +11,8 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
 import Chip from '@mui/material/Chip'
-
+import Cookies from 'js-cookie'
+import decryptDataObject from '@/@menu/utils/decrypt'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
@@ -37,6 +38,7 @@ const AccountDetails = () => {
   // States
   const [formData, setFormData] = useState(initialData)
   const [fileInput, setFileInput] = useState('')
+  const [userData, setUserData] = useState('')
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
   const [language, setLanguage] = useState(['English'])
 
@@ -71,11 +73,18 @@ const AccountDetails = () => {
     setImgSrc('/images/avatars/1.png')
   }
 
+  // get login user data
+    useEffect(() => {
+      const sessionToken = Cookies.get('sessionToken')
+      const data = JSON.parse(decryptDataObject(sessionToken))
+      setUserData(data)
+    }, [])
+
   return (
     <Card>
       <CardContent className='mbe-4'>
         <div className='flex items-center gap-6 max-sm:flex-col'>
-          <img height={100} width={100} className='rounded' src={imgSrc} alt='Profile' />
+          <img height={100} width={100} className='rounded' src={userData.photoURL} alt='Profile' />
           <div className='flex flex-col flex-grow gap-4'>
             <div className='flex flex-col gap-4 sm:flex-row'>
               <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
@@ -103,27 +112,19 @@ const AccountDetails = () => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='First Name'
-                value={formData.firstName}
-                placeholder='John'
+                label='User Name'
+                value={userData.uname}
+                placeholder='Enter Your Name'
                 onChange={e => handleFormChange('firstName', e.target.value)}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                fullWidth
-                label='Last Name'
-                value={formData.lastName}
-                placeholder='Doe'
-                onChange={e => handleFormChange('lastName', e.target.value)}
-              />
-            </Grid>
+           
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
                 label='Email'
-                value={formData.email}
-                placeholder='john.doe@gmail.com'
+                value={userData.email}
+                placeholder='Enter Your Email'
                 onChange={e => handleFormChange('email', e.target.value)}
               />
             </Grid>
@@ -140,8 +141,8 @@ const AccountDetails = () => {
               <CustomTextField
                 fullWidth
                 label='Phone Number'
-                value={formData.phoneNumber}
-                placeholder='+1 (234) 567-8901'
+                value={userData.telephone}
+                placeholder='Enter Your Phone Number'
                 onChange={e => handleFormChange('phoneNumber', e.target.value)}
               />
             </Grid>
@@ -149,8 +150,8 @@ const AccountDetails = () => {
               <CustomTextField
                 fullWidth
                 label='Address'
-                value={formData.address}
-                placeholder='Address'
+                value={userData.address}
+                placeholder='Enter Your Address'
                 onChange={e => handleFormChange('address', e.target.value)}
               />
             </Grid>

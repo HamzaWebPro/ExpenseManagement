@@ -330,6 +330,10 @@ const AdminManagement = () => {
         cell: info => info.getValue(),
         header: 'Email'
       }),
+      columnHelper.accessor('amount', {
+        cell: info => info.getValue(),
+        header: 'Franchise Amount(€)'
+      }),
       columnHelper.accessor('designation', {
         cell: info => info.getValue(),
         header: 'Designation'
@@ -728,7 +732,9 @@ const AdminManagement = () => {
           component={() => (
             <TablePaginationComponent table={table}>
               <CSVLink filename='all_admin' data={data}>
-                Download All
+              <Button variant='contained'>
+              Export All Admin
+              </Button>
               </CSVLink>
             </TablePaginationComponent>
           )}
