@@ -3,7 +3,11 @@ import React from 'react'
 const page = () => {
   return (
     <div>
-      add user
+Product Name, Price, Description
+<br />
+list of all product with edit delete 
+
+
     </div>
   )
 }
