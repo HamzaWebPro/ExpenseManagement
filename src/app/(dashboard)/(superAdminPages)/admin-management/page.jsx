@@ -157,12 +157,6 @@ const AdminManagement = () => {
 
   // Form Submit Handler
   const onSubmit = async formData => {
-    const newAdmin = {
-      ...formData,
-      role: 'admin',
-      addBy: 'superAdmin'
-    }
-
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -176,7 +170,7 @@ const AdminManagement = () => {
       const response = await axios.post(
         `${baseUrl}/backend/authentication/store`,
         {
-          ...newAdmin
+          ...formData
         },
         {
           headers: {
@@ -214,6 +208,7 @@ const AdminManagement = () => {
 
     // Reset form with admin data
     reset({
+      id: admin._id,
       uname: admin.uname,
       email: admin.email,
       password: '',
@@ -237,12 +232,12 @@ const AdminManagement = () => {
 
   // Update Admin
   const handleUpdateAdmin = async formData => {
+    console.log('formData for update', formData)
+
     if (!selectedAdmin) return
 
     const updatedAdmin = {
       ...formData,
-      id: selectedAdmin.id,
-
       imageObj: formData.imageObj.length > 0 ? formData.imageObj : selectedAdmin.imageObj || []
     }
 
@@ -256,7 +251,7 @@ const AdminManagement = () => {
     })
 
     try {
-      const response = await axios.post(`${baseUrl}/backend/authentication/update, updatedAdmin`, {
+      const response = await axios.post(`${baseUrl}/backend/authentication/update`, updatedAdmin, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
@@ -265,10 +260,10 @@ const AdminManagement = () => {
       })
 
       toast.success('Admin Updated Successfully!')
-      fetchAdmin()
+      fetchAdmin() // ফর্ম আপডেট হলে রিফ্রেশ করার জন্য
       setEditDialogOpen(false)
-      reset()
-      setImagePreview('')
+      reset() // ফর্ম রিসেট
+      setImagePreview('') // প্রিভিউ রিসেট
     } catch (error) {
       console.error('Error updating admin:', error)
       toast.error('Failed to update admin')
@@ -732,9 +727,7 @@ const AdminManagement = () => {
           component={() => (
             <TablePaginationComponent table={table}>
               <CSVLink filename='all_admin' data={data}>
-              <Button variant='contained'>
-              Export All Admin
-              </Button>
+                <Button variant='contained'>Export All Admin</Button>
               </CSVLink>
             </TablePaginationComponent>
           )}
@@ -1004,6 +997,8 @@ const AdminManagement = () => {
                         <CustomImageUploadField
                           fullWidth
                           label='Upload Image'
+                          error={!!errors.imageObj}
+                          helperText={errors.imageObj?.message}
                           onChange={e => {
                             const file = e.target.files[0]
                             if (file) {
@@ -1011,7 +1006,7 @@ const AdminManagement = () => {
                               reader.onloadend = () => {
                                 const imageDataUrl = reader.result
                                 setImagePreview(imageDataUrl)
-                                onChange([{ url: imageDataUrl }])
+                                onChange([imageDataUrl])
                               }
                               reader.readAsDataURL(file)
                             }

@@ -217,7 +217,7 @@ const AdminManagement = () => {
       email: manager.email,
       password: '',
       designation: manager.designation,
-     
+
       address: manager.address,
       telephone: manager.telephone,
       status: manager.status,
@@ -329,7 +329,7 @@ const AdminManagement = () => {
         cell: info => info.getValue(),
         header: 'Email'
       }),
-     
+
       columnHelper.accessor('status', {
         cell: info => (
           <span
@@ -506,8 +506,6 @@ const AdminManagement = () => {
                   />
                 </Grid>
 
-              
-
                 {/* Telephone */}
                 <Grid item xs={12} sm={6}>
                   <Controller
@@ -608,7 +606,6 @@ const AdminManagement = () => {
                   />
                 </Grid>
 
-
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button variant='contained' type='submit'>
@@ -679,9 +676,7 @@ const AdminManagement = () => {
           component={() => (
             <TablePaginationComponent table={table}>
               <CSVLink filename='all_manager' data={data}>
-              <Button variant='contained'>
-              Export All Manager
-              </Button>
+                <Button variant='contained'>Export All Manager</Button>
               </CSVLink>
             </TablePaginationComponent>
           )}
@@ -722,7 +717,7 @@ const AdminManagement = () => {
                       <Typography variant='body1'>{selectedManager.status}</Typography>
                     </Box>
                   </Grid>
-            
+
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
@@ -981,7 +976,6 @@ const AdminManagement = () => {
                     )}
                   />
                 </Grid>
-             
               </Grid>
             </form>
           </DialogContent>
