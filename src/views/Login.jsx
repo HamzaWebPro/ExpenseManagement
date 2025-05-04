@@ -9,13 +9,13 @@ import { useParams, useRouter } from 'next/navigation'
 
 // MUI Imports
 import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import Checkbox from '@mui/material/Checkbox';
-import Button from '@mui/material/Button';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import Checkbox from '@mui/material/Checkbox'
+import Button from '@mui/material/Button'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 // Component Imports
 import Logo from '@components/layout/shared/Logo'
@@ -85,7 +85,7 @@ const Login = () => {
   const loginHandler = async e => {
     e.preventDefault()
 
-    console.log(values)
+   
 
     if (!validate()) {
       return
@@ -126,18 +126,17 @@ const Login = () => {
           } else {
             router.push('/home')
           }
-          toast.success('login success')
+          toast.success(response?.data?.success?.message)
           return
-        }else{
+        } else {
           toast.error(response?.data?.error?.message)
         }
       } catch (error) {
         console.error('Login error:', error.response ? error.response.data : error.message)
-        
       }
     }
   }
-// sss
+  // sss
   return (
     <AuthIllustrationWrapper>
       <Card className='flex flex-col sm:is-[450px]'>
@@ -146,7 +145,6 @@ const Login = () => {
             <Logo />
           </Link>
           <div className='flex flex-col gap-1 mbe-6'>
-          
             <Typography className='text-center'>Please sign-in to your account and start the adventure</Typography>
           </div>
           <form noValidate autoComplete='off' onSubmit={loginHandler} className='flex flex-col gap-6'>
@@ -190,10 +188,10 @@ const Login = () => {
               </Typography>
             )}
             <div className='flex flex-wrap items-center justify-center gap-x-3 gap-y-1'>
-             
               <Typography className='text-end' color='primary.main'>
-                Forgot password? 
-              </Typography> <Typography>Please Contact with Admin.</Typography>
+                Forgot password?
+              </Typography>{' '}
+              <Typography>Please Contact with Admin.</Typography>
             </div>
             <Button fullWidth variant='contained' type='submit'>
               Login
@@ -206,7 +204,3 @@ const Login = () => {
 }
 
 export default Login
-
-
-
-

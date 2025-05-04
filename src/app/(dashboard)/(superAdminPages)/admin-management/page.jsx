@@ -165,7 +165,6 @@ const AdminManagement = () => {
       postToken: backendPostToken,
       loginToken: token
     })
-
     try {
       const response = await axios.post(
         `${baseUrl}/backend/authentication/store`,
@@ -183,14 +182,13 @@ const AdminManagement = () => {
 
       console.log(response)
 
-      toast.success('Admin Created Successfully!')
+      toast.success(response?.data?.success?.message)
       fetchAdmin()
       reset()
       setShowAddForm(false)
       setImagePreview('')
     } catch (error) {
-      console.error('Error creating admin:', error)
-      toast.error('Failed to create admin')
+      toast.error(error?.response?.data?.error?.message)
     }
   }
 
