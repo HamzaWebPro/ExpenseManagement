@@ -258,10 +258,10 @@ const AdminManagement = () => {
       })
 
       toast.success('Admin Updated Successfully!')
-      fetchAdmin() // ফর্ম আপডেট হলে রিফ্রেশ করার জন্য
+      fetchAdmin()
       setEditDialogOpen(false)
-      reset() // ফর্ম রিসেট
-      setImagePreview('') // প্রিভিউ রিসেট
+      reset()
+      setImagePreview('')
     } catch (error) {
       console.error('Error updating admin:', error)
       toast.error('Failed to update admin')
@@ -269,7 +269,7 @@ const AdminManagement = () => {
   }
 
   // Delete Admin
-  const handleDeleteAdmin = async email => {
+  const handleDeleteAdmin = async id => {
     const confirm = window.confirm('Are you sure you want to delete this admin?')
     if (!confirm) return
     let token = decryptDataObject(sessionToken)
@@ -284,7 +284,7 @@ const AdminManagement = () => {
     try {
       const response = await axios.post(
         ` ${baseUrl}/backend/authentication/destroy`,
-        { email, addBy: 'superAdmin' },
+        { id },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -362,7 +362,7 @@ const AdminManagement = () => {
             <IconButton onClick={() => handleEditAdmin(info.row.original)}>
               <PencilOutline className='text-textPrimary' />
             </IconButton>
-            <IconButton onClick={() => handleDeleteAdmin(info.row.original.email)}>
+            <IconButton onClick={() => handleDeleteAdmin(info.row.original._id)}>
               <DeleteOutline className='text-textPrimary' />
             </IconButton>
           </div>

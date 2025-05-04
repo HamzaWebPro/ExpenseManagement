@@ -202,6 +202,7 @@ const AdminManagement = () => {
     setSelectedManager(manager)
 
     reset({
+      id: manager._id,
       uname: manager.uname,
       email: manager.email,
       password: '',
@@ -223,7 +224,7 @@ const AdminManagement = () => {
     setEditDialogOpen(true)
   }
 
-  // Update Admin
+  // Update Manager
   const handleUpdateManager = async formData => {
     console.log('formData for update', formData)
 
@@ -251,9 +252,10 @@ const AdminManagement = () => {
         },
         maxBodyLength: Infinity
       })
+      console.log(response)
 
       toast.success('Admin Updated Successfully!')
-      fetchAdmin()
+      fetchManager()
       setEditDialogOpen(false)
       reset()
       setImagePreview('')
@@ -264,7 +266,7 @@ const AdminManagement = () => {
   }
 
   // Delete Admin
-  const handleDeleteManager = async email => {
+  const handleDeleteManager = async id => {
     const confirm = window.confirm('Are you sure you want to delete this admin?')
     if (!confirm) return
     let token = decryptDataObject(sessionToken)
@@ -279,7 +281,7 @@ const AdminManagement = () => {
     try {
       const response = await axios.post(
         ` ${baseUrl}/backend/authentication/destroy`,
-        { email, addBy: 'superAdmin' },
+        { id, addBy: 'superAdmin' },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -292,7 +294,7 @@ const AdminManagement = () => {
       console.log(response)
 
       toast.success('Admin Deleted Successfully!')
-      fetchAdmin()
+      fetchManager()
     } catch (error) {
       console.error('Error deleting admin:', error)
       toast.error('Failed to delete admin')
@@ -336,7 +338,6 @@ const AdminManagement = () => {
         cell: info => {
           let date = new Date(info.getValue())
           date = date.toLocaleDateString()
-          console.log(date)
           return date
         },
         header: 'Created Date'
@@ -350,7 +351,7 @@ const AdminManagement = () => {
             <IconButton onClick={() => handleEditManager(info.row.original)}>
               <PencilOutline className='text-textPrimary' />
             </IconButton>
-            <IconButton onClick={() => handleDeleteManager(info.row.original.email)}>
+            <IconButton onClick={() => handleDeleteManager(info.row.original._id)}>
               <DeleteOutline className='text-textPrimary' />
             </IconButton>
           </div>
@@ -768,7 +769,7 @@ const AdminManagement = () => {
         <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth='md' fullWidth>
           <DialogTitle>Edit Manager</DialogTitle>
           <DialogContent>
-            <form onSubmit={handleSubmit(handleEditManager)}>
+            <form onSubmit={handleSubmit(handleUpdateManager)}>
               <Grid container spacing={4} className='p-4'>
                 <Grid item xs={12} sm={6}>
                   <Controller
