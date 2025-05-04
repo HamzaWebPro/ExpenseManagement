@@ -156,15 +156,11 @@ const AdminManagement = () => {
 
   // Form Submit Handler
   const onSubmit = async formData => {
-    const newManager = {
-      ...formData,
-      role: 'manager',
-      addBy: 'admin'
-    }
-
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
+
+    console.log(formData)
 
     const setTokenInJson = JSON.stringify({
       postToken: backendPostToken,
@@ -172,19 +168,13 @@ const AdminManagement = () => {
     })
 
     try {
-      const response = await axios.post(
-        `${baseUrl}/backend/authentication/store`,
-        {
-          ...newManager
+      const response = await axios.post(`${baseUrl}/backend/authentication/store`, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-          },
-          maxBodyLength: Infinity
-        }
-      )
+        maxBodyLength: Infinity
+      })
 
       console.log(response)
 
@@ -205,13 +195,12 @@ const AdminManagement = () => {
     setViewDialogOpen(true)
   }
 
-  // Edit Admin
+  // Edit Manager
   const handleEditManager = manager => {
     console.log(manager)
 
-    setSelectedAdmin(manager)
+    setSelectedManager(manager)
 
-    // Reset form with admin data
     reset({
       uname: manager.uname,
       email: manager.email,
@@ -234,14 +223,14 @@ const AdminManagement = () => {
     setEditDialogOpen(true)
   }
 
-  // Update Manager
+  // Update Admin
   const handleUpdateManager = async formData => {
+    console.log('formData for update', formData)
+
     if (!selectedManager) return
 
     const updatedManager = {
       ...formData,
-      id: selectedManager.id,
-
       imageObj: formData.imageObj.length > 0 ? formData.imageObj : selectedManager.imageObj || []
     }
 
@@ -255,7 +244,7 @@ const AdminManagement = () => {
     })
 
     try {
-      const response = await axios.post(`${baseUrl}/backend/authentication/update, updatedManager`, {
+      const response = await axios.post(`${baseUrl}/backend/authentication/update`, updatedManager, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
@@ -263,20 +252,20 @@ const AdminManagement = () => {
         maxBodyLength: Infinity
       })
 
-      toast.success('Manager Updated Successfully!')
-      fetchManager()
+      toast.success('Admin Updated Successfully!')
+      fetchAdmin()
       setEditDialogOpen(false)
       reset()
       setImagePreview('')
     } catch (error) {
-      console.error('Error updating manager:', error)
-      toast.error('Failed to update manager')
+      console.error('Error updating admin:', error)
+      toast.error('Failed to update admin')
     }
   }
 
-  // Delete Manager
+  // Delete Admin
   const handleDeleteManager = async email => {
-    const confirm = window.confirm('Are you sure you want to delete this Manager?')
+    const confirm = window.confirm('Are you sure you want to delete this admin?')
     if (!confirm) return
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
@@ -290,7 +279,7 @@ const AdminManagement = () => {
     try {
       const response = await axios.post(
         ` ${baseUrl}/backend/authentication/destroy`,
-        { email, addBy: 'admin' },
+        { email, addBy: 'superAdmin' },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -302,11 +291,11 @@ const AdminManagement = () => {
 
       console.log(response)
 
-      toast.success('Manager Deleted Successfully!')
-      fetchManager()
+      toast.success('Admin Deleted Successfully!')
+      fetchAdmin()
     } catch (error) {
-      console.error('Error deleting manager', error)
-      toast.error('Failed to delete manager')
+      console.error('Error deleting admin:', error)
+      toast.error('Failed to delete admin')
     } finally {
       return
     }
@@ -620,7 +609,7 @@ const AdminManagement = () => {
           </CardContent>
         )}
 
-        {/* Admins Table */}
+        {/* manager Table */}
         <div className='overflow-x-auto'>
           <table className={styles.table}>
             <thead>
@@ -779,20 +768,18 @@ const AdminManagement = () => {
         <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth='md' fullWidth>
           <DialogTitle>Edit Manager</DialogTitle>
           <DialogContent>
-            <form onSubmit={handleSubmit(handleUpdateManager)}>
+            <form onSubmit={handleSubmit(handleEditManager)}>
               <Grid container spacing={4} className='p-4'>
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='uname'
                     control={control}
-                    rules={{ required: 'Username is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
                         fullWidth
                         label='Manager Name'
                         placeholder='Enter manager name'
-                        error={!!errors.uname}
                         helperText={errors.uname?.message}
                       />
                     )}
@@ -803,23 +790,12 @@ const AdminManagement = () => {
                     name='email'
                     control={control}
                     rules={{
-                      required: 'Email is required',
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                         message: 'Invalid email address'
                       }
                     }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        type='email'
-                        label='Email'
-                        placeholder='Enter admin email'
-                        error={!!errors.email}
-                        helperText={errors.email?.message}
-                      />
-                    )}
+                    render={({ field }) => <CustomTextField {...field} fullWidth type='email' label='Email' />}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -855,13 +831,6 @@ const AdminManagement = () => {
                   <Controller
                     name='amount'
                     control={control}
-                    rules={{
-                      required: 'Franchise amount is required',
-                      pattern: {
-                        value: /^[0-9]+$/,
-                        message: 'Please enter a valid number'
-                      }
-                    }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -869,8 +838,6 @@ const AdminManagement = () => {
                         label='Franchise Amount'
                         placeholder='Enter amount'
                         type='number'
-                        error={!!errors.amount}
-                        helperText={errors.amount?.message}
                         InputProps={{
                           startAdornment: <InputAdornment position='start'>$</InputAdornment>
                         }}
@@ -882,17 +849,8 @@ const AdminManagement = () => {
                   <Controller
                     name='status'
                     control={control}
-                    rules={{ required: 'Status is required' }}
                     render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        select
-                        label='Status'
-                        error={!!errors.status}
-                        helperText={errors.status?.message}
-                        SelectProps={{ native: true }}
-                      >
+                      <CustomTextField {...field} fullWidth select label='Status' SelectProps={{ native: true }}>
                         <option value=''>Select Status</option>
                         <option value='active'>Active</option>
                         <option value='inactive'>Inactive</option>
@@ -911,14 +869,7 @@ const AdminManagement = () => {
                       }
                     }}
                     render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='Telephone'
-                        placeholder='Phone number'
-                        error={!!errors.telephone}
-                        helperText={errors.telephone?.message}
-                      />
+                      <CustomTextField {...field} fullWidth label='Telephone' placeholder='Phone number' />
                     )}
                   />
                 </Grid>
@@ -970,8 +921,6 @@ const AdminManagement = () => {
                         placeholder='Enter address'
                         multiline
                         rows={3}
-                        error={!!errors.address}
-                        helperText={errors.address?.message}
                       />
                     )}
                   />
