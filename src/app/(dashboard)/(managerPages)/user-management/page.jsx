@@ -117,6 +117,7 @@ const UserManagement = () => {
         },
         maxBodyLength: Infinity
       })
+      console.log(response)
 
       const managerArr = response?.data?.success?.data || []
       if (managerArr.length > 0) {
