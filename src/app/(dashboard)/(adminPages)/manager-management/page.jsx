@@ -260,14 +260,14 @@ const AdminManagement = () => {
       reset()
       setImagePreview('')
     } catch (error) {
-      console.error('Error updating admin:', error)
-      toast.error('Failed to update admin')
+      console.error('Error updating manager:', error)
+      toast.error('Failed to update manager')
     }
   }
 
   // Delete Admin
   const handleDeleteManager = async id => {
-    const confirm = window.confirm('Are you sure you want to delete this admin?')
+    const confirm = window.confirm('Are you sure you want to delete this manager?')
     if (!confirm) return
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
@@ -293,11 +293,11 @@ const AdminManagement = () => {
 
       console.log(response)
 
-      toast.success('Admin Deleted Successfully!')
+      toast.success('manager Deleted Successfully!')
       fetchManager()
     } catch (error) {
-      console.error('Error deleting admin:', error)
-      toast.error('Failed to delete admin')
+      console.error('Error deleting manager:', error)
+      toast.error('Failed to delete manager')
     } finally {
       return
     }

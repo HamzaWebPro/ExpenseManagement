@@ -185,7 +185,7 @@ const UserManagement = () => {
       setShowAddForm(false)
       setImagePreview('')
     } catch (error) {
-      console.error('Error creating manager:', error)
+      console.error('Error creating user:', error)
       toast.error(error?.response?.data?.error?.message)
     }
   }
@@ -255,20 +255,20 @@ const UserManagement = () => {
       })
       console.log(response)
 
-      toast.success('Admin Updated Successfully!')
+      toast.success('User Updated Successfully!')
       fetchUser()
       setEditDialogOpen(false)
       reset()
       setImagePreview('')
     } catch (error) {
-      console.error('Error updating admin:', error)
-      toast.error('Failed to update admin')
+      console.error('Error updating User:', error)
+      toast.error('Failed to update User')
     }
   }
 
   // Delete Admin
   const handleDeleteManager = async id => {
-    const confirm = window.confirm('Are you sure you want to delete this admin?')
+    const confirm = window.confirm('Are you sure you want to delete this User?')
     if (!confirm) return
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
@@ -294,11 +294,11 @@ const UserManagement = () => {
 
       console.log(response)
 
-      toast.success('Admin Deleted Successfully!')
+      toast.success('User Deleted Successfully!')
       fetchUser()
     } catch (error) {
-      console.error('Error deleting admin:', error)
-      toast.error('Failed to delete admin')
+      console.error('Error deleting User:', error)
+      toast.error('Failed to delete User')
     } finally {
       return
     }
