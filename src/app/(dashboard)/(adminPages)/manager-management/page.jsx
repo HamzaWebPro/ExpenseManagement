@@ -185,7 +185,7 @@ const AdminManagement = () => {
       setImagePreview('')
     } catch (error) {
       console.error('Error creating manager:', error)
-      toast.error('Failed to create manager')
+      toast.error(error?.response?.data?.error?.message)
     }
   }
 
@@ -254,7 +254,7 @@ const AdminManagement = () => {
       })
       console.log(response)
 
-      toast.success('Admin Updated Successfully!')
+      toast.success('Manager Updated Successfully!')
       fetchManager()
       setEditDialogOpen(false)
       reset()
