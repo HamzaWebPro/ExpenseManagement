@@ -71,7 +71,7 @@ const VerticalMenu = ({ scrollMenu }) => {
         {
           /* superadmin part start */
 
-          // role === 'superAdmin' && (
+          role === 'superAdmin' && (
           <MenuSection label='Super Admin'>
             <MenuItem href='/superadmin-dashboard' icon={<i className='tabler-smart-home' />}>
               Dashboard
@@ -84,13 +84,13 @@ const VerticalMenu = ({ scrollMenu }) => {
               All Users
             </MenuItem>
           </MenuSection>
-          // )
+          )
           /* superadmin part end */
         }
 
         {
           /* admin part start */
-          // role === 'admin' && (
+          role === 'admin' && (
           <MenuSection label='Admin'>
             <MenuItem href='/admin-dashboard' icon={<i className='tabler-smart-home' />}>
               Dashboard
@@ -110,12 +110,12 @@ const VerticalMenu = ({ scrollMenu }) => {
               All Products
             </MenuItem>
           </MenuSection>
-          // )
+          )
           /* admin part end */
         }
         {
           /* manager part start */
-          // role === 'manager' && (
+          role === 'manager' && (
           <MenuSection label='Manager'>
             <MenuItem href='/manager-dashboard' icon={<i className='tabler-smart-home' />}>
               Dashboard
@@ -136,18 +136,18 @@ const VerticalMenu = ({ scrollMenu }) => {
               Daily Financial Entry
             </MenuItem>
           </MenuSection>
-          // )
+          )
           /* manager part end */
         }
         {
           /* user part start */
-          // role === 'user' && (
+          role === 'user' && (
           <MenuSection label='User'>
             <MenuItem href='/user-dashboard' icon={<i className='tabler-smart-home' />}>
               Dashboard
             </MenuItem>
           </MenuSection>
-          // )
+          )
           /* user part end */
         }
         {/* <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem> */}
