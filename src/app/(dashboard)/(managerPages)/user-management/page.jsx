@@ -335,6 +335,10 @@ const UserManagement = () => {
         ),
         header: 'Status'
       }),
+      columnHelper.accessor('null', {
+        cell: info => (<Button>Manage Percentage</Button>),
+        header: 'Manage Percentage'
+      }),
       columnHelper.accessor('createdAt', {
         cell: info => {
           let date = new Date(info.getValue())
