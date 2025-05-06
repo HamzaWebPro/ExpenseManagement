@@ -670,7 +670,7 @@ const UserManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename='all_manager' data={data}>
+              <CSVLink filename='all_user' data={data}>
                 <Button variant='contained'>Export All User</Button>
               </CSVLink>
             </TablePaginationComponent>
