@@ -186,7 +186,7 @@ const UserManagement = () => {
       setImagePreview('')
     } catch (error) {
       console.error('Error creating manager:', error)
-      toast.error('Failed to create manager')
+      toast.error(error?.response?.data?.error?.message)
     }
   }
 
