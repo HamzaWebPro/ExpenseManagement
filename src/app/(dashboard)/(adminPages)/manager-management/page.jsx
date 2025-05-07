@@ -110,7 +110,7 @@ const AdminManagement = () => {
       loginToken: token
     })
     try {
-      const response = await axios.get(`${baseUrl}/backend/authentication/all-manager`, {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-added-user`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
@@ -146,7 +146,7 @@ const AdminManagement = () => {
       designation: '',
       address: '',
       telephone: '',
-      status: 'inactive',
+      // status: 'inactive',
       imageObj: []
     }
   })
@@ -525,15 +525,10 @@ const AdminManagement = () => {
                   <Controller
                     name='imageObj'
                     control={control}
-                    rules={{
-                      required: 'Please upload an image'
-                    }}
                     render={({ field: { onChange } }) => (
                       <CustomImageUploadField
                         fullWidth
                         label='Upload Image'
-                        error={!!errors.imageObj}
-                        helperText={errors.imageObj?.message}
                         onChange={e => {
                           const file = e.target.files[0]
                           if (file) {
@@ -552,7 +547,7 @@ const AdminManagement = () => {
                 </Grid>
 
                 {/* status */}
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -573,7 +568,7 @@ const AdminManagement = () => {
                       </CustomTextField>
                     )}
                   />
-                </Grid>
+                </Grid> */}
 
                 {/* Address */}
                 <Grid item xs={12}>
@@ -846,7 +841,7 @@ const AdminManagement = () => {
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -858,7 +853,7 @@ const AdminManagement = () => {
                       </CustomTextField>
                     )}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='telephone'
@@ -879,36 +874,26 @@ const AdminManagement = () => {
                     name='imageObj'
                     control={control}
                     render={({ field: { onChange } }) => (
-                      <div className='flex flex-col gap-2'>
-                        <CustomImageUploadField
-                          fullWidth
-                          label='Upload Image'
-                          onChange={e => {
-                            const file = e.target.files[0]
-                            if (file) {
-                              const reader = new FileReader()
-                              reader.onloadend = () => {
-                                const imageDataUrl = reader.result
-                                setImagePreview(imageDataUrl)
-                                onChange([{ url: imageDataUrl }])
-                              }
-                              reader.readAsDataURL(file)
+                      <CustomImageUploadField
+                        fullWidth
+                        label='Upload Image'
+                        onChange={e => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            const reader = new FileReader()
+                            reader.onloadend = () => {
+                              const imageDataUrl = reader.result
+                              setImagePreview(imageDataUrl)
+                              onChange([imageDataUrl])
                             }
-                          }}
-                        />
-                        {(imagePreview || (selectedManager?.imageObj?.[0]?.url && !imagePreview)) && (
-                          <div className='mt-2'>
-                            <img
-                              src={imagePreview || selectedManager.imageObj[0].url}
-                              alt='Preview'
-                              className='max-h-[100px] max-w-full object-contain'
-                            />
-                          </div>
-                        )}
-                      </div>
+                            reader.readAsDataURL(file)
+                          }
+                        }}
+                      />
                     )}
                   />
                 </Grid>
+
                 <Grid item xs={12}>
                   <Controller
                     name='address'

@@ -110,7 +110,7 @@ const UserManagement = () => {
       loginToken: token
     })
     try {
-      const response = await axios.get(`${baseUrl}/backend/authentication/all-user`, {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-added-user`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
@@ -336,7 +336,7 @@ const UserManagement = () => {
         header: 'Status'
       }),
       columnHelper.accessor('null', {
-        cell: info => (<Button>Manage Percentage</Button>),
+        cell: info => <Button>Manage Percentage</Button>,
         header: 'Manage Percentage'
       }),
       columnHelper.accessor('createdAt', {
@@ -530,15 +530,10 @@ const UserManagement = () => {
                   <Controller
                     name='imageObj'
                     control={control}
-                    rules={{
-                      required: 'Please upload an image'
-                    }}
                     render={({ field: { onChange } }) => (
                       <CustomImageUploadField
                         fullWidth
                         label='Upload Image'
-                        error={!!errors.imageObj}
-                        helperText={errors.imageObj?.message}
                         onChange={e => {
                           const file = e.target.files[0]
                           if (file) {
@@ -557,7 +552,7 @@ const UserManagement = () => {
                 </Grid>
 
                 {/* status */}
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -578,7 +573,7 @@ const UserManagement = () => {
                       </CustomTextField>
                     )}
                   />
-                </Grid>
+                </Grid> */}
 
                 {/* Address */}
                 <Grid item xs={12}>
@@ -851,7 +846,7 @@ const UserManagement = () => {
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -863,7 +858,7 @@ const UserManagement = () => {
                       </CustomTextField>
                     )}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='telephone'
