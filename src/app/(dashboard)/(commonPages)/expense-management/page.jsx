@@ -109,7 +109,7 @@ const ExpenseManagement = () => {
       loginToken: token
     })
     try {
-      const response = await axios.get(`${baseUrl}/backend/expense/all`, {
+      const response = await axios.get(`${baseUrl}/backend/expense/get-expense`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
@@ -200,6 +200,7 @@ const ExpenseManagement = () => {
   // Update Expense
   const handleUpdateExpense = async formData => {
     if (!selectedExpense) return
+    console.log(expense)
 
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
@@ -275,14 +276,22 @@ const ExpenseManagement = () => {
         cell: info => info.getValue(),
         header: 'Expense Title'
       }),
+
       columnHelper.accessor('amount', {
         cell: info => info.getValue(),
         header: 'Amount'
       }),
+
       columnHelper.accessor('date', {
         cell: info => formatDate(info.getValue()),
         header: 'Date'
       }),
+
+      columnHelper.accessor('addedBy', {
+        cell: info => info.getValue()?.uname || '',
+        header: 'Added By'
+      }),
+
       columnHelper.accessor('id', {
         cell: info => (
           <div className='flex items-center gap-2'>
@@ -303,6 +312,32 @@ const ExpenseManagement = () => {
     ],
     []
   )
+
+  const fuzzyFilter = (row, columnId, value, addMeta) => {
+    const columnsToSearch = ['title', 'amount', 'date', 'addedBy']
+
+    for (const column of columnsToSearch) {
+      // Special handling for addedBy to search both username and email
+      if (column === 'addedBy') {
+        const addedBy = row.getValue(column)
+        const emailMatch = rankItem(addedBy?.email || '', value)
+        const unameMatch = rankItem(addedBy?.uname || '', value)
+
+        if (emailMatch.passed || unameMatch.passed) {
+          addMeta({ itemRank: emailMatch.passed ? emailMatch : unameMatch })
+          return true
+        }
+      } else {
+        const itemRank = rankItem(row.getValue(column), value)
+        if (itemRank.passed) {
+          addMeta({ itemRank })
+          return true
+        }
+      }
+    }
+
+    return false
+  }
 
   // React Table Instance
   const table = useReactTable({

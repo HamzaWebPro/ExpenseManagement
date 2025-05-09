@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -28,8 +28,16 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
+import Cookies from 'js-cookie'
+import decryptDataObject from '@/@menu/utils/decrypt'
+import axios from 'axios'
 
 const DailyFinancialEntry = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
+  const sessionToken = Cookies.get('sessionToken')
+  const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
+  const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
+
   // Form state
   const [formData, setFormData] = useState({
     userId: '',
@@ -39,20 +47,69 @@ const DailyFinancialEntry = () => {
     description: '',
     products: [{ productId: '', quantity: 1 }]
   })
+  const [products, setProducts] = useState([])
+  const [users, setUsers] = useState([])
 
-  // Mock data - replace with your actual data
-  const users = [
-    { id: '1', name: 'John Doe' },
-    { id: '2', name: 'Jane Smith' },
-    { id: '3', name: 'Robert Johnson' }
-  ]
+  const fetchUser = async () => {
+    let token = decryptDataObject(sessionToken)
+    token = JSON.parse(token)
+    token = token?.tokens
 
-  const products = [
-    { id: '101', name: 'Product A', price: 19.99 },
-    { id: '102', name: 'Product B', price: 29.99 },
-    { id: '103', name: 'Product C', price: 39.99 },
-    { id: '104', name: 'Product D', price: 49.99 }
-  ]
+    const setTokenInJson = JSON.stringify({
+      getToken: backendGetToken,
+      loginToken: token
+    })
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-added-user`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+      console.log(response)
+
+      const usersArr = response?.data?.success?.data || []
+      if (usersArr.length > 0) {
+        setUsers([...usersArr])
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const fetchProducts = async () => {
+    let token = decryptDataObject(sessionToken)
+    token = JSON.parse(token)
+    token = token?.tokens
+
+    const setTokenInJson = JSON.stringify({
+      getToken: backendGetToken,
+      loginToken: token
+    })
+    try {
+      const response = await axios.get(`${baseUrl}/backend/product/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+      console.log(response)
+
+      const productsArr = response?.data?.data || []
+      if (productsArr.length > 0) {
+        setProducts([...productsArr])
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+    fetchUser()
+  }, [])
 
   // Handle input changes
   const handleInputChange = e => {
@@ -130,8 +187,8 @@ const DailyFinancialEntry = () => {
             required
           >
             {users.map(user => (
-              <MenuItem key={user.id} value={user.id}>
-                {user.name}
+              <MenuItem key={user._id} value={user._id}>
+                {user.uname}
               </MenuItem>
             ))}
           </Select>
@@ -204,7 +261,7 @@ const DailyFinancialEntry = () => {
                           required
                         >
                           {products.map(prod => (
-                            <MenuItem key={prod.id} value={prod.id}>
+                            <MenuItem key={prod._id} value={prod._id}>
                               {prod.name} (${prod.price.toFixed(2)})
                             </MenuItem>
                           ))}

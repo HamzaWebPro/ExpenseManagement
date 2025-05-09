@@ -1,4 +1,6 @@
+import Cookies from 'js-cookie'
 import { NextResponse } from 'next/server'
+import decryptDataObject from './@menu/utils/decrypt'
 
 const PUBLIC_ROUTES = ['/login', '/registration']
 
@@ -10,7 +12,17 @@ export function middleware(request) {
   console.log('sessionToken:', sessionToken)
 
   if (sessionToken && PUBLIC_ROUTES.includes(pathname)) {
-    return NextResponse.redirect(new URL('/home', request.url))
+    const userRole = JSON.parse(decryptDataObject(sessionToken))?.role
+    const userRolePath =
+      userRole === 'superAdmin'
+        ? '/super-admin-dashboard'
+        : userRole === 'admin'
+          ? '/admin-dashboard'
+          : userRole === 'manager'
+            ? '/manager-dashboard'
+            : '/user-dashboard'
+    console.log('userRole:', userRole)
+    return NextResponse.redirect(new URL(userRolePath, request.url))
   }
 
   if (PUBLIC_ROUTES.includes(pathname)) {

@@ -141,7 +141,6 @@ const ProductManagement = () => {
       name: '',
       price: '',
       description: '',
-      status: 'active',
       imageObj: []
     }
   })
@@ -225,13 +224,15 @@ const ProductManagement = () => {
     })
 
     try {
-      const response = await axios.post(`${baseUrl}/backend/products/update`, updatedProduct, {
+      const response = await axios.post(`${baseUrl}/backend/product/update`, updatedProduct, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         },
         maxBodyLength: Infinity
       })
+
+      console.log('response', response)
 
       toast.success('Product Updated Successfully!')
       fetchProducts()
@@ -246,20 +247,22 @@ const ProductManagement = () => {
 
   // Delete Product
   const handleDeleteProduct = async id => {
+    if (!id) return toast.error('Product ID is required')
+
     const confirm = window.confirm('Are you sure you want to delete this product?')
     if (!confirm) return
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
     try {
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: token
+      })
+
       const response = await axios.post(
-        `${baseUrl}/backend/products/destroy`,
+        `${baseUrl}/backend/product/destroy`,
         { id },
         {
           headers: {
@@ -269,6 +272,7 @@ const ProductManagement = () => {
           maxBodyLength: Infinity
         }
       )
+      console.log('id', response)
 
       toast.success('Product Deleted Successfully!')
       fetchProducts()
@@ -295,19 +299,19 @@ const ProductManagement = () => {
         cell: info => `$${info.getValue()}`,
         header: 'Price'
       }),
-      columnHelper.accessor('status', {
-        cell: info => (
-          <span
-            className={classnames({
-              'text-success': info.getValue() === 'active',
-              'text-error': info.getValue() === 'inactive'
-            })}
-          >
-            {info.getValue()}
-          </span>
-        ),
-        header: 'Status'
-      }),
+      // columnHelper.accessor('status', {
+      //   cell: info => (
+      //     <span
+      //       className={classnames({
+      //         'text-success': info.getValue() === 'active',
+      //         'text-error': info.getValue() === 'inactive'
+      //       })}
+      //     >
+      //       {info.getValue()}
+      //     </span>
+      //   ),
+      //   header: 'Status'
+      // }),
       columnHelper.accessor('createdAt', {
         cell: info => formatDate(info.getValue()),
         header: 'Created Date'
@@ -434,15 +438,10 @@ const ProductManagement = () => {
                   <Controller
                     name='imageObj'
                     control={control}
-                    rules={{
-                      required: 'Please upload an image'
-                    }}
                     render={({ field: { onChange } }) => (
                       <CustomImageUploadField
                         fullWidth
                         label='Upload Product Image'
-                        error={!!errors.imageObj}
-                        helperText={errors.imageObj?.message}
                         onChange={e => {
                           const file = e.target.files[0]
                           if (file) {
@@ -470,7 +469,7 @@ const ProductManagement = () => {
                 </Grid>
 
                 {/* Status */}
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -491,7 +490,7 @@ const ProductManagement = () => {
                       </CustomTextField>
                     )}
                   />
-                </Grid>
+                </Grid>*/}
 
                 {/* Description */}
                 <Grid item xs={12}>
@@ -617,14 +616,14 @@ const ProductManagement = () => {
                       <Typography variant='body1'>${selectedProduct.price}</Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  {/* <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
                         Status
                       </Typography>
                       <Typography variant='body1'>{selectedProduct.status}</Typography>
                     </Box>
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
@@ -724,7 +723,7 @@ const ProductManagement = () => {
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -745,7 +744,7 @@ const ProductManagement = () => {
                       </CustomTextField>
                     )}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12}>
                   <Controller
                     name='imageObj'
