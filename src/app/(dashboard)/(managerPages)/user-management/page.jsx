@@ -17,6 +17,9 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import MenuItem from '@mui/material/MenuItem'
 
 // Third-party Imports
 import { toast } from 'react-toastify'
@@ -99,6 +102,9 @@ const UserManagement = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
+  const [percentageDialogOpen, setPercentageDialogOpen] = useState(false)
+  const [products, setProducts] = useState([])
+  const [selectedProduct, setSelectedProduct] = useState('')
 
   const fetchUser = async () => {
     let token = decryptDataObject(sessionToken)
@@ -128,8 +134,30 @@ const UserManagement = () => {
     }
   }
 
+  const fetchProducts = async () => {
+    // Mock product data - replace with your actual API call
+    const mockProducts = [
+      { id: '1', name: 'Product 1' },
+      { id: '2', name: 'Product 2' },
+      { id: '3', name: 'Product 3' },
+      { id: '4', name: 'Product 4' }
+    ]
+    setProducts(mockProducts)
+
+    // Example of actual API call:
+    /*
+    try {
+      const response = await axios.get(`${baseUrl}/products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+    */
+  }
+
   useEffect(() => {
     fetchUser()
+    fetchProducts()
   }, [])
 
   // Form Hook
@@ -138,6 +166,7 @@ const UserManagement = () => {
     reset,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: {
@@ -147,10 +176,15 @@ const UserManagement = () => {
       designation: '',
       address: '',
       telephone: '',
-      status: 'inactive',
-      imageObj: []
+      imageObj: [],
+      applyToAll: false,
+      globalPercentage: '',
+      productPercentage: '',
+      selectedProduct: ''
     }
   })
+
+  const applyToAll = watch('applyToAll')
 
   // Toggle Password Visibility
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
@@ -208,10 +242,8 @@ const UserManagement = () => {
       email: manager.email,
       password: '',
       designation: manager.designation,
-
       address: manager.address,
       telephone: manager.telephone,
-      status: manager.status,
       imageObj: manager.imageObj || []
     })
 
@@ -226,7 +258,7 @@ const UserManagement = () => {
   }
 
   // Update User
-  const handleUpdateManager = async formData => {
+  const handleUpdateUser = async formData => {
     console.log('formData for update', formData)
 
     if (!selectedUser) return
@@ -310,6 +342,26 @@ const UserManagement = () => {
     setImagePreview('')
   }
 
+  // Open Percentage Management Dialog
+  const handleOpenPercentageDialog = user => {
+    setSelectedUser(user)
+    reset({
+      applyToAll: false,
+      globalPercentage: '',
+      productPercentage: '',
+      selectedProduct: ''
+    })
+    setPercentageDialogOpen(true)
+  }
+
+  // Submit Percentage Management Form
+  const handleSubmitPercentage = data => {
+    console.log('Percentage data:', data)
+    // Here you would typically send this data to your API
+    toast.success('Percentage settings saved successfully!')
+    setPercentageDialogOpen(false)
+  }
+
   // Table Columns
   const columns = useMemo(
     () => [
@@ -322,21 +374,21 @@ const UserManagement = () => {
         header: 'Email'
       }),
 
-      columnHelper.accessor('status', {
-        cell: info => (
-          <span
-            className={classnames({
-              'text-success': info.getValue() === 'active',
-              'text-error': info.getValue() === 'inactive'
-            })}
-          >
-            {info.getValue()}
-          </span>
-        ),
-        header: 'Status'
-      }),
+      // columnHelper.accessor('status', {
+      //   cell: info => (
+      //     <span
+      //       className={classnames({
+      //         'text-success': info.getValue() === 'active',
+      //         'text-error': info.getValue() === 'inactive'
+      //       })}
+      //     >
+      //       {info.getValue()}
+      //     </span>
+      //   ),
+      //   header: 'Status'
+      // }),
       columnHelper.accessor('null', {
-        cell: info => <Button>Manage Percentage</Button>,
+        cell: info => <Button onClick={() => handleOpenPercentageDialog(info.row.original)}>Manage Percentage</Button>,
         header: 'Manage Percentage'
       }),
       columnHelper.accessor('createdAt', {
@@ -411,7 +463,7 @@ const UserManagement = () => {
           }
         />
 
-        {/* Add Admin Form */}
+        {/* Add User Form */}
         {showAddForm && (
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -610,7 +662,7 @@ const UserManagement = () => {
           </CardContent>
         )}
 
-        {/* manager Table */}
+        {/* User Table */}
         <div className='overflow-x-auto'>
           <table className={styles.table}>
             <thead>
@@ -699,14 +751,14 @@ const UserManagement = () => {
                       <Typography variant='body1'>{selectedUser.email}</Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  {/* <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
                         Status
                       </Typography>
                       <Typography variant='body1'>{selectedUser.status}</Typography>
                     </Box>
-                  </Grid>
+                  </Grid> */}
 
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
@@ -765,24 +817,18 @@ const UserManagement = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Edit Admin Dialog */}
+        {/* Edit User Dialog */}
         <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth='md' fullWidth>
           <DialogTitle>Edit User</DialogTitle>
           <DialogContent>
-            <form onSubmit={handleSubmit(handleUpdateManager)}>
+            <form onSubmit={handleSubmit(handleUpdateUser)}>
               <Grid container spacing={4} className='p-4'>
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='uname'
                     control={control}
                     render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='User Name'
-                        placeholder='Enter manager name'
-                        helperText={errors.uname?.message}
-                      />
+                      <CustomTextField {...field} fullWidth label='User Name' placeholder='Enter manager name' />
                     )}
                   />
                 </Grid>
@@ -790,12 +836,6 @@ const UserManagement = () => {
                   <Controller
                     name='email'
                     control={control}
-                    rules={{
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Invalid email address'
-                      }
-                    }}
                     render={({ field }) => <CustomTextField {...field} fullWidth type='email' label='Email' />}
                   />
                 </Grid>
@@ -830,45 +870,8 @@ const UserManagement = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller
-                    name='amount'
-                    control={control}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='Franchise Amount'
-                        placeholder='Enter amount'
-                        type='number'
-                        InputProps={{
-                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
-                {/* <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='status'
-                    control={control}
-                    render={({ field }) => (
-                      <CustomTextField {...field} fullWidth select label='Status' SelectProps={{ native: true }}>
-                        <option value=''>Select Status</option>
-                        <option value='active'>Active</option>
-                        <option value='inactive'>Inactive</option>
-                      </CustomTextField>
-                    )}
-                  />
-                </Grid> */}
-                <Grid item xs={12} sm={6}>
-                  <Controller
                     name='telephone'
                     control={control}
-                    rules={{
-                      pattern: {
-                        value: /^[0-9]{10,15}$/,
-                        message: 'Please enter a valid phone number'
-                      }
-                    }}
                     render={({ field }) => (
                       <CustomTextField {...field} fullWidth label='Telephone' placeholder='Phone number' />
                     )}
@@ -913,7 +916,6 @@ const UserManagement = () => {
                   <Controller
                     name='address'
                     control={control}
-                    rules={{ required: 'Address is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -938,8 +940,133 @@ const UserManagement = () => {
             >
               Cancel
             </Button>
-            <Button variant='contained' onClick={handleSubmit(handleUpdateManager)}>
+            <Button variant='contained' onClick={handleSubmit(handleUpdateUser)}>
               Save Changes
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Percentage Management Dialog */}
+        <Dialog open={percentageDialogOpen} onClose={() => setPercentageDialogOpen(false)} maxWidth='sm' fullWidth>
+          <DialogTitle>Manage Percentage for {selectedUser?.uname}</DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit(handleSubmitPercentage)}>
+              <Grid container spacing={4} className='p-4'>
+                {/* Apply to all products checkbox */}
+                <Grid item xs={12}>
+                  <Controller
+                    name='applyToAll'
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...field}
+                            checked={field.value}
+                            onChange={e => {
+                              field.onChange(e.target.checked)
+                              if (e.target.checked) {
+                                setValue('selectedProduct', '')
+                                setValue('productPercentage', '')
+                              }
+                            }}
+                          />
+                        }
+                        label='Apply percentage to all products'
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Global percentage input (shown when applyToAll is true) */}
+                {applyToAll && (
+                  <Grid item xs={12}>
+                    <Controller
+                      name='globalPercentage'
+                      control={control}
+                      rules={{
+                        required: 'Percentage is required',
+                        min: { value: 0, message: 'Percentage must be at least 0' },
+                        max: { value: 100, message: 'Percentage cannot exceed 100' }
+                      }}
+                      render={({ field }) => (
+                        <CustomTextField
+                          {...field}
+                          fullWidth
+                          type='number'
+                          label='Percentage for all products'
+                          placeholder='Enter percentage'
+                          InputProps={{
+                            endAdornment: <InputAdornment position='end'>%</InputAdornment>
+                          }}
+                          error={!!errors.globalPercentage}
+                          helperText={errors.globalPercentage?.message}
+                        />
+                      )}
+                    />
+                  </Grid>
+                )}
+
+                {/* Product-specific percentage (shown when applyToAll is false) */}
+                {!applyToAll && (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='selectedProduct'
+                        control={control}
+                        rules={{ required: 'Product selection is required' }}
+                        render={({ field }) => (
+                          <CustomTextField
+                            {...field}
+                            select
+                            fullWidth
+                            label='Select Product'
+                            error={!!errors.selectedProduct}
+                            helperText={errors.selectedProduct?.message}
+                          >
+                            {products.map(product => (
+                              <MenuItem key={product.id} value={product.id}>
+                                {product.name}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='productPercentage'
+                        control={control}
+                        rules={{
+                          required: 'Percentage is required',
+                          min: { value: 0, message: 'Percentage must be at least 0' },
+                          max: { value: 100, message: 'Percentage cannot exceed 100' }
+                        }}
+                        render={({ field }) => (
+                          <CustomTextField
+                            {...field}
+                            fullWidth
+                            type='number'
+                            label='Percentage'
+                            placeholder='Enter percentage'
+                            InputProps={{
+                              endAdornment: <InputAdornment position='end'>%</InputAdornment>
+                            }}
+                            error={!!errors.productPercentage}
+                            helperText={errors.productPercentage?.message}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+            </form>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPercentageDialogOpen(false)}>Cancel</Button>
+            <Button variant='contained' onClick={handleSubmit(handleSubmitPercentage)}>
+              Save
             </Button>
           </DialogActions>
         </Dialog>

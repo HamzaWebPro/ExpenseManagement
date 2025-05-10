@@ -461,22 +461,13 @@ const AdminManagement = () => {
                   <Controller
                     name='password'
                     control={control}
-                    rules={{
-                      required: 'Password is required',
-                      minLength: {
-                        value: 6,
-                        message: 'Password must be at least 6 characters'
-                      }
-                    }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
-                        label='Manager Password'
-                        placeholder='Enter password'
-                        error={!!errors.password}
-                        helperText={errors.password?.message}
+                        label='Password'
+                        placeholder='Enter new password (leave blank to keep current)'
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position='end'>
