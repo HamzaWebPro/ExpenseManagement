@@ -22,7 +22,7 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Grid
+  CircularProgress
 } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
@@ -31,6 +31,7 @@ import { IconPlus, IconTrash } from '@tabler/icons-react'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const DailyFinancialEntry = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
@@ -41,7 +42,7 @@ const DailyFinancialEntry = () => {
   // Form state
   const [formData, setFormData] = useState({
     userId: '',
-    amount: '',
+    amount: 0,
     paymentMethod: 'cash',
     date: new Date(),
     description: '',
@@ -49,17 +50,25 @@ const DailyFinancialEntry = () => {
   })
   const [products, setProducts] = useState([])
   const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState({
+    users: true,
+    products: true,
+    submitting: false
+  })
+  const [error, setError] = useState(null)
 
   const fetchUser = async () => {
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      getToken: backendGetToken,
-      loginToken: token
-    })
     try {
+      setLoading(prev => ({ ...prev, users: true }))
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: token
+      })
+
       const response = await axios.get(`${baseUrl}/backend/authentication/all-added-user`, {
         headers: {
           'Content-Type': 'application/json',
@@ -67,27 +76,29 @@ const DailyFinancialEntry = () => {
         },
         maxBodyLength: Infinity
       })
-      console.log(response)
 
       const usersArr = response?.data?.success?.data || []
-      if (usersArr.length > 0) {
-        setUsers([...usersArr])
-      }
+      setUsers(usersArr)
     } catch (error) {
-      console.log(error)
+      console.error('Error fetching users:', error)
+      setError('Failed to load users. Please try again.')
+    } finally {
+      setLoading(prev => ({ ...prev, users: false }))
     }
   }
 
   const fetchProducts = async () => {
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      getToken: backendGetToken,
-      loginToken: token
-    })
     try {
+      setLoading(prev => ({ ...prev, products: true }))
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: token
+      })
+
       const response = await axios.get(`${baseUrl}/backend/product/all`, {
         headers: {
           'Content-Type': 'application/json',
@@ -95,14 +106,14 @@ const DailyFinancialEntry = () => {
         },
         maxBodyLength: Infinity
       })
-      console.log(response)
 
       const productsArr = response?.data?.data || []
-      if (productsArr.length > 0) {
-        setProducts([...productsArr])
-      }
+      setProducts(productsArr)
     } catch (error) {
-      console.log(error)
+      console.error('Error fetching products:', error)
+      setError('Failed to load products. Please try again.')
+    } finally {
+      setLoading(prev => ({ ...prev, products: false }))
     }
   }
 
@@ -126,7 +137,10 @@ const DailyFinancialEntry = () => {
   const handleProductChange = (index, e) => {
     const { name, value } = e.target
     const updatedProducts = [...formData.products]
-    updatedProducts[index] = { ...updatedProducts[index], [name]: value }
+    updatedProducts[index] = {
+      ...updatedProducts[index],
+      [name]: name === 'quantity' ? Math.max(0.01, Number.isNaN(Number(value)) ? 1 : Number(value)) : value
+    }
     setFormData(prev => ({ ...prev, products: updatedProducts }))
   }
 
@@ -140,6 +154,7 @@ const DailyFinancialEntry = () => {
 
   // Remove product row
   const removeProductRow = index => {
+    if (formData.products.length <= 1) return
     const updatedProducts = [...formData.products]
     updatedProducts.splice(index, 1)
     setFormData(prev => ({ ...prev, products: updatedProducts }))
@@ -148,23 +163,83 @@ const DailyFinancialEntry = () => {
   // Calculate total amount
   const calculateTotal = () => {
     return formData.products.reduce((total, item) => {
-      const product = products.find(p => p.id === item.productId)
+      const product = products.find(p => p._id === item.productId)
       return total + (product ? product.price * item.quantity : 0)
     }, 0)
   }
 
   // Handle form submission
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
-    const totalAmount = calculateTotal()
-    const submissionData = {
-      ...formData,
-      amount: totalAmount
-      // Add any additional processing here
+    try {
+      setLoading(prev => ({ ...prev, submitting: true }))
+      const totalAmount = calculateTotal()
+
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+
+      const submissionData = {
+        userId: formData.userId,
+        amount: totalAmount,
+        paymentMethod: formData.paymentMethod,
+        date: formData.date,
+        description: formData.description,
+        products: formData.products.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity
+        }))
+      }
+
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: token
+      })
+
+      const response = await axios.post(`${baseUrl}/backend/financial/store`, submissionData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log(response)
+
+      if (response.data.message) {
+        // Reset form after successful submission
+        setFormData({
+          userId: '',
+          amount: 0,
+          paymentMethod: 'cash',
+          date: new Date(),
+          description: '',
+          products: [{ productId: '', quantity: 1 }]
+        })
+        toast.success('Entry submitted successfully!')
+      } else {
+        toast.error(response.data.message || 'Failed to submit entry')
+      }
+    } catch (error) {
+      console.error('Submission error:', error)
+      toast(error.message || 'Failed to submit entry. Please try again.')
+    } finally {
+      setLoading(prev => ({ ...prev, submitting: false }))
     }
-    console.log('Form submitted:', submissionData)
-    // Here you would typically send the data to your API
-    alert('Entry submitted successfully!')
+  }
+
+  if (loading.users || loading.products) {
+    return (
+      <Box display='flex' justifyContent='center' alignItems='center' minHeight='200px'>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (error) {
+    return (
+      <Box display='flex' justifyContent='center' alignItems='center' minHeight='200px'>
+        <Typography color='error'>{error}</Typography>
+      </Box>
+    )
   }
 
   return (
@@ -194,25 +269,26 @@ const DailyFinancialEntry = () => {
           </Select>
         </FormControl>
 
-        <div className='flex items-center gap-4'>
+        <Box display='flex' alignItems='center' gap={4} mb={2}>
           {/* Payment Method */}
-          <FormControl component='fieldset' margin='normal'>
+          <FormControl component='fieldset'>
             <Typography component='legend'>Payment Method</Typography>
             <RadioGroup row name='paymentMethod' value={formData.paymentMethod} onChange={handleInputChange}>
               <FormControlLabel value='cash' control={<Radio />} label='Cash' />
               <FormControlLabel value='card' control={<Radio />} label='Card' />
             </RadioGroup>
           </FormControl>
+
           {/* Date Picker */}
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label='Date'
               value={formData.date}
               onChange={handleDateChange}
-              renderInput={params => <TextField {...params} fullWidth margin='normal' required />}
+              renderInput={params => <TextField {...params} required />}
             />
           </LocalizationProvider>
-        </div>
+        </Box>
 
         {/* Description */}
         <TextField
@@ -246,7 +322,7 @@ const DailyFinancialEntry = () => {
             </TableHead>
             <TableBody>
               {formData.products.map((product, index) => {
-                const selectedProduct = products.find(p => p.id === product.productId)
+                const selectedProduct = products.find(p => p._id === product.productId)
                 const subtotal = selectedProduct ? selectedProduct.price * product.quantity : 0
 
                 return (
@@ -259,7 +335,9 @@ const DailyFinancialEntry = () => {
                           value={product.productId}
                           onChange={e => handleProductChange(index, e)}
                           required
+                          disabled={products.length === 0}
                         >
+                          <MenuItem value=''>Select a product</MenuItem>
                           {products.map(prod => (
                             <MenuItem key={prod._id} value={prod._id}>
                               {prod.name} (${prod.price.toFixed(2)})
@@ -276,6 +354,7 @@ const DailyFinancialEntry = () => {
                         onChange={e => handleProductChange(index, e)}
                         inputProps={{ min: 1 }}
                         required
+                        fullWidth
                       />
                     </TableCell>
                     <TableCell>{selectedProduct ? `$${selectedProduct.price.toFixed(2)}` : '-'}</TableCell>
@@ -292,7 +371,13 @@ const DailyFinancialEntry = () => {
           </Table>
         </TableContainer>
 
-        <Button startIcon={<IconPlus />} onClick={addProductRow} sx={{ mt: 2 }} variant='outlined'>
+        <Button
+          startIcon={<IconPlus />}
+          onClick={addProductRow}
+          sx={{ mt: 2 }}
+          variant='outlined'
+          disabled={products.length === 0}
+        >
           Add Product
         </Button>
 
@@ -305,8 +390,8 @@ const DailyFinancialEntry = () => {
 
         {/* Submit Button */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-          <Button type='submit' variant='contained' size='large'>
-            Submit Entry
+          <Button type='submit' variant='contained' size='large' disabled={loading.submitting}>
+            {loading.submitting ? <CircularProgress size={24} /> : 'Submit Entry'}
           </Button>
         </Box>
       </form>
