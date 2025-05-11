@@ -294,7 +294,7 @@ const AdminDashboard = () => {
             <Divider />
             <CardContent>
               <Grid container spacing={4}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Button
                     fullWidth
                     variant='contained'
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
                     Add Manager
                   </Button>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Button
                     fullWidth
                     variant='contained'
@@ -315,7 +315,7 @@ const AdminDashboard = () => {
                     Manage Users
                   </Button>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Button
                     fullWidth
                     variant='contained'
@@ -326,7 +326,7 @@ const AdminDashboard = () => {
                     View Products
                   </Button>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                {/* <Grid item xs={12} sm={6} md={3}>
                   <Button
                     fullWidth
                     variant='contained'
@@ -336,7 +336,7 @@ const AdminDashboard = () => {
                   >
                     Generate Reports
                   </Button>
-                </Grid>
+                </Grid> */}
               </Grid>
             </CardContent>
           </Card>

@@ -17,6 +17,7 @@ import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import Grid from '@mui/material/Grid'
 
 // Third-party Imports
 import {
@@ -48,7 +49,6 @@ import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
 import styles from '@core/styles/table.module.css'
-import { Grid } from '@mui/material'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -77,7 +77,7 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
   return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 }
 
-const AllUser = () => {
+const AllProducts = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const sessionToken = Cookies.get('sessionToken')
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
@@ -87,10 +87,10 @@ const AllUser = () => {
   const [columnFilters, setColumnFilters] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
-  // Fetch Users
-  const fetchUsers = async () => {
+  // Fetch Products
+  const fetchProducts = async () => {
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -101,43 +101,44 @@ const AllUser = () => {
     })
 
     try {
-      const response = await axios.get(`${baseUrl}/backend/authentication/all-user`, {
+      const response = await axios.get(`${baseUrl}/backend/product/all`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         },
         maxBodyLength: Infinity
       })
+      console.log(response)
 
-      const usersArr = response?.data?.success?.data || []
-      if (usersArr.length > 0) {
-        setData([...usersArr])
+      const productsArr = response?.data?.data || []
+      if (productsArr.length > 0) {
+        setData([...productsArr])
       }
     } catch (error) {
-      console.log('Error fetching users:', error)
+      console.log('Error fetching products:', error)
     }
   }
 
   useEffect(() => {
-    fetchUsers()
+    fetchProducts()
   }, [])
 
-  // View User Details
-  const handleViewUser = user => {
-    setSelectedUser(user)
+  // View Product Details
+  const handleViewProduct = product => {
+    setSelectedProduct(product)
     setViewDialogOpen(true)
   }
 
   // Table Columns
   const columns = useMemo(
     () => [
-      columnHelper.accessor('uname', {
+      columnHelper.accessor('name', {
         cell: info => info.getValue(),
-        header: 'User Name'
+        header: 'Product Name'
       }),
-      columnHelper.accessor('email', {
-        cell: info => info.getValue(),
-        header: 'Email'
+      columnHelper.accessor('price', {
+        cell: info => `$${info.getValue()}`,
+        header: 'Price'
       }),
       columnHelper.accessor('store.uname', {
         cell: info => info.getValue() || 'N/A',
@@ -154,7 +155,7 @@ const AllUser = () => {
       columnHelper.accessor('id', {
         cell: info => (
           <div className='flex items-center gap-2'>
-            <IconButton onClick={() => handleViewUser(info.row.original)}>
+            <IconButton onClick={() => handleViewProduct(info.row.original)}>
               <EyeOutline className='text-textPrimary' />
             </IconButton>
           </div>
@@ -192,26 +193,25 @@ const AllUser = () => {
   return (
     <Card>
       <CardHeader
-        title='All Users'
+        title='All Products'
         action={
           <div className='flex items-center gap-4'>
             <DebouncedInput
               value={globalFilter ?? ''}
               onChange={value => setGlobalFilter(String(value))}
-              placeholder='Search users...'
+              placeholder='Search products...'
               className='min-is-[200px]'
             />
             <CSVLink
-              data={data.map(user => ({
-                'User Name': user.uname,
-                Email: user.email,
-                'Shop Name': user.shop?.name || 'N/A',
-                'Admin Name': user.admin?.uname || 'N/A',
-                'Created Date': formatDate(user.createdAt),
-                Telephone: user.telephone,
-                Address: user.address
+              data={data.map(product => ({
+                'Product Name': product.name,
+                Price: `$${product.price}`,
+                'Shop Name': product.store?.uname || 'N/A',
+                'Added By': product.addedBy?.uname || 'N/A',
+                'Created Date': formatDate(product.createdAt),
+                Description: product.description
               }))}
-              filename='all_users.csv'
+              filename='all_products.csv'
             >
               <Button variant='contained'>Export to CSV</Button>
             </CSVLink>
@@ -219,7 +219,7 @@ const AllUser = () => {
         }
       />
 
-      {/* User Table */}
+      {/* Product Table */}
       <div className='overflow-x-auto'>
         <table className={styles.table}>
           <thead>
@@ -250,7 +250,7 @@ const AllUser = () => {
             <tbody>
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  No users found
+                  No products found
                 </td>
               </tr>
             </tbody>
@@ -279,35 +279,35 @@ const AllUser = () => {
         onPageChange={(_, page) => table.setPageIndex(page)}
       />
 
-      {/* View User Dialog */}
+      {/* View Product Dialog */}
       <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth='md' fullWidth>
-        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>User Details</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Product Details</DialogTitle>
         <DialogContent>
-          {selectedUser && (
+          {selectedProduct && (
             <Box className='p-4'>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                     <Typography variant='subtitle2' color='textSecondary'>
-                      User Name
+                      Product Name
                     </Typography>
-                    <Typography variant='body1'>{selectedUser?.uname}</Typography>
+                    <Typography variant='body1'>{selectedProduct?.name}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                     <Typography variant='subtitle2' color='textSecondary'>
-                      Email
+                      Price
                     </Typography>
-                    <Typography variant='body1'>{selectedUser.email}</Typography>
+                    <Typography variant='body1'>${selectedProduct.price}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                     <Typography variant='subtitle2' color='textSecondary'>
-                      Admin Name
+                      Shop Name
                     </Typography>
-                    <Typography variant='body1'>{selectedUser.store?.uname || 'N/A'}</Typography>
+                    <Typography variant='body1'>{selectedProduct.store?.uname || 'N/A'}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -315,24 +315,16 @@ const AllUser = () => {
                     <Typography variant='subtitle2' color='textSecondary'>
                       Added By
                     </Typography>
-                    <Typography variant='body1'>{selectedUser.store?.uname || 'N/A'}</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                    <Typography variant='subtitle2' color='textSecondary'>
-                      Telephone
-                    </Typography>
-                    <Typography variant='body1'>{selectedUser.telephone || 'N/A'}</Typography>
+                    <Typography variant='body1'>{selectedProduct.addedBy?.uname || 'N/A'}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12}>
                   <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                     <Typography variant='subtitle2' color='textSecondary'>
-                      Address
+                      Description
                     </Typography>
                     <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap' }}>
-                      {selectedUser.address || 'N/A'}
+                      {selectedProduct.description || 'N/A'}
                     </Typography>
                   </Box>
                 </Grid>
@@ -341,10 +333,10 @@ const AllUser = () => {
                     <Typography variant='subtitle2' color='textSecondary'>
                       Created Time
                     </Typography>
-                    <Typography variant='body1'>{formatDate(selectedUser.createdAt)}</Typography>
+                    <Typography variant='body1'>{formatDate(selectedProduct.createdAt)}</Typography>
                   </Box>
                 </Grid>
-                {selectedUser.imageObj?.[0]?.url && (
+                {selectedProduct.photoUrl?.[0] && (
                   <Grid item xs={12} sm={6} className='flex items-center justify-center'>
                     <Box
                       border={1}
@@ -357,8 +349,8 @@ const AllUser = () => {
                       bgcolor='background.paper'
                     >
                       <img
-                        src={selectedUser.imageObj[0].url}
-                        alt='User'
+                        src={selectedProduct.photoUrl[0]}
+                        alt='Product'
                         style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain' }}
                       />
                     </Box>
@@ -378,4 +370,4 @@ const AllUser = () => {
   )
 }
 
-export default AllUser
+export default AllProducts

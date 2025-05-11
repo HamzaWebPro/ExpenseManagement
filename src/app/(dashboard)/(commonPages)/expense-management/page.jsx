@@ -56,6 +56,7 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
+import { formatDistance, formatDistanceToNow } from 'date-fns'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -200,7 +201,7 @@ const ExpenseManagement = () => {
   // Update Expense
   const handleUpdateExpense = async formData => {
     if (!selectedExpense) return
-    console.log(expense)
+    // console.log(expense)
 
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
@@ -219,6 +220,8 @@ const ExpenseManagement = () => {
         },
         maxBodyLength: Infinity
       })
+
+      console.log(response)
 
       toast.success('Expense Updated Successfully!')
       fetchExpenses()
@@ -270,48 +273,52 @@ const ExpenseManagement = () => {
   }
 
   // Table Columns
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const sessionToken = Cookies.get('sessionToken')
+    const role = JSON.parse(decryptDataObject(sessionToken))?.role
+
+    console.log(role)
+
+    return [
       columnHelper.accessor('title', {
         cell: info => info.getValue(),
         header: 'Expense Title'
       }),
-
       columnHelper.accessor('amount', {
-        cell: info => info.getValue(),
+        cell: info => `$${info.getValue()}`,
         header: 'Amount'
       }),
-
       columnHelper.accessor('date', {
-        cell: info => formatDate(info.getValue()),
+        cell: info => formatDistanceToNow(new Date(info.getValue()), { addSuffix: true }),
         header: 'Date'
       }),
-
       columnHelper.accessor('addedBy', {
-        cell: info => info.getValue()?.uname || '',
+        cell: info => info.getValue()?.email || '',
         header: 'Added By'
       }),
-
       columnHelper.accessor('id', {
         cell: info => (
           <div className='flex items-center gap-2'>
             <IconButton onClick={() => handleViewExpense(info.row.original)}>
               <EyeOutline className='text-textPrimary' />
             </IconButton>
-            <IconButton onClick={() => handleEditExpense(info.row.original)}>
-              <PencilOutline className='text-textPrimary' />
-            </IconButton>
-            <IconButton onClick={() => handleDeleteExpense(info.row.original._id)}>
-              <DeleteOutline className='text-textPrimary' />
-            </IconButton>
+            {role === 'admin' && (
+              <>
+                <IconButton onClick={() => handleEditExpense(info.row.original)}>
+                  <PencilOutline className='text-textPrimary' />
+                </IconButton>
+                <IconButton onClick={() => handleDeleteExpense(info.row.original._id)}>
+                  <DeleteOutline className='text-textPrimary' />
+                </IconButton>
+              </>
+            )}
           </div>
         ),
         header: 'Actions',
         size: 120
       })
-    ],
-    []
-  )
+    ]
+  }, [sessionToken]) // Only depend on sessionToken for memoization
 
   const fuzzyFilter = (row, columnId, value, addMeta) => {
     const columnsToSearch = ['title', 'amount', 'date', 'addedBy']

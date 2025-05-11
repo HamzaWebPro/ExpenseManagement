@@ -165,6 +165,8 @@ const ProductManagement = () => {
         maxBodyLength: Infinity
       })
 
+      console.log('response', response)
+
       toast.success('Product Created Successfully!')
       fetchProducts()
       reset()

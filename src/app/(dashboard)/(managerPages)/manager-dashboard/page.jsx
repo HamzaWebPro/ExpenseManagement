@@ -300,28 +300,28 @@ const ManagerDashboard = () => {
             <Divider />
             <CardContent>
               <Grid container spacing={4}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Button
                     fullWidth
                     variant='contained'
                     startIcon={<Icon icon='tabler-user-plus' />}
-                    onClick={() => router.push('/user-management/add')}
+                    onClick={() => router.push('/user-management')}
                   >
                     Add User
                   </Button>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Button
                     fullWidth
                     variant='contained'
                     color='secondary'
                     startIcon={<Icon icon='tabler-shopping-bag-plus' />}
-                    onClick={() => router.push('/product-management/add')}
+                    onClick={() => router.push('/product-management')}
                   >
                     Add Product
                   </Button>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Button
                     fullWidth
                     variant='contained'
@@ -332,7 +332,7 @@ const ManagerDashboard = () => {
                     Daily Finance Entry
                   </Button>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                {/* <Grid item xs={12} sm={6} md={3}>
                   <Button
                     fullWidth
                     variant='contained'
@@ -342,7 +342,7 @@ const ManagerDashboard = () => {
                   >
                     Generate Reports
                   </Button>
-                </Grid>
+                </Grid> */}
               </Grid>
             </CardContent>
           </Card>

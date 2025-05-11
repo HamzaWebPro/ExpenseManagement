@@ -135,24 +135,31 @@ const UserManagement = () => {
   }
 
   const fetchProducts = async () => {
-    // Mock product data - replace with your actual API call
-    const mockProducts = [
-      { id: '1', name: 'Product 1' },
-      { id: '2', name: 'Product 2' },
-      { id: '3', name: 'Product 3' },
-      { id: '4', name: 'Product 4' }
-    ]
-    setProducts(mockProducts)
+    let token = decryptDataObject(sessionToken)
+    token = JSON.parse(token)
+    token = token?.tokens
 
-    // Example of actual API call:
-    /*
+    const setTokenInJson = JSON.stringify({
+      getToken: backendGetToken,
+      loginToken: token
+    })
     try {
-      const response = await axios.get(`${baseUrl}/products`);
-      setProducts(response.data);
+      const response = await axios.get(`${baseUrl}/backend/product/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+      console.log(response)
+
+      const productsArr = response?.data?.data || []
+      if (productsArr.length > 0) {
+        setProducts([...productsArr])
+      }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.log(error)
     }
-    */
   }
 
   useEffect(() => {
@@ -355,11 +362,44 @@ const UserManagement = () => {
   }
 
   // Submit Percentage Management Form
-  const handleSubmitPercentage = data => {
+  const handleSubmitPercentage = async data => {
     console.log('Percentage data:', data)
+    console.log('selected user data:', selectedUser)
+
+    try {
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: token
+      })
+      console.log('setTokenInJson', setTokenInJson)
+      const response = await axios.post(
+        `${baseUrl}/backend/manage-percentage/store`,
+        { userId: selectedUser._id, ...data },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          }
+        }
+      )
+      console.log('Percentage response:', response)
+      if (response.data && response.status === 201) {
+        toast.success('Percentage settings saved successfully!')
+        setPercentageDialogOpen(false)
+      } else {
+        toast.error('Failed to save percentage settings')
+      }
+    } catch (error) {
+      console.error('Error submitting percentage data:', error)
+      toast.error('Failed to submit percentage data')
+    }
+
     // Here you would typically send this data to your API
-    toast.success('Percentage settings saved successfully!')
-    setPercentageDialogOpen(false)
+    // toast.success('Percentage settings saved successfully!')
+    // setPercentageDialogOpen(false)
   }
 
   // Table Columns
@@ -1025,7 +1065,7 @@ const UserManagement = () => {
                             helperText={errors.selectedProduct?.message}
                           >
                             {products.map(product => (
-                              <MenuItem key={product.id} value={product.id}>
+                              <MenuItem key={product._id} value={product._id}>
                                 {product.name}
                               </MenuItem>
                             ))}
