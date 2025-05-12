@@ -143,7 +143,7 @@ const AdminManagement = () => {
       uname: '',
       email: '',
       password: '',
-      designation: '',
+      // designation: '',
       amount: '',
       address: '',
       telephone: '',
@@ -210,7 +210,7 @@ const AdminManagement = () => {
       uname: admin.uname,
       email: admin.email,
       password: '',
-      designation: admin.designation,
+      // designation: admin.designation,
       amount: admin.amount || admin.franchiseAmount,
       address: admin.address,
       telephone: admin.telephone,
@@ -327,23 +327,23 @@ const AdminManagement = () => {
         cell: info => info.getValue(),
         header: 'Franchise Amount(€)'
       }),
-      columnHelper.accessor('designation', {
-        cell: info => info.getValue(),
-        header: 'Designation'
-      }),
-      columnHelper.accessor('status', {
-        cell: info => (
-          <span
-            className={classnames({
-              'text-success': info.getValue() === 'active',
-              'text-error': info.getValue() === 'inactive'
-            })}
-          >
-            {info.getValue()}
-          </span>
-        ),
-        header: 'Status'
-      }),
+      // columnHelper.accessor('designation', {
+      //   cell: info => info.getValue(),
+      //   header: 'Designation'
+      // }),
+      // columnHelper.accessor('status', {
+      //   cell: info => (
+      //     <span
+      //       className={classnames({
+      //         'text-success': info.getValue() === 'active',
+      //         'text-error': info.getValue() === 'inactive'
+      //       })}
+      //     >
+      //       {info.getValue()}
+      //     </span>
+      //   ),
+      //   header: 'Status'
+      // }),
       columnHelper.accessor('createdAt', {
         cell: info => {
           let date = new Date(info.getValue())
@@ -632,7 +632,7 @@ const AdminManagement = () => {
                 </Grid>
 
                 {/* Designation */}
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <Controller
                     name='designation'
                     control={control}
@@ -648,7 +648,7 @@ const AdminManagement = () => {
                       />
                     )}
                   />
-                </Grid>
+                </Grid> */}
 
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
@@ -753,22 +753,22 @@ const AdminManagement = () => {
                       <Typography variant='body1'>{selectedAdmin.email}</Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  {/* <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
                         Designation
                       </Typography>
                       <Typography variant='body1'>{selectedAdmin.designation}</Typography>
                     </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
+                  </Grid> */}
+                  {/* <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
                         Status
                       </Typography>
                       <Typography variant='body1'>{selectedAdmin.status}</Typography>
                     </Box>
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>

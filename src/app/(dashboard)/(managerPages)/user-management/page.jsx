@@ -493,7 +493,7 @@ const UserManagement = () => {
               <DebouncedInput
                 value={globalFilter ?? ''}
                 onChange={value => setGlobalFilter(String(value))}
-                placeholder='Search admins...'
+                placeholder='Search users...'
                 className='min-is-[200px]'
               />
               <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>

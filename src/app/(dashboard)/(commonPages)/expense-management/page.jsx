@@ -289,13 +289,18 @@ const ExpenseManagement = () => {
         header: 'Amount'
       }),
       columnHelper.accessor('date', {
-        cell: info => formatDistanceToNow(new Date(info.getValue()), { addSuffix: true }),
+        cell: info => {
+          let date = new Date(info.getValue())
+          date = date.toLocaleDateString()
+          return date
+        },
         header: 'Date'
       }),
-      columnHelper.accessor('addedBy', {
-        cell: info => info.getValue()?.email || '',
-        header: 'Added By'
-      }),
+      role === 'admin' &&
+        columnHelper.accessor('addedBy', {
+          cell: info => info.getValue()?.email || '',
+          header: 'Added By'
+        }),
       columnHelper.accessor('id', {
         cell: info => (
           <div className='flex items-center gap-2'>
@@ -317,8 +322,8 @@ const ExpenseManagement = () => {
         header: 'Actions',
         size: 120
       })
-    ]
-  }, [sessionToken]) // Only depend on sessionToken for memoization
+    ].filter(Boolean)
+  }, [Cookies.get('sessionToken')]) // Adjusted dependency to avoid stale value
 
   const fuzzyFilter = (row, columnId, value, addMeta) => {
     const columnsToSearch = ['title', 'amount', 'date', 'addedBy']

@@ -321,19 +321,19 @@ const AdminManagement = () => {
         header: 'Email'
       }),
 
-      columnHelper.accessor('status', {
-        cell: info => (
-          <span
-            className={classnames({
-              'text-success': info.getValue() === 'active',
-              'text-error': info.getValue() === 'inactive'
-            })}
-          >
-            {info.getValue()}
-          </span>
-        ),
-        header: 'Status'
-      }),
+      // columnHelper.accessor('status', {
+      //   cell: info => (
+      //     <span
+      //       className={classnames({
+      //         'text-success': info.getValue() === 'active',
+      //         'text-error': info.getValue() === 'inactive'
+      //       })}
+      //     >
+      //       {info.getValue()}
+      //     </span>
+      //   ),
+      //   header: 'Status'
+      // }),
       columnHelper.accessor('createdAt', {
         cell: info => {
           let date = new Date(info.getValue())
@@ -396,7 +396,7 @@ const AdminManagement = () => {
               <DebouncedInput
                 value={globalFilter ?? ''}
                 onChange={value => setGlobalFilter(String(value))}
-                placeholder='Search admins...'
+                placeholder='Search manager...'
                 className='min-is-[200px]'
               />
               <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
@@ -685,14 +685,14 @@ const AdminManagement = () => {
                       <Typography variant='body1'>{selectedManager.email}</Typography>
                     </Box>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  {/* <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
                         Status
                       </Typography>
                       <Typography variant='body1'>{selectedManager.status}</Typography>
                     </Box>
-                  </Grid>
+                  </Grid> */}
 
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
@@ -780,7 +780,8 @@ const AdminManagement = () => {
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                         message: 'Invalid email address'
-                      }
+                      },
+                      required: false
                     }}
                     render={({ field }) => <CustomTextField {...field} fullWidth type='email' label='Email' />}
                   />

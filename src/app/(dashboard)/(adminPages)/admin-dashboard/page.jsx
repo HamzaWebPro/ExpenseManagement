@@ -46,6 +46,111 @@ const AdminDashboard = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
+  // Fatch recent users data
+  const recentUsers = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-user`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentUsers', response)
+
+      if (response.data.success) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentUsers: response.data.success.data,
+          userCount: response.data.success.data.length
+        }))
+      } else {
+        console.error('Error fetching recent managers:', response.data.message)
+        toast.error('Failed to load recent managers')
+      }
+    } catch (error) {
+      console.error('Error fetching recent managers:', error)
+      toast.error('Failed to load recent managers')
+    }
+  }
+
+  // Fatch recent products data
+  const recentProducts = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/product/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentProducts', response)
+      if (response.data.data) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentProducts: response.data.data,
+          productCount: response.data.data.length
+        }))
+      } else {
+        console.error('Error fetching recent products:', response.data.message)
+        toast.error('Failed to load recent products')
+      }
+    } catch (error) {
+      console.error('Error fetching recent products:', error)
+      toast.error('Failed to load recent products')
+    }
+  }
+
+  // Fatch recent expenses data
+  const recentExpenses = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/expense/get-expense`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentExpenses', response)
+      if (response.data.data) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentExpenses: response.data.data,
+          expenseCount: response.data.data.length
+        }))
+      } else {
+        console.error('Error fetching recent expenses:', response.data.message)
+        toast.error('Failed to load recent expenses')
+      }
+    } catch (error) {
+      console.error('Error fetching recent expenses:', error)
+      toast.error('Failed to load recent expenses')
+    }
+  }
+
+  // Fatch recent managers data
+  const recentManagers = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-manager`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentManagers', response)
+      if (response.data.success) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentManagers: response.data.success.data,
+          managerCount: response.data.success.data.length
+        }))
+      } else {
+        console.error('Error fetching recent managers:', response.data.message)
+        toast.error('Failed to load recent managers')
+      }
+    } catch (error) {
+      console.error('Error fetching recent managers:', error)
+      toast.error('Failed to load recent managers')
+    }
+  }
+
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
@@ -60,16 +165,27 @@ const AdminDashboard = () => {
         loginToken: token
       })
 
-      const response = await axios.get(`${baseUrl}/backend/authentication/admin-dashboard`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-        },
-        maxBodyLength: Infinity
-      })
-      if (response.data.success) {
-        setDashboardData(response.data.data)
-      }
+      // Fetch recent managers
+      await recentManagers(setTokenInJson)
+
+      // Fetch recent users
+      await recentUsers(setTokenInJson)
+
+      // Fetch recent products
+      await recentProducts(setTokenInJson)
+
+      // Fetch recent expenses
+      await recentExpenses(setTokenInJson)
+
+      // Fetch recent managers
+      // await recentManagers(setTokenInJson)
+
+      // Fetch total admins
+      // await totalAdmins(setTokenInJson)
+      // // Fetch total managers
+      // await totalManagers(setTokenInJson)
+      // // Fetch total users
+      // await totalUsers(setTokenInJson)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       toast.error('Failed to load dashboard data')

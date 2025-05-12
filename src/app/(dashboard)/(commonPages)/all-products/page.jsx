@@ -149,7 +149,11 @@ const AllProducts = () => {
         header: 'Added By'
       }),
       columnHelper.accessor('createdAt', {
-        cell: info => formatDate(info.getValue()),
+        cell: info => {
+          let date = new Date(info.getValue())
+          date = date.toLocaleDateString()
+          return date
+        },
         header: 'Created Date'
       }),
       columnHelper.accessor('id', {

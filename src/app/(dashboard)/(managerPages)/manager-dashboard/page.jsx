@@ -48,7 +48,84 @@ const ManagerDashboard = () => {
   // Constants
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
+  // Fatch recent users data
+  const recentUsers = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-user`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentUsers', response)
 
+      if (response.data.success) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentUsers: response.data.success.data,
+          userCount: response.data.success.data.length
+        }))
+      } else {
+        console.error('Error fetching recent managers:', response.data.message)
+        toast.error('Failed to load recent managers')
+      }
+    } catch (error) {
+      console.error('Error fetching recent managers:', error)
+      toast.error('Failed to load recent managers')
+    }
+  }
+
+  // Fatch recent products data
+  const recentProducts = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/product/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentProducts', response)
+      if (response.data.data) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentProducts: response.data.data,
+          productCount: response.data.data.length
+        }))
+      } else {
+        console.error('Error fetching recent products:', response.data.message)
+        toast.error('Failed to load recent products')
+      }
+    } catch (error) {
+      console.error('Error fetching recent products:', error)
+      toast.error('Failed to load recent products')
+    }
+  }
+
+  // Fatch recent expenses data
+  const recentExpenses = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/expense/get-expense`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentExpenses', response)
+      if (response.data.data) {
+        setDashboardData(prevData => ({
+          ...prevData,
+          recentExpenses: response.data.data,
+          totalExpenses: response.data.data.reduce((acc, expense) => acc + expense.amount, 0)
+        }))
+      } else {
+        console.error('Error fetching recent expenses:', response.data.message)
+        toast.error('Failed to load recent expenses')
+      }
+    } catch (error) {
+      console.error('Error fetching recent expenses:', error)
+      toast.error('Failed to load recent expenses')
+    }
+  }
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
@@ -63,16 +140,24 @@ const ManagerDashboard = () => {
         loginToken: token
       })
 
-      const response = await axios.get(`${baseUrl}/backend/authentication/manager-dashboard`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-        },
-        maxBodyLength: Infinity
-      })
-      if (response.data.success) {
-        setDashboardData(response.data.data)
-      }
+      // Fetch recent users
+      await recentUsers(setTokenInJson)
+
+      // Fetch recent products
+      await recentProducts(setTokenInJson)
+
+      // Fetch recent expenses
+      await recentExpenses(setTokenInJson)
+
+      // Fetch recent managers
+      // await recentManagers(setTokenInJson)
+
+      // Fetch total admins
+      // await totalAdmins(setTokenInJson)
+      // // Fetch total managers
+      // await totalManagers(setTokenInJson)
+      // // Fetch total users
+      // await totalUsers(setTokenInJson)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       toast.error('Failed to load dashboard data')
@@ -101,13 +186,13 @@ const ManagerDashboard = () => {
       color: 'info',
       action: () => router.push('/product-management')
     },
-    {
-      title: 'Active Products',
-      value: dashboardData.activeProductCount,
-      icon: 'tabler-check',
-      color: 'success',
-      action: () => router.push('/product-management?status=active')
-    },
+    // {
+    //   title: 'Active Products',
+    //   value: dashboardData.activeProductCount,
+    //   icon: 'tabler-check',
+    //   color: 'success',
+    //   action: () => router.push('/product-management?status=active')
+    // },
     {
       title: 'Total Expenses',
       value: `$${dashboardData.totalExpenses.toFixed(2)}`,
@@ -132,7 +217,7 @@ const ManagerDashboard = () => {
           {/* Stats Cards */}
           <Grid container spacing={6} className='mb-6'>
             {stats.map((stat, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card
                   onClick={stat.action}
                   sx={{
@@ -182,7 +267,7 @@ const ManagerDashboard = () => {
                       {dashboardData.recentUsers.map((user, index) => (
                         <div key={index} className='flex items-center justify-between'>
                           <div className='flex items-center gap-4'>
-                            <Avatar src={user.imageObj?.[0]?.url} alt={user.uname} />
+                            <Avatar src={user.photoURL} alt={user.uname} />
                             <div>
                               <Typography variant='subtitle1'>{user.uname}</Typography>
                               <Typography variant='body2' color='text.secondary'>
@@ -223,7 +308,7 @@ const ManagerDashboard = () => {
                       {dashboardData.recentProducts.map((product, index) => (
                         <div key={index} className='flex items-center justify-between'>
                           <div className='flex items-center gap-4'>
-                            <Avatar src={product.imageObj?.[0]?.url} alt={product.name} variant='rounded' />
+                            <Avatar src={product.photoUrl[0]} alt={product.name} variant='rounded' />
                             <div>
                               <Typography variant='subtitle1'>{product.name}</Typography>
                               <Typography variant='body2' color='text.secondary'>

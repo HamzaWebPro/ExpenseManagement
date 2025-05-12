@@ -518,7 +518,7 @@ const DailyFinancialEntry = () => {
                       return (
                         <TableRow key={entry._id}>
                           <TableCell>{user?.uname || 'Unknown User'}</TableCell>
-                          <TableCell>{formatDate(entry.date)}</TableCell>
+                          <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
                           <TableCell>${entry.amount.toFixed(2)}</TableCell>
                           <TableCell>{entry.paymentMethod}</TableCell>
                           <TableCell>
@@ -561,7 +561,7 @@ const DailyFinancialEntry = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>Date</Typography>
-                  <Typography variant='body1'>{formatDate(selectedEntry.date)}</Typography>
+                  <Typography variant='body1'>{new Date(selectedEntry.date).toLocaleDateString()}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>Amount</Typography>

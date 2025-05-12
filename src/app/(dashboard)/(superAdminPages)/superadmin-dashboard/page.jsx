@@ -46,6 +46,116 @@ const SuperAdminDashboard = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
+  // Fatch recent admin data
+  const recentAdmins = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-admin`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentAdmins', response)
+
+      if (response.data.success) {
+        setDashboardData(prevData => ({ ...prevData, recentAdmins: response.data.success.data }))
+      } else {
+        console.error('Error fetching recent admins:', response.data.message)
+        toast.error('Failed to load recent admins')
+      }
+    } catch (error) {
+      console.error('Error fetching recent admins:', error)
+      toast.error('Failed to load recent admins')
+    }
+  }
+
+  // Fatch recent manager data
+  const recentManagers = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-manager`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('recentManagers', response)
+
+      if (response.data.success) {
+        setDashboardData(prevData => ({ ...prevData, recentManagers: response.data.success.data }))
+      } else {
+        console.error('Error fetching recent managers:', response.data.message)
+        toast.error('Failed to load recent managers')
+      }
+    } catch (error) {
+      console.error('Error fetching recent managers:', error)
+      toast.error('Failed to load recent managers')
+    }
+  }
+
+  // Fatch admin data
+  const totalAdmins = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/total-admins`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      if (response.data.success) {
+        setDashboardData(prevData => ({ ...prevData, adminCount: response.data.success.data }))
+      } else {
+        console.error('Error fetching total admins:', response.data.message)
+        toast.error('Failed to load total admins')
+      }
+    } catch (error) {
+      console.error('Error fetching total admins:', error)
+      toast.error('Failed to load total admins')
+    }
+  }
+
+  // Fatch manager data
+  const totalManagers = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/total-managers`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      if (response.data.success) {
+        setDashboardData(prevData => ({ ...prevData, managerCount: response.data.success.data }))
+      } else {
+        console.error('Error fetching total managers:', response.data.message)
+        toast.error('Failed to load total managers')
+      }
+    } catch (error) {
+      console.error('Error fetching total managers:', error)
+      toast.error('Failed to load total managers')
+    }
+  }
+  // Fatch user data
+  const totalUsers = async setTokenInJson => {
+    try {
+      const response = await axios.get(`${baseUrl}/backend/authentication/total-users`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+      console.log('response', response)
+
+      if (response.data.success) {
+        setDashboardData(prevData => ({ ...prevData, userCount: response.data.success.data }))
+      } else {
+        console.error('Error fetching total users:', response.data.message)
+        toast.error('Failed to load total users')
+      }
+    } catch (error) {
+      console.error('Error fetching total users:', error)
+      toast.error('Failed to load total users')
+    }
+  }
+
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
@@ -60,16 +170,17 @@ const SuperAdminDashboard = () => {
         loginToken: token
       })
 
-      const response = await axios.get(`${baseUrl}/backend/authentication/superadmin-dashboard`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-        },
-        maxBodyLength: Infinity
-      })
-      if (response.data.success) {
-        setDashboardData(response.data.data)
-      }
+      // Fetch recent admins
+      await recentAdmins(setTokenInJson)
+      // Fetch recent managers
+      await recentManagers(setTokenInJson)
+
+      // Fetch total admins
+      await totalAdmins(setTokenInJson)
+      // Fetch total managers
+      await totalManagers(setTokenInJson)
+      // Fetch total users
+      await totalUsers(setTokenInJson)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       toast.error('Failed to load dashboard data')
