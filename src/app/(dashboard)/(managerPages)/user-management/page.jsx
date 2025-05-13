@@ -997,10 +997,10 @@ const UserManagement = () => {
                 Current Percentage Settings
               </Typography>
 
-              {selectedUser?.individualProductPercentage && (
+              {selectedUser?.allProductPercentage && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography fontWeight='bold'>Global Percentage:</Typography>
-                  <Typography>{selectedUser.individualProductPercentage.length}% (applies to all products)</Typography>
+                  <Typography>{selectedUser.allProductPercentage}% (applies to all products)</Typography>
                 </Box>
               )}
               {selectedUser?.individualProductPercentage?.length > 0 && (
