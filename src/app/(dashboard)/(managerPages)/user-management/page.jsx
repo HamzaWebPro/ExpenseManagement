@@ -56,7 +56,7 @@ import CustomImageUploadField from '@/@core/components/mui/CustomImageUploadFiel
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
-import { Box, Typography } from '@mui/material'
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import formatDate from '@/@menu/utils/formatDate'
 
 // Column Helper
@@ -427,7 +427,7 @@ const UserManagement = () => {
       //   ),
       //   header: 'Status'
       // }),
-      columnHelper.accessor('null', {
+      columnHelper.accessor('id', {
         cell: info => <Button onClick={() => handleOpenPercentageDialog(info.row.original)}>Manage Percentage</Button>,
         header: 'Manage Percentage'
       }),
@@ -987,12 +987,63 @@ const UserManagement = () => {
         </Dialog>
 
         {/* Percentage Management Dialog */}
-        <Dialog open={percentageDialogOpen} onClose={() => setPercentageDialogOpen(false)} maxWidth='sm' fullWidth>
-          <DialogTitle>Manage Percentage for {selectedUser?.uname}</DialogTitle>
+        {/* // Percentage Management Dialog - Updated Version */}
+        <Dialog open={percentageDialogOpen} onClose={() => setPercentageDialogOpen(false)} maxWidth='md' fullWidth>
+          <DialogTitle>Percentage Management for {selectedUser?.uname}</DialogTitle>
           <DialogContent>
+            {/* Current Percentage Settings Section */}
+            <Box sx={{ mb: 4, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+              <Typography variant='h6' gutterBottom>
+                Current Percentage Settings
+              </Typography>
+
+              {selectedUser?.individualProductPercentage && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography fontWeight='bold'>Global Percentage:</Typography>
+                  <Typography>{selectedUser.individualProductPercentage.length}% (applies to all products)</Typography>
+                </Box>
+              )}
+              {selectedUser?.individualProductPercentage?.length > 0 && (
+                <>
+                  <Typography variant='subtitle1' gutterBottom>
+                    Product-Specific Percentages:
+                  </Typography>
+                  <TableContainer sx={{ maxHeight: 300 }}>
+                    <Table size='small' stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Product</TableCell>
+                          <TableCell align='right'>Percentage</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedUser.individualProductPercentage.map((item, index) => {
+                          console.log('item', item)
+
+                          const product = products.find(p => p._id === item.product.name)
+                          return (
+                            <TableRow key={index}>
+                              <TableCell>{item?.product?.name || 'Unknown Product'}</TableCell>
+                              <TableCell align='right'>{item.percentage}%</TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
+              )}
+              {!selectedUser?.allProductPercentage && !selectedUser?.individualProductPercentage?.length && (
+                <Typography color='text.secondary'>No percentage settings configured</Typography>
+              )}
+            </Box>
+
+            {/* Update Percentage Settings Section */}
+            <Typography variant='h6' gutterBottom sx={{ mt: 3 }}>
+              Update Settings
+            </Typography>
             <form onSubmit={handleSubmit(handleSubmitPercentage)}>
-              <Grid container spacing={4} className='p-4'>
-                {/* Apply to all products checkbox */}
+              <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Controller
                     name='applyToAll'
@@ -1005,10 +1056,8 @@ const UserManagement = () => {
                             checked={field.value}
                             onChange={e => {
                               field.onChange(e.target.checked)
-                              if (e.target.checked) {
-                                setValue('selectedProduct', '')
-                                setValue('productPercentage', '')
-                              }
+                              setValue('selectedProduct', '')
+                              setValue('productPercentage', '')
                             }}
                           />
                         }
@@ -1018,24 +1067,24 @@ const UserManagement = () => {
                   />
                 </Grid>
 
-                {/* Global percentage input (shown when applyToAll is true) */}
-                {applyToAll && (
+                {applyToAll ? (
                   <Grid item xs={12}>
                     <Controller
                       name='globalPercentage'
                       control={control}
                       rules={{
                         required: 'Percentage is required',
-                        min: { value: 0, message: 'Percentage must be at least 0' },
-                        max: { value: 100, message: 'Percentage cannot exceed 100' }
+                        min: { value: 0, message: 'Minimum 0%' },
+                        max: { value: 100, message: 'Maximum 100%' },
+                        validate: value => !isNaN(value) || 'Must be a number'
                       }}
                       render={({ field }) => (
                         <CustomTextField
                           {...field}
                           fullWidth
                           type='number'
-                          label='Percentage for all products'
-                          placeholder='Enter percentage'
+                          label='Global Percentage'
+                          placeholder='0-100'
                           InputProps={{
                             endAdornment: <InputAdornment position='end'>%</InputAdornment>
                           }}
@@ -1045,16 +1094,13 @@ const UserManagement = () => {
                       )}
                     />
                   </Grid>
-                )}
-
-                {/* Product-specific percentage (shown when applyToAll is false) */}
-                {!applyToAll && (
+                ) : (
                   <>
                     <Grid item xs={12} sm={6}>
                       <Controller
                         name='selectedProduct'
                         control={control}
-                        rules={{ required: 'Product selection is required' }}
+                        rules={{ required: 'Product is required' }}
                         render={({ field }) => (
                           <CustomTextField
                             {...field}
@@ -1079,8 +1125,9 @@ const UserManagement = () => {
                         control={control}
                         rules={{
                           required: 'Percentage is required',
-                          min: { value: 0, message: 'Percentage must be at least 0' },
-                          max: { value: 100, message: 'Percentage cannot exceed 100' }
+                          min: { value: 0, message: 'Minimum 0%' },
+                          max: { value: 100, message: 'Maximum 100%' },
+                          validate: value => !isNaN(value) || 'Must be a number'
                         }}
                         render={({ field }) => (
                           <CustomTextField
@@ -1088,7 +1135,7 @@ const UserManagement = () => {
                             fullWidth
                             type='number'
                             label='Percentage'
-                            placeholder='Enter percentage'
+                            placeholder='0-100'
                             InputProps={{
                               endAdornment: <InputAdornment position='end'>%</InputAdornment>
                             }}
