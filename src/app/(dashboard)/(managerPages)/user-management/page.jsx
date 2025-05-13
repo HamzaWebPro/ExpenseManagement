@@ -362,8 +362,8 @@ const UserManagement = () => {
   }
 
   // Submit Percentage Management Form
-  const handleSubmitPercentage = async data => {
-    console.log('Percentage data:', data)
+  const handleSubmitPercentage = async itm => {
+    console.log('Percentage data:', itm)
     console.log('selected user data:', selectedUser)
 
     try {
@@ -377,7 +377,7 @@ const UserManagement = () => {
       console.log('setTokenInJson', setTokenInJson)
       const response = await axios.post(
         `${baseUrl}/backend/manage-percentage/store`,
-        { userId: selectedUser._id, ...data },
+        { userId: selectedUser._id, ...itm },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -388,6 +388,7 @@ const UserManagement = () => {
       console.log('Percentage response:', response)
       if (response.data && response.status === 201) {
         toast.success('Percentage settings saved successfully!')
+        await fetchUser()
         setPercentageDialogOpen(false)
       } else {
         toast.error('Failed to save percentage settings')
