@@ -49,6 +49,7 @@ import { IconEye as EyeOutline } from '@tabler/icons-react'
 import { IconPencil as PencilOutline } from '@tabler/icons-react'
 import { IconTrash as DeleteOutline } from '@tabler/icons-react'
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
+import { IconPlus, IconTrash } from '@tabler/icons-react'
 
 // Style Imports
 import styles from '@core/styles/table.module.css'
@@ -58,6 +59,7 @@ import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import formatDate from '@/@menu/utils/formatDate'
+import { DNA } from 'react-loader-spinner'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -104,7 +106,7 @@ const UserManagement = () => {
   const [imagePreview, setImagePreview] = useState('')
   const [percentageDialogOpen, setPercentageDialogOpen] = useState(false)
   const [products, setProducts] = useState([])
-  const [selectedProduct, setSelectedProduct] = useState('')
+  const [btnLoading, setBtnLoading] = useState('')
 
   const fetchUser = async () => {
     let token = decryptDataObject(sessionToken)
@@ -123,7 +125,7 @@ const UserManagement = () => {
         },
         maxBodyLength: Infinity
       })
-      console.log(response)
+      console.log('added user', response)
 
       const managerArr = response?.data?.success?.data || []
       if (managerArr.length > 0) {
@@ -183,21 +185,35 @@ const UserManagement = () => {
       designation: '',
       address: '',
       telephone: '',
+      delayCost: '',
       imageObj: [],
       applyToAll: false,
-      globalPercentage: '',
-      productPercentage: '',
-      selectedProduct: ''
+      allProductPercentage: '',
+      specificProducts: [{ percentage: '', product: '' }]
     }
   })
 
   const applyToAll = watch('applyToAll')
+  const specificProducts = watch('specificProducts')
+
+  // Add new product percentage field
+  const addProductPercentageField = () => {
+    setValue('specificProducts', [...specificProducts, { percentage: '', product: '' }])
+  }
+
+  // Remove product percentage field
+  const removeProductPercentageField = index => {
+    const updatedProducts = [...specificProducts]
+    updatedProducts.splice(index, 1)
+    setValue('specificProducts', updatedProducts)
+  }
 
   // Toggle Password Visibility
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   // Form Submit Handler
   const onSubmit = async formData => {
+    setBtnLoading('submit')
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -228,6 +244,8 @@ const UserManagement = () => {
     } catch (error) {
       console.error('Error creating user:', error)
       toast.error(error?.response?.data?.error?.message)
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -251,6 +269,7 @@ const UserManagement = () => {
       designation: manager.designation,
       address: manager.address,
       telephone: manager.telephone,
+      delayCost: manager.delayCost || '',
       imageObj: manager.imageObj || []
     })
 
@@ -266,6 +285,7 @@ const UserManagement = () => {
 
   // Update User
   const handleUpdateUser = async formData => {
+    setBtnLoading('update')
     console.log('formData for update', formData)
 
     if (!selectedUser) return
@@ -302,6 +322,8 @@ const UserManagement = () => {
     } catch (error) {
       console.error('Error updating User:', error)
       toast.error('Failed to update User')
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -354,16 +376,16 @@ const UserManagement = () => {
     setSelectedUser(user)
     reset({
       applyToAll: false,
-      globalPercentage: '',
-      productPercentage: '',
-      selectedProduct: ''
+      allProductPercentage: user.allProductPercentage || '',
+      specificProducts: [{ percentage: '', product: '' }]
     })
     setPercentageDialogOpen(true)
   }
 
   // Submit Percentage Management Form
-  const handleSubmitPercentage = async itm => {
-    console.log('Percentage data:', itm)
+  const handleSubmitPercentage = async formData => {
+    setBtnLoading('percentage')
+    console.log('Percentage data:', formData)
     console.log('selected user data:', selectedUser)
 
     try {
@@ -374,33 +396,40 @@ const UserManagement = () => {
         postToken: backendPostToken,
         loginToken: token
       })
-      console.log('setTokenInJson', setTokenInJson)
-      const response = await axios.post(
-        `${baseUrl}/backend/manage-percentage/store`,
-        { userId: selectedUser._id, ...itm },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-          }
+
+      const payload = {
+        userId: selectedUser._id,
+        allProductPercentage: formData.applyToAll ? formData.allProductPercentage : null,
+        individualProductPercentage: formData.applyToAll
+          ? []
+          : formData.specificProducts.map(item => ({
+              product: item.product,
+              percentage: item.percentage
+            }))
+      }
+      console.log(payload)
+      const response = await axios.post(`${baseUrl}/backend/manage-percentage/store`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         }
-      )
+      })
+
       console.log('Percentage response:', response)
       if (response.data && response.status === 201) {
         toast.success('Percentage settings saved successfully!')
         await fetchUser()
+
         setPercentageDialogOpen(false)
       } else {
         toast.error('Failed to save percentage settings')
       }
     } catch (error) {
       console.error('Error submitting percentage data:', error)
-      toast.error('Failed to submit percentage data')
+      toast.error(error?.response?.data?.error?.message || 'Failed to submit percentage data')
+    } finally {
+      setBtnLoading('')
     }
-
-    // Here you would typically send this data to your API
-    // toast.success('Percentage settings saved successfully!')
-    // setPercentageDialogOpen(false)
   }
 
   // Table Columns
@@ -414,21 +443,11 @@ const UserManagement = () => {
         cell: info => info.getValue(),
         header: 'Email'
       }),
-
-      // columnHelper.accessor('status', {
-      //   cell: info => (
-      //     <span
-      //       className={classnames({
-      //         'text-success': info.getValue() === 'active',
-      //         'text-error': info.getValue() === 'inactive'
-      //       })}
-      //     >
-      //       {info.getValue()}
-      //     </span>
-      //   ),
-      //   header: 'Status'
-      // }),
-      columnHelper.accessor('id', {
+      columnHelper.accessor('delayCost', {
+        cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
+        header: 'Delay Cost'
+      }),
+      columnHelper.accessor('_id', {
         cell: info => <Button onClick={() => handleOpenPercentageDialog(info.row.original)}>Manage Percentage</Button>,
         header: 'Manage Percentage'
       }),
@@ -440,7 +459,7 @@ const UserManagement = () => {
         },
         header: 'Created Date'
       }),
-      columnHelper.accessor('id', {
+      columnHelper.accessor('_id', {
         cell: info => (
           <div className='flex items-center gap-2'>
             <IconButton onClick={() => handleViewManager(info.row.original)}>
@@ -618,6 +637,34 @@ const UserManagement = () => {
                   />
                 </Grid>
 
+                {/* Delay Cost */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='delayCost'
+                    control={control}
+                    rules={{
+                      min: {
+                        value: 0,
+                        message: 'Delay cost cannot be negative'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type='number'
+                        label='Delay Cost ($)'
+                        placeholder='Enter delay cost'
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
+                        error={!!errors.delayCost}
+                        helperText={errors.delayCost?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
                 {/* Image Upload */}
                 <Grid item xs={12} sm={6}>
                   <Controller
@@ -644,30 +691,6 @@ const UserManagement = () => {
                   />
                 </Grid>
 
-                {/* status */}
-                {/* <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='status'
-                    control={control}
-                    rules={{ required: 'Status is required' }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        select
-                        label='Status'
-                        error={!!errors.status}
-                        helperText={errors.status?.message}
-                        SelectProps={{ native: true }}
-                      >
-                        <option value=''>Select Status</option>
-                        <option value='active'>Active</option>
-                        <option value='inactive'>Inactive</option>
-                      </CustomTextField>
-                    )}
-                  />
-                </Grid> */}
-
                 {/* Address */}
                 <Grid item xs={12}>
                   <Controller
@@ -692,7 +715,17 @@ const UserManagement = () => {
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button variant='contained' type='submit'>
-                    Add User
+                    {btnLoading === 'submit' ? (
+                      <DNA
+                        visible={true}
+                        height={22}
+                        ariaLabel='dna-loading'
+                        wrapperStyle={{}}
+                        wrapperClass='dna-wrapper'
+                      />
+                    ) : (
+                      'Add User'
+                    )}
                   </Button>
                   <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
                     Reset
@@ -792,15 +825,16 @@ const UserManagement = () => {
                       <Typography variant='body1'>{selectedUser.email}</Typography>
                     </Box>
                   </Grid>
-                  {/* <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
-                        Status
+                        Delay Cost
                       </Typography>
-                      <Typography variant='body1'>{selectedUser.status}</Typography>
+                      <Typography variant='body1'>
+                        {selectedUser.delayCost ? `$${selectedUser.delayCost}` : '-'}
+                      </Typography>
                     </Box>
-                  </Grid> */}
-
+                  </Grid>
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
@@ -920,6 +954,23 @@ const UserManagement = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller
+                    name='delayCost'
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type='number'
+                        label='Delay Cost ($)'
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
                     name='imageObj'
                     control={control}
                     render={({ field: { onChange } }) => (
@@ -982,13 +1033,16 @@ const UserManagement = () => {
               Cancel
             </Button>
             <Button variant='contained' onClick={handleSubmit(handleUpdateUser)}>
-              Save Changes
+              {btnLoading === 'update' ? (
+                <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </DialogActions>
         </Dialog>
 
         {/* Percentage Management Dialog */}
-        {/* // Percentage Management Dialog - Updated Version */}
         <Dialog open={percentageDialogOpen} onClose={() => setPercentageDialogOpen(false)} maxWidth='md' fullWidth>
           <DialogTitle>Percentage Management for {selectedUser?.uname}</DialogTitle>
           <DialogContent>
@@ -1019,12 +1073,10 @@ const UserManagement = () => {
                       </TableHead>
                       <TableBody>
                         {selectedUser.individualProductPercentage.map((item, index) => {
-                          console.log('item', item)
-
-                          const product = products.find(p => p._id === item.product.name)
+                          const product = products.find(p => p._id === item.product._id)
                           return (
                             <TableRow key={index}>
-                              <TableCell>{item?.product?.name || 'Unknown Product'}</TableCell>
+                              <TableCell>{product?.name || 'Unknown Product'}</TableCell>
                               <TableCell align='right'>{item.percentage}%</TableCell>
                             </TableRow>
                           )
@@ -1057,8 +1109,9 @@ const UserManagement = () => {
                             checked={field.value}
                             onChange={e => {
                               field.onChange(e.target.checked)
-                              setValue('selectedProduct', '')
-                              setValue('productPercentage', '')
+                              if (e.target.checked) {
+                                setValue('specificProducts', [{ percentage: '', product: '' }])
+                              }
                             }}
                           />
                         }
@@ -1071,7 +1124,7 @@ const UserManagement = () => {
                 {applyToAll ? (
                   <Grid item xs={12}>
                     <Controller
-                      name='globalPercentage'
+                      name='allProductPercentage'
                       control={control}
                       rules={{
                         required: 'Percentage is required',
@@ -1089,63 +1142,78 @@ const UserManagement = () => {
                           InputProps={{
                             endAdornment: <InputAdornment position='end'>%</InputAdornment>
                           }}
-                          error={!!errors.globalPercentage}
-                          helperText={errors.globalPercentage?.message}
+                          error={!!errors.allProductPercentage}
+                          helperText={errors.allProductPercentage?.message}
                         />
                       )}
                     />
                   </Grid>
                 ) : (
                   <>
-                    <Grid item xs={12} sm={6}>
-                      <Controller
-                        name='selectedProduct'
-                        control={control}
-                        rules={{ required: 'Product is required' }}
-                        render={({ field }) => (
-                          <CustomTextField
-                            {...field}
-                            select
-                            fullWidth
-                            label='Select Product'
-                            error={!!errors.selectedProduct}
-                            helperText={errors.selectedProduct?.message}
-                          >
-                            {products.map(product => (
-                              <MenuItem key={product._id} value={product._id}>
-                                {product.name}
-                              </MenuItem>
-                            ))}
-                          </CustomTextField>
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Controller
-                        name='productPercentage'
-                        control={control}
-                        rules={{
-                          required: 'Percentage is required',
-                          min: { value: 0, message: 'Minimum 0%' },
-                          max: { value: 100, message: 'Maximum 100%' },
-                          validate: value => !isNaN(value) || 'Must be a number'
-                        }}
-                        render={({ field }) => (
-                          <CustomTextField
-                            {...field}
-                            fullWidth
-                            type='number'
-                            label='Percentage'
-                            placeholder='0-100'
-                            InputProps={{
-                              endAdornment: <InputAdornment position='end'>%</InputAdornment>
-                            }}
-                            error={!!errors.productPercentage}
-                            helperText={errors.productPercentage?.message}
+                    {specificProducts.map((product, index) => (
+                      <Grid container item xs={12} spacing={2} key={index}>
+                        <Grid item xs={5}>
+                          <Controller
+                            name={`specificProducts.${index}.product`}
+                            control={control}
+                            rules={{ required: 'Product is required' }}
+                            render={({ field }) => (
+                              <CustomTextField
+                                {...field}
+                                select
+                                fullWidth
+                                label='Select Product'
+                                error={!!errors.specificProducts?.[index]?.product}
+                                helperText={errors.specificProducts?.[index]?.product?.message}
+                              >
+                                {products.map(product => (
+                                  <MenuItem key={product._id} value={product._id}>
+                                    {product.name}
+                                  </MenuItem>
+                                ))}
+                              </CustomTextField>
+                            )}
                           />
-                        )}
-                      />
-                    </Grid>
+                        </Grid>
+                        <Grid item xs={5}>
+                          <Controller
+                            name={`specificProducts.${index}.percentage`}
+                            control={control}
+                            rules={{
+                              required: 'Percentage is required',
+                              min: { value: 0, message: 'Minimum 0%' },
+                              max: { value: 100, message: 'Maximum 100%' },
+                              validate: value => !isNaN(value) || 'Must be a number'
+                            }}
+                            render={({ field }) => (
+                              <CustomTextField
+                                {...field}
+                                fullWidth
+                                type='number'
+                                label='Percentage'
+                                placeholder='0-100'
+                                InputProps={{
+                                  endAdornment: <InputAdornment position='end'>%</InputAdornment>
+                                }}
+                                error={!!errors.specificProducts?.[index]?.percentage}
+                                helperText={errors.specificProducts?.[index]?.percentage?.message}
+                              />
+                            )}
+                          />
+                        </Grid>
+                        <Grid item xs={2} className='flex items-center'>
+                          {index === 0 ? (
+                            <IconButton onClick={addProductPercentageField}>
+                              <IconPlus />
+                            </IconButton>
+                          ) : (
+                            <IconButton onClick={() => removeProductPercentageField(index)}>
+                              <IconTrash color='error' />
+                            </IconButton>
+                          )}
+                        </Grid>
+                      </Grid>
+                    ))}
                   </>
                 )}
               </Grid>
@@ -1154,7 +1222,11 @@ const UserManagement = () => {
           <DialogActions>
             <Button onClick={() => setPercentageDialogOpen(false)}>Cancel</Button>
             <Button variant='contained' onClick={handleSubmit(handleSubmitPercentage)}>
-              Save
+              {btnLoading === 'percentage' ? (
+                <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
+              ) : (
+                'Save'
+              )}
             </Button>
           </DialogActions>
         </Dialog>

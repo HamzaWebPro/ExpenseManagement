@@ -32,11 +32,15 @@ import { addItem } from '@/app/_Slices/userSlice'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import { toast } from 'react-toastify'
 
+import { DNA } from 'react-loader-spinner'
+
 const Login = () => {
   const loginToken = process.env.NEXT_PUBLIC_VITE_LOGIN_TOKEN
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const dispatch = useDispatch()
   const router = useRouter()
+
+  const [btnLoading, setBtnLoading] = useState(false)
 
   // States
   const [values, setValues] = useState({ email: '', password: '' })
@@ -83,11 +87,11 @@ const Login = () => {
   }
 
   const loginHandler = async e => {
+    setBtnLoading(true)
     e.preventDefault()
 
-   
-
     if (!validate()) {
+      setBtnLoading(false)
       return
     } else {
       try {
@@ -133,6 +137,8 @@ const Login = () => {
         }
       } catch (error) {
         console.error('Login error:', error.response ? error.response.data : error.message)
+      } finally {
+        setBtnLoading(false)
       }
     }
   }
@@ -194,7 +200,18 @@ const Login = () => {
               <Typography>Please Contact with Admin.</Typography>
             </div>
             <Button fullWidth variant='contained' type='submit'>
-              Login
+              {btnLoading ? (
+                <DNA
+                  visible={true}
+                  // className='h-full w-auto'
+                  height={22}
+                  ariaLabel='dna-loading'
+                  wrapperStyle={{}}
+                  wrapperClass='dna-wrapper'
+                />
+              ) : (
+                'Login'
+              )}
             </Button>
           </form>
         </CardContent>

@@ -53,6 +53,7 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
+import { DNA } from 'react-loader-spinner'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -96,6 +97,7 @@ const ProductManagement = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
+  const [btnLoading, setBtnLoading] = useState('')
 
   const fetchProducts = async () => {
     let token = decryptDataObject(sessionToken)
@@ -147,6 +149,7 @@ const ProductManagement = () => {
 
   // Form Submit Handler
   const onSubmit = async formData => {
+    setBtnLoading('submit')
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -175,6 +178,8 @@ const ProductManagement = () => {
     } catch (error) {
       console.error('Error creating product:', error)
       toast.error('Failed to create product')
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -209,6 +214,7 @@ const ProductManagement = () => {
 
   // Update Product
   const handleUpdateProduct = async formData => {
+    setBtnLoading('update')
     if (!selectedProduct) return
 
     const updatedProduct = {
@@ -244,11 +250,14 @@ const ProductManagement = () => {
     } catch (error) {
       console.error('Error updating product:', error)
       toast.error('Failed to update product')
+    } finally {
+      setBtnLoading('')
     }
   }
 
   // Delete Product
   const handleDeleteProduct = async id => {
+    setBtnLoading('delete')
     if (!id) return toast.error('Product ID is required')
 
     const confirm = window.confirm('Are you sure you want to delete this product?')
@@ -281,6 +290,8 @@ const ProductManagement = () => {
     } catch (error) {
       console.error('Error deleting product:', error)
       toast.error('Failed to delete product')
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -523,7 +534,18 @@ const ProductManagement = () => {
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button variant='contained' type='submit'>
-                    Add Product
+                    {btnLoading === 'submit' ? (
+                      <DNA
+                        visible={true}
+                        // className='h-full w-auto'
+                        height={22}
+                        ariaLabel='dna-loading'
+                        wrapperStyle={{}}
+                        wrapperClass='dna-wrapper'
+                      />
+                    ) : (
+                      'Add Product'
+                    )}
                   </Button>
                   <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
                     Reset
@@ -819,7 +841,11 @@ const ProductManagement = () => {
               Cancel
             </Button>
             <Button variant='contained' onClick={handleSubmit(handleUpdateProduct)}>
-              Save Changes
+              {btnLoading ? (
+                <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
+              ) : (
+                'Save Change'
+              )}
             </Button>
           </DialogActions>
         </Dialog>

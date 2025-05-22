@@ -317,7 +317,7 @@ const AdminManagement = () => {
     () => [
       columnHelper.accessor('uname', {
         cell: info => info.getValue(),
-        header: 'Admin Name'
+        header: 'Store Name'
       }),
       columnHelper.accessor('email', {
         cell: info => info.getValue(),
@@ -401,7 +401,7 @@ const AdminManagement = () => {
     <>
       <Card>
         <CardHeader
-          title='Admin Management'
+          title='Store Management'
           action={
             <div className='flex items-center gap-4'>
               <DebouncedInput
@@ -422,7 +422,7 @@ const AdminManagement = () => {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={4}>
-                {/* Admin Name */}
+                {/* Store Name */}
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='uname'
@@ -432,8 +432,8 @@ const AdminManagement = () => {
                       <CustomTextField
                         {...field}
                         fullWidth
-                        label='Admin Name'
-                        placeholder='Enter admin name'
+                        label='Store Name'
+                        placeholder='Enter store name'
                         error={!!errors.uname}
                         helperText={errors.uname?.message}
                       />
@@ -459,7 +459,7 @@ const AdminManagement = () => {
                         fullWidth
                         type='email'
                         label='Admin Email'
-                        placeholder='Enter admin email'
+                        placeholder='Enter store email'
                         error={!!errors.email}
                         helperText={errors.email?.message}
                       />
@@ -740,7 +740,7 @@ const AdminManagement = () => {
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
-                        Admin Name
+                        Store Name
                       </Typography>
                       <Typography variant='body1'>{selectedAdmin?.uname}</Typography>
                     </Box>
@@ -849,8 +849,8 @@ const AdminManagement = () => {
                       <CustomTextField
                         {...field}
                         fullWidth
-                        label='Admin Name'
-                        placeholder='Enter admin name'
+                        label='Store Name'
+                        placeholder='Enter store name'
                         error={!!errors.uname}
                         helperText={errors.uname?.message}
                       />
@@ -874,7 +874,7 @@ const AdminManagement = () => {
                         fullWidth
                         type='email'
                         label='Email'
-                        placeholder='Enter admin email'
+                        placeholder='Enter store email'
                         error={!!errors.email}
                         helperText={errors.email?.message}
                       />
