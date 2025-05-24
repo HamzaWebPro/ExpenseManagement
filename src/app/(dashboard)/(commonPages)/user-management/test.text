@@ -1,3 +1,4 @@
+
 'use client'
 
 // React Imports
@@ -17,6 +18,9 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import MenuItem from '@mui/material/MenuItem'
 
 // Third-party Imports
 import { toast } from 'react-toastify'
@@ -46,6 +50,7 @@ import { IconEye as EyeOutline } from '@tabler/icons-react'
 import { IconPencil as PencilOutline } from '@tabler/icons-react'
 import { IconTrash as DeleteOutline } from '@tabler/icons-react'
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
+import { IconPlus, IconTrash } from '@tabler/icons-react'
 
 // Style Imports
 import styles from '@core/styles/table.module.css'
@@ -53,7 +58,7 @@ import CustomImageUploadField from '@/@core/components/mui/CustomImageUploadFiel
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
-import { Box, Typography } from '@mui/material'
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import formatDate from '@/@menu/utils/formatDate'
 import { DNA } from 'react-loader-spinner'
 
@@ -84,7 +89,7 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
   return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 }
 
-const AdminManagement = () => {
+const UserManagement = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const sessionToken = Cookies.get('sessionToken')
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
@@ -98,11 +103,14 @@ const AdminManagement = () => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedAdmin, setSelectedAdmin] = useState(null)
+  const [selectedUser, setSelectedUser] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
+  const [percentageDialogOpen, setPercentageDialogOpen] = useState(false)
+  const [products, setProducts] = useState([])
   const [btnLoading, setBtnLoading] = useState('')
+  const [selectedProducts, setSelectedProducts] = useState([])
 
-  const fetchAdmin = async () => {
+  const fetchUser = async () => {
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -119,10 +127,39 @@ const AdminManagement = () => {
         },
         maxBodyLength: Infinity
       })
+      console.log('added user', response)
 
-      const adminArr = response?.data?.success?.data || []
-      if (adminArr.length > 0) {
-        setData([...adminArr])
+      const managerArr = response?.data?.success?.data || []
+      if (managerArr.length > 0) {
+        setData([...managerArr])
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const fetchProducts = async () => {
+    let token = decryptDataObject(sessionToken)
+    token = JSON.parse(token)
+    token = token?.tokens
+
+    const setTokenInJson = JSON.stringify({
+      getToken: backendGetToken,
+      loginToken: token
+    })
+    try {
+      const response = await axios.get(`${baseUrl}/backend/product/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+      console.log(response)
+
+      const productsArr = response?.data?.data || []
+      if (productsArr.length > 0) {
+        setProducts([...productsArr])
       }
     } catch (error) {
       console.log(error)
@@ -130,7 +167,8 @@ const AdminManagement = () => {
   }
 
   useEffect(() => {
-    fetchAdmin()
+    fetchUser()
+    fetchProducts()
   }, [])
 
   // Form Hook
@@ -139,20 +177,27 @@ const AdminManagement = () => {
     reset,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: {
       uname: '',
       email: '',
       password: '',
-      // designation: '',
-      amount: '',
+      designation: '',
       address: '',
       telephone: '',
-      status: 'inactive',
-      imageObj: []
+      delayCost: '',
+      imageObj: [],
+      applyToAll: false,
+      allProductPercentage: '',
+      percentage: '',
+      selectedProducts: []
     }
   })
+
+  const applyToAll = watch('applyToAll')
+  const percentage = watch('percentage')
 
   // Toggle Password Visibility
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
@@ -164,69 +209,64 @@ const AdminManagement = () => {
     token = JSON.parse(token)
     token = token?.tokens
 
+    console.log(formData)
+
     const setTokenInJson = JSON.stringify({
       postToken: backendPostToken,
       loginToken: token
     })
+
     try {
-      const response = await axios.post(
-        `${baseUrl}/backend/authentication/store`,
-        {
-          ...formData
+      const response = await axios.post(`${baseUrl}/backend/authentication/store`, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-          },
-          maxBodyLength: Infinity
-        }
-      )
+        maxBodyLength: Infinity
+      })
 
       console.log(response)
 
-      toast.success(response?.data?.success?.message)
-      fetchAdmin()
+      toast.success('User Created Successfully!')
+      fetchUser()
       reset()
       setShowAddForm(false)
       setImagePreview('')
     } catch (error) {
+      console.error('Error creating user:', error)
       toast.error(error?.response?.data?.error?.message)
     } finally {
       setBtnLoading('')
-      return
     }
   }
 
   // View Admin Details
-  const handleViewAdmin = admin => {
-    setSelectedAdmin(admin)
+  const handleViewManager = manager => {
+    setSelectedUser(manager)
     setViewDialogOpen(true)
   }
 
-  // Edit Admin
-  const handleEditAdmin = admin => {
-    console.log(admin)
+  // Edit User
+  const handleEditManager = manager => {
+    console.log(manager)
 
-    setSelectedAdmin(admin)
+    setSelectedUser(manager)
 
-    // Reset form with admin data
     reset({
-      id: admin._id,
-      uname: admin.uname,
-      email: admin.email,
+      id: manager._id,
+      uname: manager.uname,
+      email: manager.email,
       password: '',
-      // designation: admin.designation,
-      amount: admin.amount || admin.franchiseAmount,
-      address: admin.address,
-      telephone: admin.telephone,
-      status: admin.status,
-      imageObj: admin.imageObj || []
+      designation: manager.designation,
+      address: manager.address,
+      telephone: manager.telephone,
+      delayCost: manager.delayCost || '',
+      imageObj: manager.imageObj || []
     })
 
     // Set image preview if available
-    if (admin.imageObj && admin.imageObj.length > 0) {
-      setImagePreview(admin.imageObj[0].url || '')
+    if (manager.imageObj && manager.imageObj.length > 0) {
+      setImagePreview(manager.imageObj[0].url || '')
     } else {
       setImagePreview('')
     }
@@ -234,16 +274,16 @@ const AdminManagement = () => {
     setEditDialogOpen(true)
   }
 
-  // Update Admin
-  const handleUpdateAdmin = async formData => {
+  // Update User
+  const handleUpdateUser = async formData => {
     setBtnLoading('update')
     console.log('formData for update', formData)
 
-    if (!selectedAdmin) return
+    if (!selectedUser) return
 
-    const updatedAdmin = {
+    const updatedManager = {
       ...formData,
-      imageObj: formData.imageObj.length > 0 ? formData.imageObj : selectedAdmin.imageObj || []
+      imageObj: formData.imageObj.length > 0 ? formData.imageObj : selectedUser.imageObj || []
     }
 
     let token = decryptDataObject(sessionToken)
@@ -256,31 +296,31 @@ const AdminManagement = () => {
     })
 
     try {
-      const response = await axios.post(`${baseUrl}/backend/authentication/update`, updatedAdmin, {
+      const response = await axios.post(`${baseUrl}/backend/authentication/update`, updatedManager, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         },
         maxBodyLength: Infinity
       })
+      console.log(response)
 
-      toast.success('Admin Updated Successfully!')
-      fetchAdmin()
+      toast.success('User Updated Successfully!')
+      fetchUser()
       setEditDialogOpen(false)
       reset()
       setImagePreview('')
     } catch (error) {
-      console.error('Error updating admin:', error)
-      toast.error('Failed to update admin')
+      console.error('Error updating User:', error)
+      toast.error('Failed to update User')
     } finally {
       setBtnLoading('')
-      return
     }
   }
 
   // Delete Admin
-  const handleDeleteAdmin = async id => {
-    const confirm = window.confirm('Are you sure you want to delete this admin?')
+  const handleDeleteManager = async id => {
+    const confirm = window.confirm('Are you sure you want to delete this User?')
     if (!confirm) return
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
@@ -294,7 +334,7 @@ const AdminManagement = () => {
     try {
       const response = await axios.post(
         ` ${baseUrl}/backend/authentication/destroy`,
-        { id },
+        { id, addBy: 'superAdmin' },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -306,11 +346,11 @@ const AdminManagement = () => {
 
       console.log(response)
 
-      toast.success('Admin Deleted Successfully!')
-      fetchAdmin()
+      toast.success('User Deleted Successfully!')
+      fetchUser()
     } catch (error) {
-      console.error('Error deleting admin:', error)
-      toast.error('Failed to delete admin')
+      console.error('Error deleting User:', error)
+      toast.error('Failed to delete User')
     } finally {
       return
     }
@@ -322,62 +362,124 @@ const AdminManagement = () => {
     setImagePreview('')
   }
 
+  // Open Percentage Management Dialog
+  const handleOpenPercentageDialog = user => {
+    setSelectedUser(user)
+    setSelectedProducts([])
+
+    reset({
+      applyToAll: !!user.allProductPercentage,
+      allProductPercentage: user.allProductPercentage || '',
+      percentage: '',
+      selectedProducts: []
+    })
+
+    // If user has individual product percentages, pre-select those products
+    // if (user.individualProductPercentage?.length > 0) {
+    //   const productIds = user.individualProductPercentage.map(item => item.product._id)
+    //   setSelectedProducts(productIds)
+    // }
+
+    setPercentageDialogOpen(true)
+  }
+
+  // Toggle product selection
+  const handleProductSelect = productId => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId)
+      } else {
+        return [...prev, productId]
+      }
+    })
+  }
+
+  // Submit Percentage Management Form
+  const handleSubmitPercentage = async formData => {
+    setBtnLoading('percentage')
+
+    try {
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: token
+      })
+
+      const payload = {
+        userId: selectedUser._id,
+        allProductPercentage: formData.applyToAll ? formData.allProductPercentage : null,
+        individualProductPercentage: formData.applyToAll
+          ? []
+          : selectedProducts.map(productId => ({
+              product: productId,
+              percentage: formData.percentage
+            }))
+      }
+
+      console.log('Submitting percentage data:', payload)
+
+      const response = await axios.post(`${baseUrl}/backend/manage-percentage/store`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+
+      console.log('Percentage response:', response)
+      if (response.data && response.status === 201) {
+        toast.success('Percentage settings saved successfully!')
+        await fetchUser()
+        setPercentageDialogOpen(false)
+      } else {
+        toast.error('Failed to save percentage settings')
+      }
+    } catch (error) {
+      console.error('Error submitting percentage data:', error)
+      toast.error(error?.response?.data?.error?.message || 'Failed to submit percentage data')
+    } finally {
+      setBtnLoading('')
+    }
+  }
+
   // Table Columns
   const columns = useMemo(
     () => [
       columnHelper.accessor('uname', {
         cell: info => info.getValue(),
-        header: 'Store Name'
+        header: 'User Name'
       }),
       columnHelper.accessor('email', {
         cell: info => info.getValue(),
         header: 'Email'
       }),
-      columnHelper.accessor('amount', {
-        cell: info => (
-          <p className='flex items-center'>
-            <span> {info.getValue()}</span>
-            <InputAdornment position='end'>%</InputAdornment>
-          </p>
-        ),
-
-        header: 'Franchise Amount(€)'
+      columnHelper.accessor('delayCost', {
+        cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
+        header: 'Delay Cost'
       }),
-      // columnHelper.accessor('designation', {
-      //   cell: info => info.getValue(),
-      //   header: 'Designation'
-      // }),
-      // columnHelper.accessor('status', {
-      //   cell: info => (
-      //     <span
-      //       className={classnames({
-      //         'text-success': info.getValue() === 'active',
-      //         'text-error': info.getValue() === 'inactive'
-      //       })}
-      //     >
-      //       {info.getValue()}
-      //     </span>
-      //   ),
-      //   header: 'Status'
-      // }),
+      columnHelper.accessor('_id', {
+        cell: info => <Button onClick={() => handleOpenPercentageDialog(info.row.original)}>Manage Percentage</Button>,
+        header: 'Manage Percentage'
+      }),
       columnHelper.accessor('createdAt', {
         cell: info => {
           let date = new Date(info.getValue())
-          date = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+          date = date = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
           return date
         },
         header: 'Created Date'
       }),
-      columnHelper.accessor('id', {
+      columnHelper.accessor('_id', {
         cell: info => (
           <div className='flex items-center gap-2'>
-            <IconButton onClick={() => handleViewAdmin(info.row.original)}>
+            <IconButton onClick={() => handleViewManager(info.row.original)}>
               <EyeOutline className='text-textPrimary' />
             </IconButton>
-            <IconButton onClick={() => handleEditAdmin(info.row.original)}>
+            <IconButton onClick={() => handleEditManager(info.row.original)}>
               <PencilOutline className='text-textPrimary' />
             </IconButton>
-            <IconButton onClick={() => handleDeleteAdmin(info.row.original._id)}>
+            <IconButton onClick={() => handleDeleteManager(info.row.original._id)}>
               <DeleteOutline className='text-textPrimary' />
             </IconButton>
           </div>
@@ -416,28 +518,28 @@ const AdminManagement = () => {
     <>
       <Card>
         <CardHeader
-          title='Store Management'
+          title='User Management'
           action={
             <div className='flex items-center gap-4'>
               <DebouncedInput
                 value={globalFilter ?? ''}
                 onChange={value => setGlobalFilter(String(value))}
-                placeholder='Search admins...'
+                placeholder='Search users...'
                 className='min-is-[200px]'
               />
               <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
-                {showAddForm ? 'Hide Form' : 'Add Admin'}
+                {showAddForm ? 'Hide Form' : 'Add User'}
               </Button>
             </div>
           }
         />
 
-        {/* Add Admin Form */}
+        {/* Add User Form */}
         {showAddForm && (
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={4}>
-                {/* Store Name */}
+                {/* User Name */}
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='uname'
@@ -447,8 +549,8 @@ const AdminManagement = () => {
                       <CustomTextField
                         {...field}
                         fullWidth
-                        label='Store Name'
-                        placeholder='Enter store name'
+                        label='User Name'
+                        placeholder='Enter manager name'
                         error={!!errors.uname}
                         helperText={errors.uname?.message}
                       />
@@ -473,8 +575,8 @@ const AdminManagement = () => {
                         {...field}
                         fullWidth
                         type='email'
-                        label='Admin Email'
-                        placeholder='Enter store email'
+                        label='User Email'
+                        placeholder='Enter m email'
                         error={!!errors.email}
                         helperText={errors.email?.message}
                       />
@@ -499,7 +601,7 @@ const AdminManagement = () => {
                         {...field}
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
-                        label='Admin Password'
+                        label='User Password'
                         placeholder='Enter password'
                         error={!!errors.password}
                         helperText={errors.password?.message}
@@ -522,35 +624,6 @@ const AdminManagement = () => {
                   />
                 </Grid>
 
-                {/* Franchise Amount */}
-
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='amount'
-                    control={control}
-                    rules={{
-                      required: 'Franchise amount is required',
-                      min: { value: 0, message: 'Minimum 0%' },
-                      max: { value: 100, message: 'Maximum 100%' },
-                      validate: value => !isNaN(value) || 'Must be a number'
-                    }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        type='number'
-                        label='Franchise Amount'
-                        placeholder='Enter amount in (0-100)'
-                        InputProps={{
-                          endAdornment: <InputAdornment position='end'>%</InputAdornment>
-                        }}
-                        error={!!errors.amount}
-                        helperText={errors.amount?.message}
-                      />
-                    )}
-                  />
-                </Grid>
-
                 {/* Telephone */}
                 <Grid item xs={12} sm={6}>
                   <Controller
@@ -567,9 +640,37 @@ const AdminManagement = () => {
                         {...field}
                         fullWidth
                         label='Telephone'
-                        placeholder='Admin Phone Number'
+                        placeholder='User Phone Number'
                         error={!!errors.telephone}
                         helperText={errors.telephone?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Delay Cost */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='delayCost'
+                    control={control}
+                    rules={{
+                      min: {
+                        value: 0,
+                        message: 'Delay cost cannot be negative'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type='number'
+                        label='Delay Cost ($)'
+                        placeholder='Enter delay cost'
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
+                        error={!!errors.delayCost}
+                        helperText={errors.delayCost?.message}
                       />
                     )}
                   />
@@ -601,36 +702,12 @@ const AdminManagement = () => {
                   />
                 </Grid>
 
-                {/* status */}
-                {/* <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='status'
-                    control={control}
-                    rules={{ required: 'Status is required' }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        select
-                        label='Status'
-                        error={!!errors.status}
-                        helperText={errors.status?.message}
-                        SelectProps={{ native: true }}
-                      >
-                        <option value=''>Select Status</option>
-                        <option value='active'>Active</option>
-                        <option value='inactive'>Inactive</option>
-                      </CustomTextField>
-                    )}
-                  />
-                </Grid> */}
-
                 {/* Address */}
                 <Grid item xs={12}>
                   <Controller
                     name='address'
                     control={control}
-                    rules={{ required: 'Address is required' }}
+                    // rules={{ required: 'Address is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -646,25 +723,6 @@ const AdminManagement = () => {
                   />
                 </Grid>
 
-                {/* Designation */}
-                {/* <Grid item xs={12}>
-                  <Controller
-                    name='designation'
-                    control={control}
-                    rules={{ required: 'Designation is required' }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='Designation'
-                        placeholder='Enter designation'
-                        error={!!errors.designation}
-                        helperText={errors.designation?.message}
-                      />
-                    )}
-                  />
-                </Grid> */}
-
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button disabled={btnLoading === 'submit'} variant='contained' type='submit'>
@@ -677,7 +735,7 @@ const AdminManagement = () => {
                         wrapperClass='dna-wrapper'
                       />
                     ) : (
-                      'Add Admin'
+                      'Add User'
                     )}
                   </Button>
                   <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
@@ -689,7 +747,7 @@ const AdminManagement = () => {
           </CardContent>
         )}
 
-        {/* Admins Table */}
+        {/* User Table */}
         <div className='overflow-x-auto'>
           <table className={styles.table}>
             <thead>
@@ -720,7 +778,7 @@ const AdminManagement = () => {
               <tbody>
                 <tr>
                   <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    No admins found
+                    No User found
                   </td>
                 </tr>
               </tbody>
@@ -744,8 +802,8 @@ const AdminManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename='all_admin' data={data}>
-                <Button variant='contained'>Export All Admin</Button>
+              <CSVLink filename='all_user' data={data}>
+                <Button variant='contained'>Export All User</Button>
               </CSVLink>
             </TablePaginationComponent>
           )}
@@ -755,19 +813,19 @@ const AdminManagement = () => {
           onPageChange={(_, page) => table.setPageIndex(page)}
         />
 
-        {/* View Admin Dialog */}
+        {/* View User Dialog */}
         <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth='md' fullWidth>
-          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Admin Details</DialogTitle>
+          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>User Details</DialogTitle>
           <DialogContent>
-            {selectedAdmin && (
+            {selectedUser && (
               <Box className='p-4'>
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
-                        Store Name
+                        User Name
                       </Typography>
-                      <Typography variant='body1'>{selectedAdmin?.uname}</Typography>
+                      <Typography variant='body1'>{selectedUser?.uname}</Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -775,31 +833,17 @@ const AdminManagement = () => {
                       <Typography variant='subtitle2' color='textSecondary'>
                         Email
                       </Typography>
-                      <Typography variant='body1'>{selectedAdmin.email}</Typography>
+                      <Typography variant='body1'>{selectedUser.email}</Typography>
                     </Box>
                   </Grid>
-                  {/* <Grid item xs={12} sm={6}>
-                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                      <Typography variant='subtitle2' color='textSecondary'>
-                        Designation
-                      </Typography>
-                      <Typography variant='body1'>{selectedAdmin.designation}</Typography>
-                    </Box>
-                  </Grid> */}
-                  {/* <Grid item xs={12} sm={6}>
-                    <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                      <Typography variant='subtitle2' color='textSecondary'>
-                        Status
-                      </Typography>
-                      <Typography variant='body1'>{selectedAdmin.status}</Typography>
-                    </Box>
-                  </Grid> */}
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
-                        Franchise Amount
+                        Delay Cost
                       </Typography>
-                      <Typography variant='body1'>${selectedAdmin?.amount}</Typography>
+                      <Typography variant='body1'>
+                        {selectedUser.delayCost ? `$${selectedUser.delayCost}` : '-'}
+                      </Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -807,7 +851,7 @@ const AdminManagement = () => {
                       <Typography variant='subtitle2' color='textSecondary'>
                         Telephone
                       </Typography>
-                      <Typography variant='body1'>{selectedAdmin.telephone}</Typography>
+                      <Typography variant='body1'>{selectedUser.telephone}</Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={12}>
@@ -816,7 +860,7 @@ const AdminManagement = () => {
                         Address
                       </Typography>
                       <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap' }}>
-                        {selectedAdmin.address}
+                        {selectedUser.address}
                       </Typography>
                     </Box>
                   </Grid>
@@ -825,10 +869,10 @@ const AdminManagement = () => {
                       <Typography variant='subtitle2' color='textSecondary'>
                         Created Time
                       </Typography>
-                      <Typography variant='body1'>{formatDate(selectedAdmin.createdAt)}</Typography>
+                      <Typography variant='body1'>{formatDate(selectedUser.createdAt)}</Typography>
                     </Box>
                   </Grid>
-                  {selectedAdmin.imageObj?.[0]?.url && (
+                  {selectedUser.imageObj?.[0]?.url && (
                     <Grid item xs={12} sm={6} className='flex items-center justify-center'>
                       <Box
                         border={1}
@@ -841,7 +885,7 @@ const AdminManagement = () => {
                         bgcolor='background.paper'
                       >
                         <img
-                          src={selectedAdmin.imageObj[0].url}
+                          src={selectedUser.imageObj[0].url}
                           alt='Admin'
                           style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain' }}
                         />
@@ -859,26 +903,18 @@ const AdminManagement = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Edit Admin Dialog */}
+        {/* Edit User Dialog */}
         <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth='md' fullWidth>
-          <DialogTitle>Edit Admin</DialogTitle>
+          <DialogTitle>Edit User</DialogTitle>
           <DialogContent>
-            <form onSubmit={handleSubmit(handleUpdateAdmin)}>
+            <form onSubmit={handleSubmit(handleUpdateUser)}>
               <Grid container spacing={4} className='p-4'>
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='uname'
                     control={control}
-                    // rules={{ required: 'Username is required' }}
                     render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='Store Name'
-                        placeholder='Enter store name'
-                        error={!!errors.uname}
-                        helperText={errors.uname?.message}
-                      />
+                      <CustomTextField {...field} fullWidth label='User Name' placeholder='Enter manager name' />
                     )}
                   />
                 </Grid>
@@ -886,24 +922,7 @@ const AdminManagement = () => {
                   <Controller
                     name='email'
                     control={control}
-                    rules={{
-                      // required: 'Email is required',
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Invalid email address'
-                      }
-                    }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        type='email'
-                        label='Email'
-                        placeholder='Enter store email'
-                        error={!!errors.email}
-                        helperText={errors.email?.message}
-                      />
-                    )}
+                    render={({ field }) => <CustomTextField {...field} fullWidth type='email' label='Email' />}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -935,92 +954,28 @@ const AdminManagement = () => {
                     )}
                   />
                 </Grid>
-                {/* <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='amount'
-                    control={control}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='Franchise Amount'
-                        placeholder='Enter amount'
-                        type='number'
-                        error={!!errors.amount}
-                        helperText={errors.amount?.message}
-                        InputProps={{
-                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
-                        }}
-                      />
-                    )}
-                  />
-                </Grid> */}
-                <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='amount'
-                    control={control}
-                    rules={{
-                      // required: 'Percentage is required',
-                      min: { value: 0, message: 'Minimum 0%' },
-                      max: { value: 100, message: 'Maximum 100%' },
-                      validate: value => !isNaN(value) || 'Must be a number'
-                    }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        type='number'
-                        label='Franchise Amount'
-                        placeholder='Enter amount in (0-100)'
-                        InputProps={{
-                          endAdornment: <InputAdornment position='end'>%</InputAdornment>
-                        }}
-                        error={!!errors.amount}
-                        helperText={errors.amount?.message}
-                      />
-                    )}
-                  />
-                </Grid>
-                {/* <Grid item xs={12} sm={6}>
-                  <Controller
-                    name='status'
-                    control={control}
-                    rules={{ required: 'Status is required' }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        select
-                        label='Status'
-                        error={!!errors.status}
-                        helperText={errors.status?.message}
-                        SelectProps={{ native: true }}
-                      >
-                        <option value=''>Select Status</option>
-                        <option value='active'>Active</option>
-                        <option value='inactive'>Inactive</option>
-                      </CustomTextField>
-                    )}
-                  />
-                </Grid> */}
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='telephone'
                     control={control}
-                    rules={{
-                      pattern: {
-                        value: /^[0-9]{10,15}$/,
-                        message: 'Please enter a valid phone number'
-                      }
-                    }}
+                    render={({ field }) => (
+                      <CustomTextField {...field} fullWidth label='Telephone' placeholder='Phone number' />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='delayCost'
+                    control={control}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
                         fullWidth
-                        label='Telephone'
-                        placeholder='Phone number'
-                        error={!!errors.telephone}
-                        helperText={errors.telephone?.message}
+                        type='number'
+                        label='Delay Cost ($)'
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
                       />
                     )}
                   />
@@ -1034,8 +989,6 @@ const AdminManagement = () => {
                         <CustomImageUploadField
                           fullWidth
                           label='Upload Image'
-                          // error={!!errors.imageObj}
-                          // helperText={errors.imageObj?.message}
                           onChange={e => {
                             const file = e.target.files[0]
                             if (file) {
@@ -1043,16 +996,16 @@ const AdminManagement = () => {
                               reader.onloadend = () => {
                                 const imageDataUrl = reader.result
                                 setImagePreview(imageDataUrl)
-                                onChange([imageDataUrl])
+                                onChange([{ url: imageDataUrl }])
                               }
                               reader.readAsDataURL(file)
                             }
                           }}
                         />
-                        {(imagePreview || (selectedAdmin?.imageObj?.[0]?.url && !imagePreview)) && (
+                        {(imagePreview || (selectedUser?.imageObj?.[0]?.url && !imagePreview)) && (
                           <div className='mt-2'>
                             <img
-                              src={imagePreview || selectedAdmin.imageObj[0].url}
+                              src={imagePreview || selectedUser.imageObj[0].url}
                               alt='Preview'
                               className='max-h-[100px] max-w-full object-contain'
                             />
@@ -1066,7 +1019,6 @@ const AdminManagement = () => {
                   <Controller
                     name='address'
                     control={control}
-                    // rules={{ required: 'Address is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -1075,29 +1027,10 @@ const AdminManagement = () => {
                         placeholder='Enter address'
                         multiline
                         rows={3}
-                        error={!!errors.address}
-                        helperText={errors.address?.message}
                       />
                     )}
                   />
                 </Grid>
-                {/* <Grid item xs={12}>
-                  <Controller
-                    name='designation'
-                    control={control}
-                    // rules={{ required: 'Designation is required' }}
-                    render={({ field }) => (
-                      <CustomTextField
-                        {...field}
-                        fullWidth
-                        label='Designation'
-                        placeholder='Enter designation'
-                        error={!!errors.designation}
-                        helperText={errors.designation?.message}
-                      />
-                    )}
-                  />
-                </Grid> */}
               </Grid>
             </form>
           </DialogContent>
@@ -1110,11 +1043,212 @@ const AdminManagement = () => {
             >
               Cancel
             </Button>
-            <Button disabled={btnLoading === 'update'} variant='contained' onClick={handleSubmit(handleUpdateAdmin)}>
+            <Button disabled={btnLoading === 'update'} variant='contained' onClick={handleSubmit(handleUpdateUser)}>
               {btnLoading === 'update' ? (
                 <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
               ) : (
                 'Save Changes'
+              )}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Percentage Management Dialog */}
+        <Dialog open={percentageDialogOpen} onClose={() => setPercentageDialogOpen(false)} maxWidth='md' fullWidth>
+          <DialogTitle>Percentage Management for {selectedUser?.uname}</DialogTitle>
+          <DialogContent>
+            {/* Current Percentage Settings Section */}
+            <Box sx={{ mb: 4, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+              <Typography variant='h6' gutterBottom>
+                Current Percentage Settings
+              </Typography>
+
+              {selectedUser?.allProductPercentage && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography fontWeight='bold'>Global Percentage:</Typography>
+                  <Typography>{selectedUser.allProductPercentage}% (applies to all products)</Typography>
+                </Box>
+              )}
+              {selectedUser?.individualProductPercentage?.length > 0 && (
+                <>
+                  <Typography variant='subtitle1' gutterBottom>
+                    Product-Specific Percentages:
+                  </Typography>
+                  <TableContainer sx={{ maxHeight: 300 }}>
+                    <Table size='small' stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Product</TableCell>
+                          <TableCell align='right'>Percentage</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedUser.individualProductPercentage.map((item, index) => {
+                          const product = products.find(p => p._id === item.product._id)
+                          return (
+                            <TableRow key={index}>
+                              <TableCell>{product?.name || 'Unknown Product'}</TableCell>
+                              <TableCell align='right'>{item.percentage}%</TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
+              )}
+              {!selectedUser?.allProductPercentage && !selectedUser?.individualProductPercentage?.length && (
+                <Typography color='text.secondary'>No percentage settings configured</Typography>
+              )}
+            </Box>
+
+            {/* Update Percentage Settings Section */}
+            <Typography variant='h6' gutterBottom sx={{ mt: 3 }}>
+              Update Settings
+            </Typography>
+            <form onSubmit={handleSubmit(handleSubmitPercentage)}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Controller
+                    name='applyToAll'
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            {...field}
+                            checked={field.value}
+                            onChange={e => {
+                              field.onChange(e.target.checked)
+                              if (e.target.checked) {
+                                setSelectedProducts([])
+                              }
+                            }}
+                          />
+                        }
+                        label='Apply percentage to all products'
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {applyToAll ? (
+                  <Grid item xs={12}>
+                    <Controller
+                      name='allProductPercentage'
+                      control={control}
+                      rules={{
+                        required: 'Percentage is required',
+                        min: { value: 0, message: 'Minimum 0%' },
+                        max: { value: 100, message: 'Maximum 100%' },
+                        validate: value => !isNaN(value) || 'Must be a number'
+                      }}
+                      render={({ field }) => (
+                        <CustomTextField
+                          {...field}
+                          fullWidth
+                          type='number'
+                          label='Global Percentage'
+                          placeholder='0-100'
+                          InputProps={{
+                            endAdornment: <InputAdornment position='end'>%</InputAdornment>
+                          }}
+                          error={!!errors.allProductPercentage}
+                          helperText={errors.allProductPercentage?.message}
+                        />
+                      )}
+                    />
+                  </Grid>
+                ) : (
+                  <>
+                    <Grid item xs={12}>
+                      <Controller
+                        name='percentage'
+                        control={control}
+                        rules={{
+                          required: 'Percentage is required',
+                          min: { value: 0, message: 'Minimum 0%' },
+                          max: { value: 100, message: 'Maximum 100%' },
+                          validate: value => !isNaN(value) || 'Must be a number'
+                        }}
+                        render={({ field }) => (
+                          <CustomTextField
+                            {...field}
+                            fullWidth
+                            type='number'
+                            label='Percentage for Selected Products'
+                            placeholder='0-100'
+                            InputProps={{
+                              endAdornment: <InputAdornment position='end'>%</InputAdornment>
+                            }}
+                            error={!!errors.percentage}
+                            helperText={errors.percentage?.message}
+                          />
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Controller
+                        name='selectedProducts'
+                        control={control}
+                        render={({ field }) => (
+                          <CustomTextField
+                            select
+                            SelectProps={{
+                              multiple: true,
+                              value: selectedProducts,
+                              onChange: e => {
+                                setSelectedProducts(e.target.value)
+                                field.onChange(e.target.value)
+                              }
+                              // renderValue: selected => {
+                              //   if (selected.length === 0) {
+                              //     return <em>Select products</em>
+                              //   }
+                              //   return selected
+                              //     .map(productId => {
+                              //       const product = products.find(p => p._id === productId)
+                              //       return product?.name || ''
+                              //     })
+                              //     .filter(name => name)
+                              //     .join(', ')
+                              // }
+                            }}
+                            fullWidth
+                            label='Select Products'
+                            error={!!errors.selectedProducts}
+                            helperText={errors.selectedProducts?.message}
+                          >
+                            <MenuItem disabled value=''>
+                              <em>Select products</em>
+                            </MenuItem>
+                            {products.map(product => (
+                              <MenuItem key={product._id} value={product._id}>
+                                <Checkbox checked={selectedProducts.includes(product._id)} />
+                                {product.name}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+            </form>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPercentageDialogOpen(false)}>Cancel</Button>
+            <Button
+              disabled={btnLoading === 'percentage'}
+              variant='contained'
+              onClick={handleSubmit(handleSubmitPercentage)}
+            >
+              {btnLoading === 'percentage' ? (
+                <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
+              ) : (
+                'Save'
               )}
             </Button>
           </DialogActions>
@@ -1124,4 +1258,4 @@ const AdminManagement = () => {
   )
 }
 
-export default AdminManagement
+export default UserManagement

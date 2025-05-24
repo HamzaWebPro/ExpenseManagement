@@ -54,7 +54,7 @@ const DailyFinancialEntry = () => {
   const [formData, setFormData] = useState({
     userId: '',
     paymentMethod: 'cash',
-    date: new Date(),
+    // date: new Date(),
     description: '',
     products: [{ productId: '', quantity: 1 }]
   })
@@ -266,7 +266,7 @@ const DailyFinancialEntry = () => {
         setFormData({
           userId: '',
           paymentMethod: 'cash',
-          date: new Date(),
+          // date: new Date(),
           description: '',
           products: [{ productId: '', quantity: 1 }]
         })
@@ -350,26 +350,26 @@ const DailyFinancialEntry = () => {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Box display='flex' alignItems='center' gap={2}>
-                  {/* Payment Method */}
-                  <FormControl component='fieldset'>
-                    <Typography component='legend'>Payment Method</Typography>
-                    <RadioGroup row name='paymentMethod' value={formData.paymentMethod} onChange={handleInputChange}>
-                      <FormControlLabel value='cash' control={<Radio />} label='Cash' />
-                      <FormControlLabel value='card' control={<Radio />} label='Card' />
-                    </RadioGroup>
-                  </FormControl>
+                {/* <Box display='flex' alignItems='center' gap={2}> */}
+                {/* Payment Method */}
+                <FormControl component='fieldset'>
+                  <Typography component='legend'>Payment Method</Typography>
+                  <RadioGroup row name='paymentMethod' value={formData.paymentMethod} onChange={handleInputChange}>
+                    <FormControlLabel value='cash' control={<Radio />} label='Cash' />
+                    <FormControlLabel value='card' control={<Radio />} label='Card' />
+                  </RadioGroup>
+                </FormControl>
 
-                  {/* Date Picker */}
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                {/* Date Picker */}
+                {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
                       label='Date'
                       value={formData.date}
                       onChange={handleDateChange}
                       renderInput={params => <TextField {...params} required fullWidth />}
                     />
-                  </LocalizationProvider>
-                </Box>
+                  </LocalizationProvider> */}
+                {/* </Box> */}
               </Grid>
 
               {/* Description */}
@@ -518,7 +518,14 @@ const DailyFinancialEntry = () => {
                       return (
                         <TableRow key={entry._id}>
                           <TableCell>{user?.uname || 'Unknown User'}</TableCell>
-                          <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {new Date(entry.createdAt).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </TableCell>
+
                           <TableCell>${entry.amount.toFixed(2)}</TableCell>
                           <TableCell>{entry.paymentMethod}</TableCell>
                           <TableCell>

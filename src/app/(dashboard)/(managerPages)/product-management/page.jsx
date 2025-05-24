@@ -329,7 +329,7 @@ const ProductManagement = () => {
       columnHelper.accessor('createdAt', {
         cell: info => {
           let date = new Date(info.getValue())
-          date = date.toLocaleDateString()
+          date = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
           return date
         },
         header: 'Created Date'
