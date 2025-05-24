@@ -16,7 +16,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
-import { Box, InputAdornment, Typography } from '@mui/material'
+import { Box, InputAdornment, MenuItem, Typography } from '@mui/material'
 
 // Third-party Imports
 import { toast } from 'react-toastify'
@@ -54,6 +54,7 @@ import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
 import { DNA } from 'react-loader-spinner'
+import TokenManager from '@/@menu/utils/token'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -88,6 +89,9 @@ const ProductManagement = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
+  const currentUser = sessionToken ? JSON.parse(decryptDataObject(sessionToken)) : null
+  const role = currentUser?.role || ''
+
   // States
   const [showAddForm, setShowAddForm] = useState(false)
   const [data, setData] = useState([])
@@ -99,16 +103,63 @@ const ProductManagement = () => {
   const [imagePreview, setImagePreview] = useState('')
   const [btnLoading, setBtnLoading] = useState('')
 
-  const fetchProducts = async () => {
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
+  const [stores, setStores] = useState([])
+  const [managers, setManagers] = useState([])
+  const [selectedManagers, setSelectedManagers] = useState([])
 
-    const setTokenInJson = JSON.stringify({
-      getToken: backendGetToken,
-      loginToken: token
-    })
+  const fetchUser = async () => {
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+
+      const response = await axios.get(
+        `${baseUrl}/backend/authentication/${role === 'superAdmin' ? 'all-user' : 'all-added-user'}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          },
+          maxBodyLength: Infinity
+        }
+      )
+
+      const users = response?.data?.success?.data || []
+
+      // Reset all data arrays
+
+      setStores([])
+      setManagers([])
+
+      // Categorize users by role
+      users.forEach(user => {
+        const userRole = user?.role?.toLowerCase()
+        console.log(stores)
+        switch (userRole) {
+          case 'admin':
+            setStores(prev => [...prev, user])
+            break
+          case 'manager':
+            setManagers(prev => [...prev, user])
+            break
+          default:
+            break
+        }
+      })
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
+
+  const fetchProducts = async () => {
+    try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
       const response = await axios.get(`${baseUrl}/backend/product/all`, {
         headers: {
           'Content-Type': 'application/json',
@@ -127,16 +178,13 @@ const ProductManagement = () => {
     }
   }
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
   // Form Hook
   const {
     control,
     reset,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: {
@@ -147,34 +195,55 @@ const ProductManagement = () => {
     }
   })
 
+  useEffect(() => {
+    if (role) {
+      fetchProducts()
+
+      if (role === 'superAdmin') {
+        reset({
+          name: '',
+          price: '',
+          description: '',
+          imageObj: [],
+          store: '',
+          addedBy: ''
+        })
+        fetchUser()
+      }
+    }
+  }, [role])
+
   // Form Submit Handler
   const onSubmit = async formData => {
     setBtnLoading('submit')
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
     try {
+      console.log('product form data:', formData)
+
+      const loginToken = await TokenManager.getLoginToken()
+      const authPayload = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
+
       const response = await axios.post(`${baseUrl}/backend/product/store`, formData, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          Authorization: `Basic ${btoa(`user:${authPayload}`)}`
         },
         maxBodyLength: Infinity
       })
 
       console.log('response', response)
 
-      toast.success('Product Created Successfully!')
-      fetchProducts()
-      reset()
-      setShowAddForm(false)
-      setImagePreview('')
+      if (response.status === 201) {
+        toast.success('Product Created Successfully!')
+        fetchProducts()
+        reset()
+        setShowAddForm(false)
+        setImagePreview('')
+      } else {
+        toast.error('Failed to create product')
+      }
     } catch (error) {
       console.error('Error creating product:', error)
       toast.error('Failed to create product')
@@ -222,20 +291,17 @@ const ProductManagement = () => {
       imageObj: formData.imageObj.length > 0 ? formData.imageObj : selectedProduct.imageObj || []
     }
 
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const authPayload = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
+
       const response = await axios.post(`${baseUrl}/backend/product/update`, updatedProduct, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          Authorization: `Basic ${btoa(`user:${authPayload}`)}`
         },
         maxBodyLength: Infinity
       })
@@ -263,13 +329,10 @@ const ProductManagement = () => {
     const confirm = window.confirm('Are you sure you want to delete this product?')
     if (!confirm) return
     try {
-      let token = decryptDataObject(sessionToken)
-      token = JSON.parse(token)
-      token = token?.tokens
-
-      const setTokenInJson = JSON.stringify({
+      const loginToken = await TokenManager.getLoginToken()
+      const authPayload = JSON.stringify({
         postToken: backendPostToken,
-        loginToken: token
+        loginToken: loginToken || ''
       })
 
       const response = await axios.post(
@@ -278,7 +341,7 @@ const ProductManagement = () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+            Authorization: `Basic ${btoa(`user:${authPayload}`)}`
           },
           maxBodyLength: Infinity
         }
@@ -302,8 +365,8 @@ const ProductManagement = () => {
   }
 
   // Table Columns
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const baseColumns = [
       columnHelper.accessor('name', {
         cell: info => info.getValue(),
         header: 'Product Name'
@@ -351,9 +414,21 @@ const ProductManagement = () => {
         header: 'Actions',
         size: 120
       })
-    ],
-    []
-  )
+    ]
+
+    if (role === 'superAdmin') {
+      baseColumns.splice(
+        1,
+        0, // Insert after uname
+        columnHelper.accessor('store.uname', {
+          cell: info => info.getValue() || '-',
+          header: 'Store Name'
+        })
+      )
+    }
+
+    return baseColumns
+  }, [role])
 
   // React Table Instance
   const table = useReactTable({
@@ -403,6 +478,75 @@ const ProductManagement = () => {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={4}>
+                {role === 'superAdmin' && (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='store'
+                        control={control}
+                        defaultValue=''
+                        rules={{
+                          required: 'Store selection is required'
+                        }}
+                        render={({ field }) => (
+                          <CustomTextField
+                            {...field}
+                            select
+                            fullWidth
+                            label='Select Store'
+                            error={!!errors.store}
+                            helperText={errors.store?.message}
+                            onChange={e => {
+                              const selectedStoreId = e.target.value
+                              field.onChange(selectedStoreId)
+                              const filteredManagers = managers.filter(
+                                manager => manager.store?._id === selectedStoreId || manager.store === selectedStoreId
+                              )
+                              console.log(filteredManagers)
+                              setSelectedManagers(filteredManagers)
+                              setValue('addedBy', '')
+                            }}
+                          >
+                            <MenuItem value=''>Select Store</MenuItem>
+                            {stores.map(store => (
+                              <MenuItem key={store._id} value={store._id}>
+                                {store.uname}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+
+                    {watch('store') && selectedManagers.length > 0 && (
+                      <Grid item xs={12} sm={6}>
+                        <Controller
+                          name='addedBy'
+                          control={control}
+                          rules={{ required: 'Manager selection is required' }}
+                          render={({ field }) => (
+                            <CustomTextField
+                              {...field}
+                              select
+                              fullWidth
+                              label='Select Manager'
+                              error={!!errors.addedBy}
+                              helperText={errors.addedBy?.message}
+                            >
+                              <MenuItem value=''>Select Manager</MenuItem>
+                              {selectedManagers.map(manager => (
+                                <MenuItem key={manager._id} value={manager._id}>
+                                  {manager.uname}
+                                </MenuItem>
+                              ))}
+                            </CustomTextField>
+                          )}
+                        />
+                      </Grid>
+                    )}
+                  </>
+                )}
+
                 {/* Product Name */}
                 <Grid item xs={12} sm={6}>
                   <Controller
@@ -515,7 +659,7 @@ const ProductManagement = () => {
                   <Controller
                     name='description'
                     control={control}
-                    rules={{ required: 'Description is required' }}
+                    // rules={{ required: 'Description is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -813,7 +957,7 @@ const ProductManagement = () => {
                   <Controller
                     name='description'
                     control={control}
-                    rules={{ required: 'Description is required' }}
+                    // rules={{ required: 'Description is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
