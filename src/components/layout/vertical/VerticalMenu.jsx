@@ -79,6 +79,9 @@ const VerticalMenu = ({ scrollMenu }) => {
               <MenuItem href='/admin-management' icon={<i className='menu-icon icon-base ti tabler-building-store' />}>
                 Store Management
               </MenuItem>
+              <MenuItem href={`/manager-management`} icon={<i className='menu-icon icon-base ti tabler-users'></i>}>
+                Manager Management
+              </MenuItem>
 
               <MenuItem href={`/user-management`} icon={<i className='menu-icon icon-base ti tabler-users' />}>
                 User Management

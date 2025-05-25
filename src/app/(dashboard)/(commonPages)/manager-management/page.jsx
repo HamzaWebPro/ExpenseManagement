@@ -53,8 +53,10 @@ import CustomImageUploadField from '@/@core/components/mui/CustomImageUploadFiel
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
-import { Box, Typography } from '@mui/material'
+import { Box, MenuItem, Typography } from '@mui/material'
 import formatDate from '@/@menu/utils/formatDate'
+import TokenManager from '@/@menu/utils/token'
+import { DNA } from 'react-loader-spinner'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -89,6 +91,9 @@ const AdminManagement = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
+  const currentUser = sessionToken ? JSON.parse(decryptDataObject(sessionToken)) : null
+  const role = currentUser?.role || ''
+
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -100,23 +105,71 @@ const AdminManagement = () => {
   const [selectedManager, setSelectedManager] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
 
-  const fetchManager = async () => {
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
+  const [btnLoading, setBtnLoading] = useState('')
 
-    const setTokenInJson = JSON.stringify({
-      getToken: backendGetToken,
-      loginToken: token
-    })
+  const [stores, setStores] = useState([])
+
+  const fetchUser = async () => {
     try {
-      const response = await axios.get(`${baseUrl}/backend/authentication/all-added-user`, {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+
+      const response = await axios.get(
+        `${baseUrl}/backend/authentication/${role === 'superAdmin' ? 'all-user' : 'all-added-user'}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          },
+          maxBodyLength: Infinity
+        }
+      )
+
+      const users = response?.data?.success?.data || []
+
+      // Reset all data arrays
+      // setData([])
+      setStores([])
+      // setManagers([])
+
+      // Categorize users by role
+      users.forEach(user => {
+        const userRole = user?.role?.toLowerCase()
+        console.log(stores)
+        switch (userRole) {
+          case 'admin':
+            setStores(prev => [...prev, user])
+            break
+
+          default:
+            break
+        }
+      })
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
+  const fetchManager = async () => {
+    try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+
+      console.log(loginToken)
+
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-manager`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         },
         maxBodyLength: Infinity
       })
+      console.log('response', response)
 
       const managerArr = response?.data?.success?.data || []
       if (managerArr.length > 0) {
@@ -126,10 +179,6 @@ const AdminManagement = () => {
       console.log(error)
     }
   }
-
-  useEffect(() => {
-    fetchManager()
-  }, [])
 
   // Form Hook
   const {
@@ -151,32 +200,52 @@ const AdminManagement = () => {
     }
   })
 
+  useEffect(() => {
+    if (role) {
+      fetchManager()
+      // fetchProducts()
+
+      if (role === 'superAdmin') {
+        fetchUser()
+        reset({
+          uname: '',
+          email: '',
+          password: '',
+          designation: '',
+          address: '',
+          telephone: '',
+          // status: 'inactive',
+          imageObj: [],
+          store: ''
+        })
+      }
+    }
+  }, [role])
   // Toggle Password Visibility
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   // Form Submit Handler
   const onSubmit = async formData => {
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    console.log(formData)
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
+    setBtnLoading('submit')
     try {
-      const response = await axios.post(`${baseUrl}/backend/authentication/store`, formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-        },
-        maxBodyLength: Infinity
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
       })
+      const response = await axios.post(
+        `${baseUrl}/backend/authentication/${role === 'superAdmin' ? 'store_manager' : 'store'}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          },
+          maxBodyLength: Infinity
+        }
+      )
 
-      console.log(response)
+      console.log('response post', response)
 
       toast.success('Manager Created Successfully!')
       fetchManager()
@@ -186,6 +255,8 @@ const AdminManagement = () => {
     } catch (error) {
       console.error('Error creating manager:', error)
       toast.error(error?.response?.data?.error?.message)
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -226,6 +297,7 @@ const AdminManagement = () => {
 
   // Update Manager
   const handleUpdateManager = async formData => {
+    setBtnLoading('update')
     console.log('formData for update', formData)
 
     if (!selectedManager) return
@@ -235,16 +307,12 @@ const AdminManagement = () => {
       imageObj: formData.imageObj.length > 0 ? formData.imageObj : selectedManager.imageObj || []
     }
 
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
       const response = await axios.post(`${baseUrl}/backend/authentication/update`, updatedManager, {
         headers: {
           'Content-Type': 'application/json',
@@ -262,6 +330,8 @@ const AdminManagement = () => {
     } catch (error) {
       console.error('Error updating manager:', error)
       toast.error('Failed to update manager')
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -269,16 +339,13 @@ const AdminManagement = () => {
   const handleDeleteManager = async id => {
     const confirm = window.confirm('Are you sure you want to delete this manager?')
     if (!confirm) return
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
 
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
       const response = await axios.post(
         ` ${baseUrl}/backend/authentication/destroy`,
         { id, addBy: 'superAdmin' },
@@ -310,8 +377,8 @@ const AdminManagement = () => {
   }
 
   // Table Columns
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const baseColumns = [
       columnHelper.accessor('uname', {
         cell: info => info.getValue(),
         header: 'Manager Name'
@@ -359,9 +426,20 @@ const AdminManagement = () => {
         header: 'Actions',
         size: 120
       })
-    ],
-    []
-  )
+    ]
+    if (role === 'superAdmin') {
+      baseColumns.splice(
+        1,
+        0,
+        columnHelper.accessor('store.uname', {
+          cell: info => info.getValue() || '-',
+          header: 'Store Name'
+        })
+      )
+    }
+
+    return baseColumns
+  }, [role])
 
   // React Table Instance
   const table = useReactTable({
@@ -411,6 +489,40 @@ const AdminManagement = () => {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={4}>
+                {role === 'superAdmin' && (
+                  <Grid item xs={12} sm={6}>
+                    <Controller
+                      name='store'
+                      control={control}
+                      defaultValue=''
+                      rules={{
+                        required: 'Store selection is required'
+                      }}
+                      render={({ field }) => (
+                        <CustomTextField
+                          {...field}
+                          select
+                          fullWidth
+                          label='Select Store'
+                          error={!!errors.store}
+                          helperText={errors.store?.message}
+                          // onChange={e => {
+                          //   const selectedStoreId = e.target.value
+
+                          // }}
+                        >
+                          <MenuItem value=''>Select Store</MenuItem>
+                          {stores.map(store => (
+                            <MenuItem key={store._id} value={store._id}>
+                              {store.uname}
+                            </MenuItem>
+                          ))}
+                        </CustomTextField>
+                      )}
+                    />
+                  </Grid>
+                )}
+
                 {/* Manager Name */}
                 <Grid item xs={12} sm={6}>
                   <Controller
@@ -585,7 +697,17 @@ const AdminManagement = () => {
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button variant='contained' type='submit'>
-                    Add Manager
+                    {btnLoading === 'submit' ? (
+                      <DNA
+                        visible={true}
+                        height={22}
+                        ariaLabel='dna-loading'
+                        wrapperStyle={{}}
+                        wrapperClass='dna-wrapper'
+                      />
+                    ) : (
+                      'Add Manager'
+                    )}
                   </Button>
                   <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
                     Reset
@@ -916,7 +1038,11 @@ const AdminManagement = () => {
               Cancel
             </Button>
             <Button variant='contained' onClick={handleSubmit(handleUpdateManager)}>
-              Save Changes
+              {btnLoading === 'update' ? (
+                <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </DialogActions>
         </Dialog>

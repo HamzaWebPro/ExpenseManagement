@@ -1,5 +1,3 @@
-// import { decryptDataObject } from '@/utils/encryption'
-
 import decryptDataObject from './decrypt'
 
 class TokenManager {
@@ -7,7 +5,6 @@ class TokenManager {
     return 'sessionToken'
   }
 
-  // 🔐 Decrypt, parse, and extract tokens
   static async parseSessionToken(rawToken) {
     try {
       const decrypted = decryptDataObject(rawToken)
@@ -19,7 +16,6 @@ class TokenManager {
     }
   }
 
-  // ✅ Client-side: get login token
   static async getLoginToken() {
     try {
       const tokens = await this.getClientToken()
@@ -30,7 +26,6 @@ class TokenManager {
     }
   }
 
-  // ✅ Client-side: get token from cookies and parse
   static async getClientToken() {
     if (typeof document === 'undefined') return null
 
@@ -48,13 +43,11 @@ class TokenManager {
     return null
   }
 
-  // ✅ Server-side (pages/ or API routes)
   static async getServerTokenFromReq(req) {
     const rawToken = req?.cookies?.[this.getTokenKey()]
     return rawToken ? await this.parseSessionToken(rawToken) : null
   }
 
-  // ✅ Server-side (app/ directory)
   static async getServerTokenAppDir() {
     try {
       const { cookies } = require('next/headers')
