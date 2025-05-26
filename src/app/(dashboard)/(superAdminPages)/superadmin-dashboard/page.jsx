@@ -59,9 +59,6 @@ const SuperAdminDashboard = () => {
 
       if (response.data.success) {
         setDashboardData(prevData => ({ ...prevData, recentAdmins: response.data.success.data }))
-      } else {
-        console.error('Error fetching recent admins:', response.data.message)
-        toast.error('Failed to load recent admins')
       }
     } catch (error) {
       console.error('Error fetching recent admins:', error)
@@ -82,9 +79,6 @@ const SuperAdminDashboard = () => {
 
       if (response.data.success) {
         setDashboardData(prevData => ({ ...prevData, recentManagers: response.data.success.data }))
-      } else {
-        console.error('Error fetching recent managers:', response.data.message)
-        toast.error('Failed to load recent managers')
       }
     } catch (error) {
       console.error('Error fetching recent managers:', error)
@@ -103,9 +97,6 @@ const SuperAdminDashboard = () => {
       })
       if (response.data.success) {
         setDashboardData(prevData => ({ ...prevData, adminCount: response.data.success.data }))
-      } else {
-        console.error('Error fetching total admins:', response.data.message)
-        toast.error('Failed to load total admins')
       }
     } catch (error) {
       console.error('Error fetching total admins:', error)
@@ -124,9 +115,6 @@ const SuperAdminDashboard = () => {
       })
       if (response.data.success) {
         setDashboardData(prevData => ({ ...prevData, managerCount: response.data.success.data }))
-      } else {
-        console.error('Error fetching total managers:', response.data.message)
-        toast.error('Failed to load total managers')
       }
     } catch (error) {
       console.error('Error fetching total managers:', error)
@@ -146,9 +134,6 @@ const SuperAdminDashboard = () => {
 
       if (response.data.success) {
         setDashboardData(prevData => ({ ...prevData, userCount: response.data.success.data }))
-      } else {
-        console.error('Error fetching total users:', response.data.message)
-        toast.error('Failed to load total users')
       }
     } catch (error) {
       console.error('Error fetching total users:', error)
