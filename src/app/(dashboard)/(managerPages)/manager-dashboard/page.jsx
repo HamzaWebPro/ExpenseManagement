@@ -66,9 +66,6 @@ const ManagerDashboard = () => {
           recentUsers: response.data.success.data,
           userCount: response.data.success.data.length
         }))
-      } else {
-        console.error('Error fetching recent managers:', response.data.message)
-        toast.error('Failed to load recent managers')
       }
     } catch (error) {
       console.error('Error fetching recent managers:', error)
@@ -92,9 +89,6 @@ const ManagerDashboard = () => {
           recentProducts: response.data.data,
           productCount: response.data.data.length
         }))
-      } else {
-        console.error('Error fetching recent products:', response.data.message)
-        toast.error('Failed to load recent products')
       }
     } catch (error) {
       console.error('Error fetching recent products:', error)
@@ -118,9 +112,6 @@ const ManagerDashboard = () => {
           recentExpenses: response.data.data,
           totalExpenses: response.data.data.reduce((acc, expense) => acc + expense.amount, 0)
         }))
-      } else {
-        console.error('Error fetching recent expenses:', response.data.message)
-        toast.error('Failed to load recent expenses')
       }
     } catch (error) {
       console.error('Error fetching recent expenses:', error)
