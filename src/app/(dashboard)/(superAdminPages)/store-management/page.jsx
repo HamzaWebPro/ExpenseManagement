@@ -473,7 +473,7 @@ const AdminManagement = () => {
                         {...field}
                         fullWidth
                         type='email'
-                        label='Admin Email'
+                        label='Store Email'
                         placeholder='Enter store email'
                         error={!!errors.email}
                         helperText={errors.email?.message}
@@ -499,7 +499,7 @@ const AdminManagement = () => {
                         {...field}
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
-                        label='Admin Password'
+                        label='Store Password'
                         placeholder='Enter password'
                         error={!!errors.password}
                         helperText={errors.password?.message}
@@ -567,7 +567,7 @@ const AdminManagement = () => {
                         {...field}
                         fullWidth
                         label='Telephone'
-                        placeholder='Admin Phone Number'
+                        placeholder='Store Phone Number'
                         error={!!errors.telephone}
                         helperText={errors.telephone?.message}
                       />
@@ -677,7 +677,7 @@ const AdminManagement = () => {
                         wrapperClass='dna-wrapper'
                       />
                     ) : (
-                      'Add Admin'
+                      'Add Store'
                     )}
                   </Button>
                   <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
