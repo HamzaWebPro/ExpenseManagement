@@ -18,7 +18,7 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 
 // Icon Imports
-import { Icon } from '@mui/material'
+import { Icon } from '@iconify/react'
 
 // Third-party Imports
 import axios from 'axios'

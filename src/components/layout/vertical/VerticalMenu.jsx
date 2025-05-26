@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
 // Third-party Imports
 import PerfectScrollbar from 'react-perfect-scrollbar'
+import { Icon } from '@iconify/react'
 
 // Component Imports
 import { Menu, SubMenu, MenuItem, MenuSection } from '@menu/vertical-menu'
@@ -24,7 +25,7 @@ import decryptDataObject from '@/@menu/utils/decrypt'
 
 const RenderExpandIcon = ({ open, transitionDuration }) => (
   <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
-    <i className='tabler-chevron-right' />
+    <Icon icon='tabler-chevron-right' />
   </StyledVerticalNavExpandIcon>
 )
 
@@ -46,8 +47,6 @@ const VerticalMenu = ({ scrollMenu }) => {
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
   return (
-    // eslint-disable-next-line lines-around-comment
-    /* Custom scrollbar instead of browser scroll, remove if you want browser scroll only */
     <ScrollWrapper
       {...(isBreakpointReached
         ? {
@@ -59,136 +58,81 @@ const VerticalMenu = ({ scrollMenu }) => {
             onScrollY: container => scrollMenu(container, true)
           })}
     >
-      {/* Incase you also want to scroll NavHeader to scroll with Vertical Menu, remove NavHeader from above and paste it below this comment */}
-      {/* Vertical Menu */}
       <Menu
         popoutMenuOffset={{ mainAxis: 23 }}
         menuItemStyles={menuItemStyles(verticalNavOptions, theme)}
         renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
-        renderExpandedMenuItemIcon={{ icon: <i className='text-xs tabler-circle' /> }}
+        renderExpandedMenuItemIcon={{ icon: <Icon icon='tabler-circle' className='text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        {
-          /* superadmin part start */
+        {role === 'superAdmin' && (
+          <MenuSection label='Super Admin'>
+            <MenuItem href='/superadmin-dashboard' icon={<Icon icon='tabler-dashboard' />}>
+              Dashboard
+            </MenuItem>
+            <MenuItem href='/store-management' icon={<Icon icon='tabler-building-store' />}>
+              Store Management
+            </MenuItem>
+            <MenuItem href='/manager-management' icon={<Icon icon='tabler-user-shield' />}>
+              Manager Management
+            </MenuItem>
+            <MenuItem href='/user-management' icon={<Icon icon='tabler-users-group' />}>
+              User Management
+            </MenuItem>
+            <MenuItem href='/product-management' icon={<Icon icon='tabler-packages' />}>
+              Product Management
+            </MenuItem>
+          </MenuSection>
+        )}
 
-          role === 'superAdmin' && (
-            <MenuSection label='Super Admin'>
-              <MenuItem href='/superadmin-dashboard' icon={<i className='tabler-smart-home' />}>
-                Dashboard
-              </MenuItem>
-              <MenuItem href='/admin-management' icon={<i className='menu-icon icon-base ti tabler-building-store' />}>
-                Store Management
-              </MenuItem>
-              <MenuItem href={`/manager-management`} icon={<i className='menu-icon icon-base ti tabler-users'></i>}>
-                Manager Management
-              </MenuItem>
-
-              <MenuItem href={`/user-management`} icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                User Management
-              </MenuItem>
-              <MenuItem
-                href={`/product-management`}
-                icon={<i className='menu-icon icon-base ti tabler-shopping-bag' />}
-              >
-                Product Management
-              </MenuItem>
-            </MenuSection>
-          )
-          /* superadmin part end */
-        }
-
-        {
-          /* admin part start */
-          role === 'admin' && (
-            <MenuSection label='Admin'>
-              <MenuItem href='/admin-dashboard' icon={<i className='tabler-smart-home' />}>
-                Dashboard
-              </MenuItem>
-
-              <MenuItem href={`/manager-management`} icon={<i className='menu-icon icon-base ti tabler-users'></i>}>
-                Manager Management
-              </MenuItem>
-
-              <MenuItem
-                href='/expense-management'
-                icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}
-              >
-                Manage Expense
-              </MenuItem>
-              <MenuItem href='/all-users' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                All Users
-              </MenuItem>
-              <MenuItem href='/all-products' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                All Products
-              </MenuItem>
-            </MenuSection>
-          )
-          /* admin part end */
-        }
-        {
-          /* manager part start */
-          role === 'manager' && (
-            <MenuSection label='Manager'>
-              <MenuItem href='/manager-dashboard' icon={<i className='tabler-smart-home' />}>
-                Dashboard
-              </MenuItem>
-
-              <MenuItem
-                href={`/product-management`}
-                icon={<i className='menu-icon icon-base ti tabler-shopping-bag' />}
-              >
-                Product Management
-              </MenuItem>
-
-              <MenuItem href={`/user-management`} icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                User Management
-              </MenuItem>
-
-              <MenuItem
-                href='/expense-management'
-                icon={<i className='menu-icon icon-base ti tabler-currency-dollar' />}
-              >
-                Manage Expense
-              </MenuItem>
-              <MenuItem href='/daily-financial-entry' icon={<i className='menu-icon icon-base ti tabler-users' />}>
-                Daily Financial Entry
-              </MenuItem>
-            </MenuSection>
-          )
-          /* manager part end */
-        }
-        {
-          /* user part start */
-          role === 'user' && (
-            <MenuSection label='User'>
-              <MenuItem href='/user-dashboard' icon={<i className='tabler-smart-home' />}>
-                Dashboard
-              </MenuItem>
-            </MenuSection>
-          )
-          /* user part end */
-        }
-        {/* <MenuItem disabled>{dictionary['navigation'].disabledMenu}</MenuItem> */}
+        {role === 'admin' && (
+          <MenuSection label='Admin'>
+            <MenuItem href='/admin-dashboard' icon={<Icon icon='tabler-dashboard' />}>
+              Dashboard
+            </MenuItem>
+            <MenuItem href='/manager-management' icon={<Icon icon='tabler-user-star' />}>
+              Manager Management
+            </MenuItem>
+            <MenuItem href='/expense-management' icon={<Icon icon='tabler-cash-banknote' />}>
+              Manage Expense
+            </MenuItem>
+            <MenuItem href='/all-users' icon={<Icon icon='tabler-users' />}>
+              All Users
+            </MenuItem>
+            <MenuItem href='/all-products' icon={<Icon icon='tabler-package' />}>
+              All Products
+            </MenuItem>
+          </MenuSection>
+        )}
+        {role === 'manager' && (
+          <MenuSection label='Manager'>
+            <MenuItem href='/manager-dashboard' icon={<Icon icon='tabler-dashboard' />}>
+              Dashboard
+            </MenuItem>
+            <MenuItem href='/product-management' icon={<Icon icon='tabler-package-export' />}>
+              Product Management
+            </MenuItem>
+            <MenuItem href='/user-management' icon={<Icon icon='tabler-user-plus' />}>
+              User Management
+            </MenuItem>
+            <MenuItem href='/expense-management' icon={<Icon icon='tabler-receipt' />}>
+              Manage Expense
+            </MenuItem>
+            <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
+              Daily Financial Entry
+            </MenuItem>
+          </MenuSection>
+        )}
+        {role === 'user' && (
+          <MenuSection label='User'>
+            <MenuItem href='/user-dashboard' icon={<Icon icon='tabler-home' />}>
+              Dashboard
+            </MenuItem>
+          </MenuSection>
+        )}
       </Menu>
-      {/* <Menu
-          popoutMenuOffset={{ mainAxis: 23 }}
-          menuItemStyles={menuItemStyles(verticalNavOptions, theme)}
-          renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
-          renderExpandedMenuItemIcon={{ icon: <i className='text-xs tabler-circle' /> }}
-          menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
-        >
-          <GenerateVerticalMenu menuData={menuData(dictionary)} />
-        </Menu> */}
     </ScrollWrapper>
   )
 }
 
 export default VerticalMenu
-
-// <SubMenu icon={<i className='menu-icon icon-base ti tabler-components' />} label='Lavel 1'>
-// <MenuItem>Lavel 2</MenuItem>
-// <SubMenu label='Lavel 2'>
-//   <MenuItem>Lavel 3</MenuItem>
-//   <MenuItem>Lavel 3</MenuItem>
-// </SubMenu>
-// </SubMenu>

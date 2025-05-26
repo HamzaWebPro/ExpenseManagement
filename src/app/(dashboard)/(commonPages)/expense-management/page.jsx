@@ -57,6 +57,8 @@ import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
 import { formatDistance, formatDistanceToNow } from 'date-fns'
+import { fi } from 'date-fns/locale'
+import { DNA } from 'react-loader-spinner'
 
 // Column Helper
 const columnHelper = createColumnHelper()
@@ -99,6 +101,7 @@ const ExpenseManagement = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState(null)
+  const [btnLoading, setBtnLoading] = useState('')
 
   const fetchExpenses = async () => {
     let token = decryptDataObject(sessionToken)
@@ -149,6 +152,7 @@ const ExpenseManagement = () => {
 
   // Form Submit Handler
   const onSubmit = async formData => {
+    setBtnLoading('submit')
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -174,6 +178,8 @@ const ExpenseManagement = () => {
     } catch (error) {
       console.error('Error creating expense:', error)
       toast.error('Failed to add expense')
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -185,6 +191,7 @@ const ExpenseManagement = () => {
 
   // Edit Expense
   const handleEditExpense = expense => {
+    setBtnLoading('update')
     setSelectedExpense(expense)
 
     reset({
@@ -230,6 +237,8 @@ const ExpenseManagement = () => {
     } catch (error) {
       console.error('Error updating expense:', error)
       toast.error('Failed to update expense')
+    } finally {
+      setBtnLoading('')
     }
   }
 
@@ -491,7 +500,17 @@ const ExpenseManagement = () => {
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button variant='contained' type='submit'>
-                    Add Expense
+                    {btnLoading === 'percentage' ? (
+                      <DNA
+                        visible={true}
+                        height={22}
+                        ariaLabel='dna-loading'
+                        wrapperStyle={{}}
+                        wrapperClass='dna-wrapper'
+                      />
+                    ) : (
+                      'Add Expense'
+                    )}
                   </Button>
                   <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
                     Reset
@@ -630,7 +649,7 @@ const ExpenseManagement = () => {
                   <Controller
                     name='title'
                     control={control}
-                    rules={{ required: 'Expense title is required' }}
+                    // rules={{ required: 'Expense title is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -648,7 +667,7 @@ const ExpenseManagement = () => {
                     name='amount'
                     control={control}
                     rules={{
-                      required: 'Amount is required',
+                      // required: 'Amount is required',
                       pattern: {
                         value: /^\d+(\.\d{1,2})?$/,
                         message: 'Please enter a valid amount'
@@ -675,7 +694,7 @@ const ExpenseManagement = () => {
                     <Controller
                       name='date'
                       control={control}
-                      rules={{ required: 'Date is required' }}
+                      // rules={{ required: 'Date is required' }}
                       render={({ field }) => (
                         <DatePicker
                           {...field}
@@ -692,7 +711,7 @@ const ExpenseManagement = () => {
                   <Controller
                     name='description'
                     control={control}
-                    rules={{ required: 'Description is required' }}
+                    // rules={{ required: 'Description is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -719,7 +738,11 @@ const ExpenseManagement = () => {
               Cancel
             </Button>
             <Button variant='contained' onClick={handleSubmit(handleUpdateExpense)}>
-              Save Changes
+              {btnLoading === 'percentage' ? (
+                <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </DialogActions>
         </Dialog>

@@ -17,7 +17,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Box from '@mui/material/Box'
 
 // Icon Imports
-import { Icon } from '@mui/material'
+import { Icon } from '@iconify/react'
 
 // Third-party Imports
 import axios from 'axios'

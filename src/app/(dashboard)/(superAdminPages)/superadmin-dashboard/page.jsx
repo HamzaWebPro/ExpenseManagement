@@ -27,7 +27,7 @@ import { toast } from 'react-toastify'
 // Utility Imports
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
-import { Icon } from '@mui/material'
+import { Icon } from '@iconify/react'
 
 const SuperAdminDashboard = () => {
   // State
@@ -196,25 +196,25 @@ const SuperAdminDashboard = () => {
   // Stats Cards Data
   const stats = [
     {
-      title: 'Total Admins',
+      title: 'Total Stores',
       value: dashboardData.adminCount,
-      icon: 'tabler-users',
+      icon: 'tabler-building-store',
       color: 'primary',
-      action: () => router.push('/admin-management')
+      action: () => router.push('/store-management')
     },
     {
       title: 'Total Managers',
       value: dashboardData.managerCount,
-      icon: 'tabler-user-check',
+      icon: 'tabler-user-shield',
       color: 'info',
-      action: () => router.push('/all_managers')
+      action: () => router.push('/manager-management')
     },
     {
       title: 'Total Users',
       value: dashboardData.userCount,
-      icon: 'tabler-user',
+      icon: 'tabler-users-group',
       color: 'success',
-      action: () => router.push('/all_users')
+      action: () => router.push('/user-management')
     },
     {
       title: 'System Status',

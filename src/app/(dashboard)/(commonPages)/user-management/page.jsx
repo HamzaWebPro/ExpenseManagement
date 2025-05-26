@@ -432,6 +432,7 @@ const UserManagement = () => {
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         }
       })
+      console.log('Percentage response:', response)
 
       if (response.data && response.status === 201) {
         toast.success('Percentage settings saved successfully!')
@@ -838,11 +839,11 @@ const UserManagement = () => {
       <div className='overflow-x-auto'>
         <table className={styles.table}>
           <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id} style={{ width: header.getSize() }}>
-                    {header.isPlaceholder ? null : (
+            {table.getHeaderGroups().map((headerGroup, index) => (
+              <tr key={index}>
+                {headerGroup.headers.map((header, idx) => (
+                  <th key={idx} style={{ width: header.getSize() }}>
+                    {!header.isPlaceholder && (
                       <div
                         className={classnames('flex items-center', {
                           'cursor-pointer select-none': header.column.getCanSort()
@@ -850,10 +851,13 @@ const UserManagement = () => {
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{
-                          asc: <ChevronRight fontSize='1.25rem' className='-rotate-90' />,
-                          desc: <ChevronRight fontSize='1.25rem' className='rotate-90' />
-                        }[header.column.getIsSorted()] ?? null}
+
+                        {header.column.getIsSorted() === 'asc' && (
+                          <ChevronRight fontSize='1.25rem' className='-rotate-90' />
+                        )}
+                        {header.column.getIsSorted() === 'desc' && (
+                          <ChevronRight fontSize='1.25rem' className='rotate-90' />
+                        )}
                       </div>
                     )}
                   </th>
