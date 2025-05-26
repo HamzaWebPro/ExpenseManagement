@@ -123,7 +123,7 @@ const UserManagement = () => {
         getToken: backendGetToken,
         loginToken: loginToken || ''
       })
-
+      // Fetch users based on role
       const response = await axios.get(
         `${baseUrl}/backend/authentication/${role === 'superAdmin' ? 'all-user' : 'all-added-user'}`,
         {
