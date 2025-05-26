@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, use } from 'react'
 import { CSVLink } from 'react-csv'
 
 // MUI Imports
@@ -115,6 +115,18 @@ const UserManagement = () => {
   const [stores, setStores] = useState([])
   const [managers, setManagers] = useState([])
   const [selectedManagers, setSelectedManagers] = useState([])
+  const [storeProducts, setStoreProducts] = useState([])
+
+  const fetchStoreProducts = async () => {
+    const selectedStoreProductNew = products.filter(product => {
+      return product.store?._id === selectedUser?.store?._id || product.store === selectedUser?.store?._id
+    })
+    setStoreProducts(selectedStoreProductNew)
+  }
+
+  useEffect(() => {
+    fetchStoreProducts()
+  }, [selectedUser])
 
   const fetchUser = async () => {
     try {
@@ -138,7 +150,7 @@ const UserManagement = () => {
       const users = response?.data?.success?.data || []
 
       // Reset all data arrays
-      setData([])
+      // setData([])
       setStores([])
       setManagers([])
 
@@ -153,15 +165,39 @@ const UserManagement = () => {
           case 'manager':
             setManagers(prev => [...prev, user])
             break
-          case 'user':
-            setData(prev => [...prev, user])
-            break
+
           default:
             break
         }
       })
     } catch (error) {
       console.error('Error fetching users:', error)
+    }
+  }
+
+  // Fetch all users
+
+  const fetchUsers = async () => {
+    try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-users-main`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+      console.log('Fetched users:', response?.data)
+
+      const users = response?.data?.success?.data || []
+      setData(users)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      toast.error('Failed to fetch users')
     }
   }
 
@@ -214,10 +250,11 @@ const UserManagement = () => {
 
   useEffect(() => {
     if (role) {
-      fetchUser()
+      fetchUsers()
       fetchProducts()
 
       if (role === 'superAdmin') {
+        fetchUser()
         reset({
           uname: '',
           email: '',
@@ -264,7 +301,7 @@ const UserManagement = () => {
 
       if (response?.data?.success) {
         toast.success('User Created Successfully!')
-        await fetchUser()
+        await fetchUsers()
         reset()
         setShowAddForm(false)
         setImagePreview('')
@@ -334,7 +371,7 @@ const UserManagement = () => {
       console.log('up user', response)
 
       toast.success('User Updated Successfully!')
-      fetchUser()
+      fetchUsers()
       setEditDialogOpen(false)
       reset()
       setImagePreview('')
@@ -371,7 +408,7 @@ const UserManagement = () => {
       )
 
       toast.success('User Deleted Successfully!')
-      fetchUser()
+      fetchUsers()
     } catch (error) {
       console.error('Error deleting User:', error)
       toast.error('Failed to delete User')
@@ -425,6 +462,7 @@ const UserManagement = () => {
               percentage: formData.percentage
             }))
       }
+      console.log('Payload for percentage:', payload)
 
       const response = await axios.post(`${baseUrl}/backend/manage-percentage/store`, payload, {
         headers: {
@@ -436,7 +474,7 @@ const UserManagement = () => {
 
       if (response.data && response.status === 201) {
         toast.success('Percentage settings saved successfully!')
-        await fetchUser()
+        await fetchUsers()
         setPercentageDialogOpen(false)
       } else {
         toast.error('Failed to save percentage settings')
@@ -1302,7 +1340,7 @@ const UserManagement = () => {
                           <MenuItem disabled value=''>
                             <em>Select products</em>
                           </MenuItem>
-                          {products.map(product => (
+                          {storeProducts.map(product => (
                             <MenuItem key={product._id} value={product._id}>
                               <Checkbox checked={selectedProducts.includes(product._id)} />
                               {product.name}
