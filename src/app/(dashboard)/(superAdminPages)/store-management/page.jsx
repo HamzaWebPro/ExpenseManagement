@@ -422,11 +422,11 @@ const AdminManagement = () => {
               <DebouncedInput
                 value={globalFilter ?? ''}
                 onChange={value => setGlobalFilter(String(value))}
-                placeholder='Search admins...'
+                placeholder='Search Store...'
                 className='min-is-[200px]'
               />
               <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
-                {showAddForm ? 'Hide Form' : 'Add Admin'}
+                {showAddForm ? 'Hide Form' : 'Add Store'}
               </Button>
             </div>
           }

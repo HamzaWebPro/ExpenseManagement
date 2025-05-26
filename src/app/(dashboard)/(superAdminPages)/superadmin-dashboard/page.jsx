@@ -261,9 +261,9 @@ const SuperAdminDashboard = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardHeader
-                  title='Recent Admins'
+                  title='Recent Stores'
                   action={
-                    <Button size='small' variant='contained' onClick={() => router.push('/admin-management')}>
+                    <Button size='small' variant='contained' onClick={() => router.push('/store-management')}>
                       View All
                     </Button>
                   }
@@ -350,10 +350,10 @@ const SuperAdminDashboard = () => {
                   <Button
                     fullWidth
                     variant='contained'
-                    startIcon={<Icon icon='tabler-user-plus' />}
-                    onClick={() => router.push('/admin-management')}
+                    startIcon={<Icon icon='tabler-building-store' />}
+                    onClick={() => router.push('/store-management')}
                   >
-                    Add Admin
+                    Add Store
                   </Button>
                 </Grid>
                 {/* <Grid item xs={12} sm={6} md={3}>
