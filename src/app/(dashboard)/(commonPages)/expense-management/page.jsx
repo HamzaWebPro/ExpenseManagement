@@ -16,7 +16,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
-import { Box, InputAdornment, Typography } from '@mui/material'
+import { Box, InputAdornment, Typography, MenuItem } from '@mui/material'
 import TextField from '@mui/material/TextField'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -56,18 +56,11 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import formatDate from '@/@menu/utils/formatDate'
-import { formatDistance, formatDistanceToNow } from 'date-fns'
-import { fi } from 'date-fns/locale'
 import { DNA } from 'react-loader-spinner'
+import TokenManager from '@/@menu/utils/token'
 
 // Column Helper
 const columnHelper = createColumnHelper()
-
-const fuzzyFilter = (row, columnId, value, addMeta) => {
-  const itemRank = rankItem(row.getValue(columnId), value)
-  addMeta({ itemRank })
-  return itemRank.passed
-}
 
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
   const [value, setValue] = useState(initialValue)
@@ -96,23 +89,32 @@ const ExpenseManagement = () => {
   // States
   const [showAddForm, setShowAddForm] = useState(false)
   const [data, setData] = useState([])
+  const [filteredData, setFilteredData] = useState([])
   const [columnFilters, setColumnFilters] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState(null)
   const [btnLoading, setBtnLoading] = useState('')
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null
+  })
+  const [stores, setStores] = useState([])
+  const [selectedStore, setSelectedStore] = useState('')
+
+  // Get current user role
+  const currentUser = sessionToken ? JSON.parse(decryptDataObject(sessionToken)) : null
+  const role = currentUser?.role || ''
 
   const fetchExpenses = async () => {
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      getToken: backendGetToken,
-      loginToken: token
-    })
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+
       const response = await axios.get(`${baseUrl}/backend/expense/get-expense`, {
         headers: {
           'Content-Type': 'application/json',
@@ -124,15 +126,115 @@ const ExpenseManagement = () => {
       const expensesArr = response?.data?.data || []
       if (expensesArr.length > 0) {
         setData([...expensesArr])
+        setFilteredData([...expensesArr])
+      } else {
+        setData([])
+        setFilteredData([])
       }
     } catch (error) {
-      console.log(error)
+      console.error('Error fetching expenses:', error)
+    }
+  }
+
+  const fetchStores = async () => {
+    try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-admin`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+
+      const storesArr = response?.data?.success?.data || []
+      setStores(storesArr)
+    } catch (error) {
+      console.error('Error fetching stores:', error)
     }
   }
 
   useEffect(() => {
     fetchExpenses()
-  }, [])
+    if (role === 'superAdmin') {
+      fetchStores()
+    }
+  }, [role])
+
+  // Apply all filters
+  const applyFilters = () => {
+    let filtered = [...data]
+
+    // Check if any filters are active
+    const hasStartDate = dateRange.startDate
+    const hasEndDate = dateRange.endDate
+    const hasStoreFilter = selectedStore
+
+    // Only apply filters if at least one is active
+    if (hasStartDate || hasEndDate || hasStoreFilter) {
+      // Apply date filter if dates are selected
+      if (hasStartDate || hasEndDate) {
+        const start = hasStartDate ? new Date(dateRange.startDate) : null
+        const end = hasEndDate ? new Date(dateRange.endDate) : hasStartDate ? new Date() : null
+
+        filtered = filtered.filter(expense => {
+          const expenseDate = new Date(expense.date)
+          
+          // Case 1: Only start date selected - show from start date to today
+          if (start && !end) {
+            return expenseDate >= start && expenseDate <= new Date()
+          }
+          // Case 2: Only end date selected - show everything up to end date
+          else if (!start && end) {
+            return expenseDate <= end
+          }
+          // Case 3: Both dates selected - show between dates
+          else if (start && end) {
+            return expenseDate >= start && expenseDate <= end
+          }
+          
+          return true
+        })
+      }
+
+      // Apply store filter if store is selected
+      if (hasStoreFilter) {
+        filtered = filtered.filter(expense => {
+          return expense.store?._id === selectedStore || expense.addedBy?.store?._id === selectedStore
+        })
+      }
+    }
+
+    setFilteredData(filtered)
+  }
+
+  // Handle date range change
+  const handleDateRangeChange = (type, date) => {
+    setDateRange(prev => ({
+      ...prev,
+      [type]: date
+    }))
+  }
+
+  // Handle store change
+  const handleStoreChange = e => {
+    setSelectedStore(e.target.value)
+  }
+
+  // Reset all filters
+  const resetFilters = () => {
+    setDateRange({
+      startDate: null,
+      endDate: null
+    })
+    setSelectedStore('')
+    setFilteredData(data)
+  }
 
   // Form Hook
   const {
@@ -153,16 +255,13 @@ const ExpenseManagement = () => {
   // Form Submit Handler
   const onSubmit = async formData => {
     setBtnLoading('submit')
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
+
       const response = await axios.post(`${baseUrl}/backend/expense/store`, formData, {
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +290,6 @@ const ExpenseManagement = () => {
 
   // Edit Expense
   const handleEditExpense = expense => {
-    setBtnLoading('update')
     setSelectedExpense(expense)
 
     reset({
@@ -208,18 +306,15 @@ const ExpenseManagement = () => {
   // Update Expense
   const handleUpdateExpense = async formData => {
     if (!selectedExpense) return
-    // console.log(expense)
 
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
-
+    setBtnLoading('update')
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
+
       const response = await axios.post(`${baseUrl}/backend/expense/update`, formData, {
         headers: {
           'Content-Type': 'application/json',
@@ -227,8 +322,6 @@ const ExpenseManagement = () => {
         },
         maxBodyLength: Infinity
       })
-
-      console.log(response)
 
       toast.success('Expense Updated Successfully!')
       fetchExpenses()
@@ -246,16 +339,14 @@ const ExpenseManagement = () => {
   const handleDeleteExpense = async id => {
     const confirm = window.confirm('Are you sure you want to delete this expense?')
     if (!confirm) return
-    let token = decryptDataObject(sessionToken)
-    token = JSON.parse(token)
-    token = token?.tokens
-
-    const setTokenInJson = JSON.stringify({
-      postToken: backendPostToken,
-      loginToken: token
-    })
 
     try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: loginToken || ''
+      })
+
       const response = await axios.post(
         `${baseUrl}/backend/expense/destroy`,
         { id },
@@ -283,12 +374,7 @@ const ExpenseManagement = () => {
 
   // Table Columns
   const columns = useMemo(() => {
-    const sessionToken = Cookies.get('sessionToken')
-    const role = JSON.parse(decryptDataObject(sessionToken))?.role
-
-    console.log(role)
-
-    return [
+    const baseColumns = [
       columnHelper.accessor('title', {
         cell: info => info.getValue(),
         header: 'Expense Title'
@@ -304,19 +390,30 @@ const ExpenseManagement = () => {
           return date
         },
         header: 'Date'
-      }),
-      role === 'admin' &&
-        columnHelper.accessor('addedBy', {
-          cell: info => info.getValue()?.email || '',
-          header: 'Added By'
-        }),
+      })
+    ]
+
+    // Add store name column for super admin
+    if (role === 'superAdmin') {
+      baseColumns.splice(
+        2,
+        0,
+        columnHelper.accessor('store.uname', {
+          cell: info => info.row.original.store?.uname || info.row.original.addedBy?.store?.uname || '-',
+          header: 'Store Name'
+        })
+      )
+    }
+
+    // Add actions column
+    baseColumns.push(
       columnHelper.accessor('id', {
         cell: info => (
           <div className='flex items-center gap-2'>
             <IconButton onClick={() => handleViewExpense(info.row.original)}>
               <EyeOutline className='text-textPrimary' />
             </IconButton>
-            {role === 'admin' && (
+            {(role === 'admin' || role === 'superAdmin') && (
               <>
                 <IconButton onClick={() => handleEditExpense(info.row.original)}>
                   <PencilOutline className='text-textPrimary' />
@@ -331,21 +428,20 @@ const ExpenseManagement = () => {
         header: 'Actions',
         size: 120
       })
-    ].filter(Boolean)
-  }, [Cookies.get('sessionToken')]) // Adjusted dependency to avoid stale value
+    )
+
+    return baseColumns
+  }, [role])
 
   const fuzzyFilter = (row, columnId, value, addMeta) => {
-    const columnsToSearch = ['title', 'amount', 'date', 'addedBy']
+    const columnsToSearch = ['title', 'amount', 'date', 'store.uname']
 
     for (const column of columnsToSearch) {
-      // Special handling for addedBy to search both username and email
-      if (column === 'addedBy') {
-        const addedBy = row.getValue(column)
-        const emailMatch = rankItem(addedBy?.email || '', value)
-        const unameMatch = rankItem(addedBy?.uname || '', value)
-
-        if (emailMatch.passed || unameMatch.passed) {
-          addMeta({ itemRank: emailMatch.passed ? emailMatch : unameMatch })
+      if (column === 'store.uname') {
+        const storeName = row.original.store?.uname || row.original.addedBy?.store?.uname || ''
+        const storeMatch = rankItem(storeName, value)
+        if (storeMatch.passed) {
+          addMeta({ itemRank: storeMatch })
           return true
         }
       } else {
@@ -362,7 +458,7 @@ const ExpenseManagement = () => {
 
   // React Table Instance
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -402,6 +498,58 @@ const ExpenseManagement = () => {
             </div>
           }
         />
+
+        {/* Super Admin Filters */}
+        {role === 'superAdmin' && (
+          <CardContent>
+            <Grid container spacing={4}>
+              <Grid item xs={12} sm={4}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label='Start Date'
+                    value={dateRange.startDate}
+                    onChange={date => handleDateRangeChange('startDate', date)}
+                    renderInput={params => <TextField {...params} fullWidth />}
+                  />
+                </LocalizationProvider>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label='End Date'
+                    value={dateRange.endDate}
+                    onChange={date => handleDateRangeChange('endDate', date)}
+                    renderInput={params => <TextField {...params} fullWidth />}
+                  />
+                </LocalizationProvider>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <CustomTextField
+                  select
+                  fullWidth
+                  label='Select Store'
+                  value={selectedStore}
+                  onChange={handleStoreChange}
+                >
+                  <MenuItem value=''>All Stores</MenuItem>
+                  {stores.map(store => (
+                    <MenuItem key={store._id} value={store._id}>
+                      {store.uname}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+              </Grid>
+              <Grid item xs={12} className='flex gap-4'>
+                <Button variant='contained' onClick={applyFilters}>
+                  Apply Filters
+                </Button>
+                <Button variant='tonal' color='secondary' onClick={resetFilters}>
+                  Reset Filters
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        )}
 
         {/* Add Expense Form */}
         {showAddForm && (
@@ -481,7 +629,6 @@ const ExpenseManagement = () => {
                   <Controller
                     name='description'
                     control={control}
-                    rules={{ required: 'Description is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -500,7 +647,7 @@ const ExpenseManagement = () => {
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
                   <Button variant='contained' type='submit'>
-                    {btnLoading === 'percentage' ? (
+                    {btnLoading === 'submit' ? (
                       <DNA
                         visible={true}
                         height={22}
@@ -552,7 +699,15 @@ const ExpenseManagement = () => {
               <tbody>
                 <tr>
                   <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    No expenses found
+                    {dateRange.startDate || dateRange.endDate || selectedStore ? (
+                      <Typography variant='body1' color='textSecondary'>
+                        No expenses found matching your filters
+                      </Typography>
+                    ) : (
+                      <Typography variant='body1' color='textSecondary'>
+                        No expenses found
+                      </Typography>
+                    )}
                   </td>
                 </tr>
               </tbody>
@@ -576,8 +731,8 @@ const ExpenseManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename='all_expenses' data={data}>
-                <Button variant='contained'>Export All Expenses</Button>
+              <CSVLink filename={`expenses_${new Date().toISOString()}.csv`} data={filteredData}>
+                <Button variant='contained'>Export {filteredData.length} Expenses</Button>
               </CSVLink>
             </TablePaginationComponent>
           )}
@@ -610,6 +765,18 @@ const ExpenseManagement = () => {
                       <Typography variant='body1'>${selectedExpense.amount}</Typography>
                     </Box>
                   </Grid>
+                  {role === 'superAdmin' && (
+                    <Grid item xs={12} sm={6}>
+                      <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                        <Typography variant='subtitle2' color='textSecondary'>
+                          Store
+                        </Typography>
+                        <Typography variant='body1'>
+                          {selectedExpense.store?.uname || selectedExpense.addedBy?.store?.uname || '-'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                       <Typography variant='subtitle2' color='textSecondary'>
@@ -649,7 +816,6 @@ const ExpenseManagement = () => {
                   <Controller
                     name='title'
                     control={control}
-                    // rules={{ required: 'Expense title is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -667,7 +833,6 @@ const ExpenseManagement = () => {
                     name='amount'
                     control={control}
                     rules={{
-                      // required: 'Amount is required',
                       pattern: {
                         value: /^\d+(\.\d{1,2})?$/,
                         message: 'Please enter a valid amount'
@@ -694,7 +859,6 @@ const ExpenseManagement = () => {
                     <Controller
                       name='date'
                       control={control}
-                      // rules={{ required: 'Date is required' }}
                       render={({ field }) => (
                         <DatePicker
                           {...field}
@@ -711,7 +875,6 @@ const ExpenseManagement = () => {
                   <Controller
                     name='description'
                     control={control}
-                    // rules={{ required: 'Description is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -738,7 +901,7 @@ const ExpenseManagement = () => {
               Cancel
             </Button>
             <Button variant='contained' onClick={handleSubmit(handleUpdateExpense)}>
-              {btnLoading === 'percentage' ? (
+              {btnLoading === 'update' ? (
                 <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
               ) : (
                 'Save Changes'

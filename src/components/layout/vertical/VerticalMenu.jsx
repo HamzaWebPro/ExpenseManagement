@@ -82,6 +82,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/product-management' icon={<Icon icon='tabler-packages' />}>
               Product Management
             </MenuItem>
+            <MenuItem href='/expense-management' icon={<Icon icon='tabler-receipt' />}>
+              Manage Expense
+            </MenuItem>
           </MenuSection>
         )}
 
