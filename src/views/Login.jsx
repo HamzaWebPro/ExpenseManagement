@@ -199,7 +199,7 @@ const Login = () => {
               </Typography>{' '}
               <Typography>Please Contact with Admin.</Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit'>
+            <Button fullWidth disabled={btnLoading} variant='contained' type='submit'>
               {btnLoading ? (
                 <DNA
                   visible={true}

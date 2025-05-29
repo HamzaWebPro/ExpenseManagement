@@ -184,7 +184,7 @@ const ExpenseManagement = () => {
 
         filtered = filtered.filter(expense => {
           const expenseDate = new Date(expense.date)
-          
+
           // Case 1: Only start date selected - show from start date to today
           if (start && !end) {
             return expenseDate >= start && expenseDate <= new Date()
@@ -197,7 +197,7 @@ const ExpenseManagement = () => {
           else if (start && end) {
             return expenseDate >= start && expenseDate <= end
           }
-          
+
           return true
         })
       }
@@ -209,6 +209,7 @@ const ExpenseManagement = () => {
         })
       }
     }
+    console.log(filtered)
 
     setFilteredData(filtered)
   }
@@ -492,9 +493,16 @@ const ExpenseManagement = () => {
                 placeholder='Search expenses...'
                 className='min-is-[200px]'
               />
-              <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
-                {showAddForm ? 'Hide Form' : 'Add Expense'}
-              </Button>
+              {role != 'superAdmin' ? (
+                <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
+                  {showAddForm ? 'Hide Form' : 'Add Expense'}
+                </Button>
+              ) : (
+                <CardHeader
+                  title='Total Expenses'
+                  subheader={`Total: ${filteredData.reduce((value, item) => value + item.amount, 0).toFixed(2)}`}
+                />
+              )}
             </div>
           }
         />

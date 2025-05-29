@@ -85,6 +85,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/expense-management' icon={<Icon icon='tabler-receipt' />}>
               Manage Expense
             </MenuItem>
+            <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
+              Daily Financial Entry
+            </MenuItem>
           </MenuSection>
         )}
 
@@ -130,6 +133,9 @@ const VerticalMenu = ({ scrollMenu }) => {
           <MenuSection label='User'>
             <MenuItem href='/user-dashboard' icon={<Icon icon='tabler-home' />}>
               Dashboard
+            </MenuItem>
+            <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
+              Daily Financial Entry
             </MenuItem>
           </MenuSection>
         )}
