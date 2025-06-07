@@ -677,7 +677,7 @@ const ProductManagement = () => {
 
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
-                  <Button variant='contained' type='submit'>
+                  <Button variant='contained' disabled={btnLoading === 'submit'} type='submit'>
                     {btnLoading === 'submit' ? (
                       <DNA
                         visible={true}
@@ -984,8 +984,8 @@ const ProductManagement = () => {
             >
               Cancel
             </Button>
-            <Button variant='contained' onClick={handleSubmit(handleUpdateProduct)}>
-              {btnLoading ? (
+            <Button variant='contained' disabled={btnLoading === 'update'} onClick={handleSubmit(handleUpdateProduct)}>
+              {btnLoading === 'update' ? (
                 <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
               ) : (
                 'Save Change'

@@ -328,6 +328,7 @@ const MyProfile = () => {
 
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
+  const backenPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
 
   // Fetch user data
   useEffect(() => {
@@ -398,39 +399,39 @@ const MyProfile = () => {
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword)
 
   // Update profile
-  const updateProfile = async () => {
-    try {
-      setIsUpdating(true)
-      const sessionToken = Cookies.get('sessionToken')
-      const decryptedData = decryptDataObject(sessionToken)
-      const { tokens, userId } = JSON.parse(decryptedData)
+  // const updateProfile = async () => {
+  //   try {
+  //     setIsUpdating(true)
+  //     const sessionToken = Cookies.get('sessionToken')
+  //     const decryptedData = decryptDataObject(sessionToken)
+  //     const { tokens, userId } = JSON.parse(decryptedData)
 
-      const setTokenInJson = JSON.stringify({
-        getToken: backendGetToken,
-        loginToken: tokens
-      })
+  //     const setTokenInJson = JSON.stringify({
+  //       getToken: backendGetToken,
+  //       loginToken: tokens
+  //     })
 
-      const response = await axios.put(`${baseUrl}/backend/authentication/update-user/${userId}`, formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-        }
-      })
+  //     const response = await axios.put(`${baseUrl}/backend/authentication/update-user/${userId}`, formData, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+  //       }
+  //     })
 
-      if (response.data.success) {
-        toast.success('Profile updated successfully')
-        setUser(prev => ({ ...prev, ...formData }))
-        setEditMode(false)
-      } else {
-        toast.error(response.data.message || 'Failed to update profile')
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error)
-      toast.error('Failed to update profile')
-    } finally {
-      setIsUpdating(false)
-    }
-  }
+  //     if (response.data.success) {
+  //       toast.success('Profile updated successfully')
+  //       setUser(prev => ({ ...prev, ...formData }))
+  //       setEditMode(false)
+  //     } else {
+  //       toast.error(response.data.message || 'Failed to update profile')
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating profile:', error)
+  //     toast.error('Failed to update profile')
+  //   } finally {
+  //     setIsUpdating(false)
+  //   }
+  // }
 
   // Change password
   const changePassword = async () => {
@@ -443,15 +444,15 @@ const MyProfile = () => {
       setIsUpdating(true)
       const sessionToken = Cookies.get('sessionToken')
       const decryptedData = decryptDataObject(sessionToken)
-      const { tokens, userId } = JSON.parse(decryptedData)
+      const { tokens } = JSON.parse(decryptedData)
 
       const setTokenInJson = JSON.stringify({
-        getToken: backendGetToken,
+        postToken: backenPostToken,
         loginToken: tokens
       })
 
-      const response = await axios.put(
-        `${baseUrl}/backend/authentication/change-password/${userId}`,
+      const response = await axios.post(
+        `${baseUrl}/backend/authentication/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -463,6 +464,8 @@ const MyProfile = () => {
           }
         }
       )
+
+      console.log(response)
 
       if (response.data.success) {
         toast.success('Password changed successfully')
@@ -636,21 +639,21 @@ const MyProfile = () => {
                 {user.email}
               </Typography>
 
-              <Button
+              {/* <Button
                 variant='outlined'
                 sx={{ mt: 3 }}
                 onClick={() => setEditMode(!editMode)}
                 startIcon={<Icon icon={editMode ? 'tabler-eye' : 'tabler-edit'} />}
               >
                 {editMode ? 'View Profile' : 'Edit Profile'}
-              </Button>
+              </Button> */}
             </CardContent>
           </Card>
         </Grid>
 
         {/* Main Content */}
         <Grid item xs={12} md={8}>
-          {editMode ? (
+          {/* {editMode ? (
             <Card>
               <CardContent>
                 <Typography variant='h6' gutterBottom>
@@ -725,39 +728,39 @@ const MyProfile = () => {
                 </Box>
               </CardContent>
             </Card>
-          ) : (
-            <Card>
-              <CardContent>
-                <Typography variant='h6' gutterBottom>
-                  Personal Information
-                </Typography>
-                <Divider sx={{ mb: 3 }} />
+          ) : ( */}
+          <Card>
+            <CardContent>
+              <Typography variant='h6' gutterBottom>
+                Personal Information
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant='subtitle2'>Username</Typography>
-                    <Typography variant='body1'>{user.uname}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant='subtitle2'>Email</Typography>
-                    <Typography variant='body1'>{user.email}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant='subtitle2'>Designation</Typography>
-                    <Typography variant='body1'>{user.designation || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant='subtitle2'>Telephone</Typography>
-                    <Typography variant='body1'>{user.telephone || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant='subtitle2'>Address</Typography>
-                    <Typography variant='body1'>{user.address || 'N/A'}</Typography>
-                  </Grid>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant='subtitle2'>Username</Typography>
+                  <Typography variant='body1'>{user.uname}</Typography>
                 </Grid>
-              </CardContent>
-            </Card>
-          )}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant='subtitle2'>Email</Typography>
+                  <Typography variant='body1'>{user.email}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant='subtitle2'>Designation</Typography>
+                  <Typography variant='body1'>{user.designation || 'N/A'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant='subtitle2'>Telephone</Typography>
+                  <Typography variant='body1'>{user.telephone || 'N/A'}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant='subtitle2'>Address</Typography>
+                  <Typography variant='body1'>{user.address || 'N/A'}</Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+          {/* )} */}
 
           {/* Password Change Card */}
           <Card sx={{ mt: 4 }}>
@@ -767,81 +770,89 @@ const MyProfile = () => {
               </Typography>
               <Divider sx={{ mb: 3 }} />
 
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label='Current Password'
-                    name='currentPassword'
-                    type={showPassword ? 'text' : 'password'}
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton onClick={togglePasswordVisibility}>
-                            <Icon icon={showPassword ? 'tabler-eye-off' : 'tabler-eye'} />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label='New Password'
-                    name='newPassword'
-                    type={showNewPassword ? 'text' : 'password'}
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton onClick={toggleNewPasswordVisibility}>
-                            <Icon icon={showNewPassword ? 'tabler-eye-off' : 'tabler-eye'} />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label='Confirm Password'
-                    name='confirmPassword'
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton onClick={toggleConfirmPasswordVisibility}>
-                            <Icon icon={showConfirmPassword ? 'tabler-eye-off' : 'tabler-eye'} />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Grid>
-              </Grid>
+              {user.role === 'superAdmin' ? (
+                <>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label='Current Password'
+                        name='currentPassword'
+                        type={showPassword ? 'text' : 'password'}
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordChange}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton onClick={togglePasswordVisibility}>
+                                <Icon icon={showPassword ? 'tabler-eye-off' : 'tabler-eye'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label='New Password'
+                        name='newPassword'
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton onClick={toggleNewPasswordVisibility}>
+                                <Icon icon={showNewPassword ? 'tabler-eye-off' : 'tabler-eye'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label='Confirm Password'
+                        name='confirmPassword'
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton onClick={toggleConfirmPasswordVisibility}>
+                                <Icon icon={showConfirmPassword ? 'tabler-eye-off' : 'tabler-eye'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                <Button
-                  variant='contained'
-                  onClick={changePassword}
-                  disabled={
-                    isUpdating ||
-                    !passwordData.currentPassword ||
-                    !passwordData.newPassword ||
-                    !passwordData.confirmPassword
-                  }
-                  startIcon={isUpdating ? <CircularProgress size={20} /> : null}
-                >
-                  Change Password
-                </Button>
-              </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                    <Button
+                      variant='contained'
+                      onClick={changePassword}
+                      disabled={
+                        isUpdating ||
+                        !passwordData.currentPassword ||
+                        !passwordData.newPassword ||
+                        !passwordData.confirmPassword
+                      }
+                      startIcon={isUpdating ? <CircularProgress size={20} /> : null}
+                    >
+                      Change Password
+                    </Button>
+                  </Box>
+                </>
+              ) : (
+                <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+                  {`If you want to change your password or anything, please contact ${user.role === 'admin' ? 'the super admin' : role === 'manager' ? 'your store' : 'your manager'}.`}
+                </Typography>
+              )}
             </CardContent>
           </Card>
 
