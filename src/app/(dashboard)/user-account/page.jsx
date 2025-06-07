@@ -324,6 +324,9 @@ const MyProfile = () => {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const sessionToken = Cookies.get('sessionToken')
+  const decryptedData = decryptDataObject(sessionToken)
+  const { tokens, userId, role } = JSON.parse(decryptedData)
   const router = useRouter()
 
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
@@ -335,9 +338,6 @@ const MyProfile = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true)
-        const sessionToken = Cookies.get('sessionToken')
-        const decryptedData = decryptDataObject(sessionToken)
-        const { tokens, userId, role } = JSON.parse(decryptedData)
 
         const setTokenInJson = JSON.stringify({
           getToken: backendGetToken,
@@ -442,9 +442,6 @@ const MyProfile = () => {
 
     try {
       setIsUpdating(true)
-      const sessionToken = Cookies.get('sessionToken')
-      const decryptedData = decryptDataObject(sessionToken)
-      const { tokens } = JSON.parse(decryptedData)
 
       const setTokenInJson = JSON.stringify({
         postToken: backenPostToken,

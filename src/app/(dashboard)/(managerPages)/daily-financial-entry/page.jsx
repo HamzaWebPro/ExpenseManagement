@@ -44,6 +44,7 @@ import { toast } from 'react-toastify'
 import { useForm, Controller } from 'react-hook-form'
 import formatDate from '@/@menu/utils/formatDate'
 import TablePagination from '@mui/material/TablePagination'
+import { CSVLink } from 'react-csv'
 
 const DailyFinancialEntry = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
@@ -674,7 +675,7 @@ const DailyFinancialEntry = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>User</TableCell>
+                      {role === 'superAdmin' && <TableCell>User</TableCell>}
                       {role === 'superAdmin' && <TableCell>Store</TableCell>}
                       <TableCell>Date</TableCell>
                       <TableCell>Amount</TableCell>
@@ -684,10 +685,12 @@ const DailyFinancialEntry = () => {
                   </TableHead>
                   <TableBody>
                     {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(entry => {
-                      const user = users.find(u => u._id === entry.userId)
+                      const user = users.find(u => u._id === entry.userId._id)
+                      console.log('user', user)
+
                       return (
                         <TableRow key={entry._id}>
-                          <TableCell>{user?.uname || 'Unknown User'}</TableCell>
+                          {role === 'superAdmin' && <TableCell>{entry?.userId?.uname || 'Unknown User'}</TableCell>}
                           {role === 'superAdmin' && (
                             <TableCell>
                               {entry.store?.uname || entry.addedBy?.store?.uname || 'Unknown Store'}
@@ -713,15 +716,27 @@ const DailyFinancialEntry = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component='div'
-                count={filteredEntries.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
+
+              {/* Fixed Pagination and Export */}
+              <Box display='flex' justifyContent='space-between' alignItems='center' mt={2}>
+                <CSVLink
+                  filename={`expenses_${new Date().toISOString()}.csv`}
+                  data={filteredEntries}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button variant='contained'>Export {filteredEntries.length} Expenses</Button>
+                </CSVLink>
+
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component='div'
+                  count={filteredEntries.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </Box>
             </>
           )}
         </CardContent>

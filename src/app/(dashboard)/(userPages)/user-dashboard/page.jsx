@@ -51,6 +51,8 @@ const UserDashboard = () => {
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         }
       })
+      console.log(response)
+
       if (response.data.data) {
         setDashboardData(prevData => ({
           ...prevData,
@@ -213,7 +215,7 @@ const UserDashboard = () => {
           </Grid>
 
           {/* Quick Actions */}
-          <Card className='mt-6'>
+          {/* <Card className='mt-6'>
             <CardHeader title='Quick Actions' />
             <Divider />
             <CardContent>
@@ -241,7 +243,7 @@ const UserDashboard = () => {
                 </Grid>
               </Grid>
             </CardContent>
-          </Card>
+          </Card> */}
         </>
       )}
     </div>

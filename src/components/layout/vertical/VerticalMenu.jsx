@@ -134,6 +134,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/user-dashboard' icon={<Icon icon='tabler-home' />}>
               Dashboard
             </MenuItem>
+            <MenuItem href='/product-management' icon={<Icon icon='tabler-package-export' />}>
+              {role === 'user' ? 'All Products' : 'Product Management'}
+            </MenuItem>
             <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
               Daily Financial Entry
             </MenuItem>
