@@ -477,6 +477,7 @@ const DailyFinancialEntry = () => {
                     name='description'
                     value={formData.description}
                     onChange={handleInputChange}
+                    required={false}
                     multiline
                     rows={3}
                   />

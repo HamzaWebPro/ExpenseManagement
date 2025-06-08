@@ -403,12 +403,16 @@ const ProductManagement = () => {
             <IconButton onClick={() => handleViewProduct(info.row.original)}>
               <EyeOutline className='text-textPrimary' />
             </IconButton>
-            <IconButton onClick={() => handleEditProduct(info.row.original)}>
-              <PencilOutline className='text-textPrimary' />
-            </IconButton>
-            <IconButton onClick={() => handleDeleteProduct(info.row.original._id)}>
-              <DeleteOutline className='text-textPrimary' />
-            </IconButton>
+            {role !== 'user' && (
+              <>
+                <IconButton onClick={() => handleEditProduct(info.row.original)}>
+                  <PencilOutline className='text-textPrimary' />
+                </IconButton>
+                <IconButton onClick={() => handleDeleteProduct(info.row.original._id)}>
+                  <DeleteOutline className='text-textPrimary' />
+                </IconButton>
+              </>
+            )}
           </div>
         ),
         header: 'Actions',
@@ -664,7 +668,7 @@ const ProductManagement = () => {
                       <Controller
                         name='description'
                         control={control}
-                        // rules={{ required: 'Description is required' }}
+                        rules={{ required: false }}
                         render={({ field }) => (
                           <CustomTextField
                             {...field}

@@ -616,7 +616,15 @@ const MyProfile = () => {
               <Avatar src={user.photoURL} alt={user.uname} sx={{ width: 120, height: 120, mb: 2 }} />
               <Typography variant='h5'>{user.uname}</Typography>
               <Chip
-                label={user.role}
+                label={
+                  user.role === 'superAdmin'
+                    ? 'Super Admin'
+                    : user.role === 'admin'
+                      ? 'Store'
+                      : user.role === 'manager'
+                        ? 'Manager'
+                        : 'User'
+                }
                 color={
                   user.role === 'superAdmin'
                     ? 'primary'
@@ -629,14 +637,15 @@ const MyProfile = () => {
                 size='small'
                 sx={{ mt: 1 }}
               />
-              <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
-                {user.designation || 'No designation'}
-              </Typography>
               <Typography variant='body2' color='text.secondary'>
                 {user.email}
               </Typography>
 
-              {/* <Button
+              {/* 
+              <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
+              {user.designation || 'No designation'}
+              </Typography>
+              <Button
                 variant='outlined'
                 sx={{ mt: 3 }}
                 onClick={() => setEditMode(!editMode)}
@@ -742,15 +751,15 @@ const MyProfile = () => {
                   <Typography variant='subtitle2'>Email</Typography>
                   <Typography variant='body1'>{user.email}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Typography variant='subtitle2'>Designation</Typography>
                   <Typography variant='body1'>{user.designation || 'N/A'}</Typography>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12} sm={6}>
                   <Typography variant='subtitle2'>Telephone</Typography>
                   <Typography variant='body1'>{user.telephone || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
                   <Typography variant='subtitle2'>Address</Typography>
                   <Typography variant='body1'>{user.address || 'N/A'}</Typography>
                 </Grid>
