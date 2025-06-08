@@ -90,6 +90,7 @@ const VerticalMenu = ({ scrollMenu }) => {
             </MenuItem>
           </MenuSection>
         )}
+        {/* for fix error  */}
 
         {role === 'admin' && (
           <MenuSection label='Admin'>
