@@ -334,7 +334,7 @@ const UserManagement = () => {
       designation: manager.designation,
       address: manager.address,
       telephone: manager.telephone,
-      delayCost: manager.delayCost || '',
+      dealycost: manager.dealycost || '',
       imageObj: manager.imageObj || []
     })
 
@@ -785,7 +785,10 @@ const UserManagement = () => {
                       value: 0,
                       message: 'Daily cost cannot be negative'
                     },
-                    required: true
+                    required: {
+                      value: true,
+                      message: 'Daily cost is required'
+                    }
                   }}
                   render={({ field }) => (
                     <CustomTextField
@@ -835,6 +838,7 @@ const UserManagement = () => {
                 <Controller
                   name='address'
                   control={control}
+                  rules={{ required: 'Address is required' }}
                   render={({ field }) => (
                     <CustomTextField
                       {...field}
