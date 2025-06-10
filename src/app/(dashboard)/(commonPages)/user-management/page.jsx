@@ -1064,7 +1064,7 @@ const UserManagement = () => {
                 <Controller
                   name='password'
                   control={control}
-                  required={false}
+                  rules={{ required: false }}
                   render={({ field }) => (
                     <CustomTextField
                       {...field}

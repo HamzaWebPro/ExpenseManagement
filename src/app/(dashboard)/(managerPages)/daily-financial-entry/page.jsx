@@ -120,6 +120,11 @@ const DailyFinancialEntry = () => {
         setStores(storesArr)
         setManagers(managersArr)
       }
+      if (role === 'admin') {
+        console.log('check', response?.data?.success?.data)
+
+        setManagers([...usersArr])
+      }
     } catch (error) {
       console.error('Error fetching users:', error)
       setError('Failed to load users. Please try again.')
@@ -149,6 +154,8 @@ const DailyFinancialEntry = () => {
       })
 
       const productsArr = response?.data?.data || []
+      console.log('products', productsArr)
+
       setProducts(productsArr)
     } catch (error) {
       console.error('Error fetching products:', error)
@@ -207,6 +214,15 @@ const DailyFinancialEntry = () => {
     const hasStoreFilter = selectedStore
     const hasManagerFilter = selectedManager
 
+    // if (role === 'admin' &&hasManagerFilter) {
+    //   // For admin, only filter by user
+    //   filtered = filtered.filter(entry => {
+    //     return entry.store?._id === currentUser.id || entry.store === currentUser.id
+    //   })
+
+    //   setFilteredEntries(filtered)
+    //   return
+    // }
     // Only apply filters if at least one is active
     if (hasStartDate || hasEndDate || hasStoreFilter || hasManagerFilter) {
       // Apply date filter if dates are selected
@@ -234,22 +250,24 @@ const DailyFinancialEntry = () => {
         })
       }
 
-      // Apply store filter if store is selected
-      if (hasStoreFilter) {
-        filtered = filtered.filter(entry => {
-          return entry.store?._id === selectedStore || entry.addedBy?.store?._id === selectedStore
-        })
-      }
-
       // Apply manager filter if manager is selected
       if (hasManagerFilter) {
         filtered = filtered.filter(entry => {
           return entry.addedBy?._id === selectedManager
         })
       }
+      // Apply store filter if store is selected
+      if (hasStoreFilter) {
+        filtered = filtered.filter(entry => {
+          return entry.store?._id === selectedStore || entry.addedBy?.store?._id === selectedStore
+        })
+      }
     }
 
     setFilteredEntries(filtered)
+
+    console.log('selectedManager', selectedManager)
+    console.log('filtered', filtered)
     setPage(0) // Reset to first page when filters change
   }
 
@@ -593,7 +611,7 @@ const DailyFinancialEntry = () => {
       )}
 
       {/* Super Admin Filters */}
-      {role === 'superAdmin' && (
+      {['superAdmin', 'admin'].includes(role) && (
         <Card sx={{ mt: 4 }}>
           <CardHeader title='Filters' />
           <CardContent>
@@ -618,19 +636,21 @@ const DailyFinancialEntry = () => {
                   />
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <FormControl fullWidth>
-                  <InputLabel>Store</InputLabel>
-                  <Select value={selectedStore} onChange={handleStoreChange} label='Store'>
-                    <MenuItem value=''>All Stores</MenuItem>
-                    {stores.map(store => (
-                      <MenuItem key={store._id} value={store._id}>
-                        {store.uname}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+              {role !== 'admin' && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth>
+                    <InputLabel>Store</InputLabel>
+                    <Select value={selectedStore} onChange={handleStoreChange} label='Store'>
+                      <MenuItem value=''>All Stores</MenuItem>
+                      {stores.map(store => (
+                        <MenuItem key={store._id} value={store._id}>
+                          {store.uname}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth>
                   <InputLabel>Manager</InputLabel>
@@ -638,16 +658,26 @@ const DailyFinancialEntry = () => {
                     value={selectedManager}
                     onChange={handleManagerChange}
                     label='Manager'
-                    disabled={!selectedStore}
+                    disabled={role === 'superAdmin' && !selectedStore}
                   >
                     <MenuItem value=''>All Managers</MenuItem>
                     {managers
-                      .filter(manager => manager.store?._id === selectedStore || manager.store === selectedStore)
+                      .filter(
+                        manager =>
+                          //   {
+                          //   console.log('manager', manager.store, decryptDataObject(sessionToken))
+                          // }
+                          manager.store?._id === selectedStore ||
+                          manager.store === selectedStore ||
+                          manager.store?._id === currentUser.id ||
+                          manager.store === currentUser.id
+                      )
                       .map(manager => (
                         <MenuItem key={manager._id} value={manager._id}>
                           {manager.uname}
                         </MenuItem>
                       ))}
+                    {managers.map(manager => console.log('manager', manager))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -678,7 +708,7 @@ const DailyFinancialEntry = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {role === 'superAdmin' && <TableCell>User</TableCell>}
+                      {['superAdmin', 'admin'].includes(role) && <TableCell>User</TableCell>}
                       {role === 'superAdmin' && <TableCell>Store</TableCell>}
                       <TableCell>Date</TableCell>
                       <TableCell>Amount</TableCell>
@@ -690,10 +720,13 @@ const DailyFinancialEntry = () => {
                     {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(entry => {
                       console.log('user', entry)
                       const user = users.find(u => u._id === entry._id)
+                      console.log('user', entry)
 
                       return (
                         <TableRow key={entry._id}>
-                          {role === 'superAdmin' && <TableCell>{entry?.userId?.uname || 'Unknown User'}</TableCell>}
+                          {['superAdmin', 'admin'].includes(role) && (
+                            <TableCell>{entry?.uname || entry?.userId?.uname || 'Unknown User'}</TableCell>
+                          )}
                           {role === 'superAdmin' && (
                             <TableCell>
                               {entry.store?.uname || entry.addedBy?.store?.uname || 'Unknown Store'}

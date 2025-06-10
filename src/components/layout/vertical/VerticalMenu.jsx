@@ -106,6 +106,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/expense-management' icon={<Icon icon='tabler-receipt' />}>
               Manage Expense
             </MenuItem>
+            <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
+              Daily Financial Entry
+            </MenuItem>
             <MenuItem href='/all-users' icon={<Icon icon='tabler-users' />}>
               All Users
             </MenuItem>
