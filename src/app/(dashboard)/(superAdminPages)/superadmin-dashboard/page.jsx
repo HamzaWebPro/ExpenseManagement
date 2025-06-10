@@ -304,7 +304,7 @@ const SuperAdminDashboard = () => {
                 <CardHeader
                   title='Recent Managers'
                   action={
-                    <Button size='small' variant='contained' onClick={() => router.push('/all_managers')}>
+                    <Button size='small' variant='contained' onClick={() => router.push('/manager-management')}>
                       View All
                     </Button>
                   }

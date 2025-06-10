@@ -755,7 +755,7 @@ const DailyFinancialEntry = () => {
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>User</Typography>
                   <Typography variant='body1'>
-                    {users.find(u => u._id === selectedEntry.userId)?.uname || 'Unknown User'}
+                    {users.find(u => u._id === selectedEntry.userId._id)?.uname || 'Unknown User'}
                   </Typography>
                 </Grid>
                 {role === 'superAdmin' && (
