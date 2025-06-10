@@ -725,7 +725,7 @@ const DailyFinancialEntry = () => {
                   data={filteredEntries}
                   style={{ textDecoration: 'none' }}
                 >
-                  <Button variant='contained'>Export {filteredEntries.length} Expenses</Button>
+                  <Button variant='contained'>Export {filteredEntries.length} Entry</Button>
                 </CSVLink>
 
                 <TablePagination

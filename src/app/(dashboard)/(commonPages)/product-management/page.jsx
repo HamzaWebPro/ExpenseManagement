@@ -191,7 +191,9 @@ const ProductManagement = () => {
       name: '',
       price: '',
       description: '',
-      imageObj: []
+      imageObj: [],
+      store: '',
+      addedBy: ''
     }
   })
 
@@ -665,7 +667,7 @@ const ProductManagement = () => {
                   <Controller
                     name='description'
                     control={control}
-                    rules={{ required: false }}
+                    required={false}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
