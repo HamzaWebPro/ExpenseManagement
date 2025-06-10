@@ -500,7 +500,7 @@ const UserManagement = () => {
       }),
       columnHelper.accessor('delayCost', {
         cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
-        header: 'Delay Cost'
+        header: 'Daily Cost'
       }),
       columnHelper.accessor('_id', {
         cell: info => <Button onClick={() => handleOpenPercentageDialog(info.row.original)}>Manage Percentage</Button>,
@@ -775,7 +775,7 @@ const UserManagement = () => {
                 />
               </Grid>
 
-              {/* Delay Cost */}
+              {/* Daily Cost */}
               <Grid item xs={12} sm={6}>
                 <Controller
                   name='delayCost'
@@ -783,7 +783,7 @@ const UserManagement = () => {
                   rules={{
                     min: {
                       value: 0,
-                      message: 'Delay cost cannot be negative'
+                      message: 'Daily cost cannot be negative'
                     }
                   }}
                   render={({ field }) => (
@@ -791,7 +791,7 @@ const UserManagement = () => {
                       {...field}
                       fullWidth
                       type='number'
-                      label='Delay Cost ($)'
+                      label='Daily Cost ($)'
                       placeholder='Enter delay cost'
                       InputProps={{
                         startAdornment: <InputAdornment position='start'>$</InputAdornment>
@@ -968,7 +968,7 @@ const UserManagement = () => {
                 <Grid item xs={12} sm={6}>
                   <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                     <Typography variant='subtitle2' color='textSecondary'>
-                      Delay Cost
+                      Daily Cost
                     </Typography>
                     <Typography variant='body1'>
                       {selectedUser.delayCost ? `$${selectedUser.delayCost}` : '-'}
@@ -1101,7 +1101,7 @@ const UserManagement = () => {
                       {...field}
                       fullWidth
                       type='number'
-                      label='Delay Cost ($)'
+                      label='Daily Cost ($)'
                       InputProps={{
                         startAdornment: <InputAdornment position='start'>$</InputAdornment>
                       }}
