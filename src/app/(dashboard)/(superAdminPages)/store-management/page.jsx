@@ -500,7 +500,7 @@ const AdminManagement = () => {
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
                         label='Store Password'
-                        placeholder='Enter password'
+                        placeholder='Enter new password'
                         error={!!errors.password}
                         helperText={errors.password?.message}
                         InputProps={{

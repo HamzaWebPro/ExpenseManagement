@@ -1071,7 +1071,7 @@ const UserManagement = () => {
                       fullWidth
                       type={isPasswordShown ? 'text' : 'password'}
                       label='Password'
-                      placeholder='Enter password'
+                      placeholder='Enter password (leave blank to keep current)'
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
