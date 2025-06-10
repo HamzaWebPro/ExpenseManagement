@@ -472,7 +472,7 @@ const ProductManagement = () => {
                 placeholder='Search products...'
                 className='min-is-[200px]'
               />
-              {role != 'user' && (
+              {!['user', 'admin'].includes(role) && (
                 <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
                   {showAddForm ? 'Hide Form' : 'Add Product'}
                 </Button>
@@ -482,7 +482,7 @@ const ProductManagement = () => {
         />
 
         {/* Add Product Form */}
-        {showAddForm && role != 'user' && (
+        {showAddForm && !['user', 'admin'].includes(role) && (
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={4}>
