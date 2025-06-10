@@ -344,7 +344,7 @@ const UserManagement = () => {
 
   // Update User
   const handleUpdateUser = async formData => {
-    setBtnLoading('update')
+    setBtnLoading('update', formData)
 
     if (!selectedUser) return
 
@@ -730,7 +730,7 @@ const UserManagement = () => {
                       fullWidth
                       type={isPasswordShown ? 'text' : 'password'}
                       label='User Password'
-                      placeholder='Enter password'
+                      placeholder='Enter new password'
                       error={!!errors.password}
                       helperText={errors.password?.message}
                       InputProps={{
@@ -1064,13 +1064,14 @@ const UserManagement = () => {
                 <Controller
                   name='password'
                   control={control}
+                  required={false}
                   render={({ field }) => (
                     <CustomTextField
                       {...field}
                       fullWidth
                       type={isPasswordShown ? 'text' : 'password'}
                       label='Password'
-                      placeholder='Enter new password'
+                      placeholder='Enter password'
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
@@ -1178,7 +1179,12 @@ const UserManagement = () => {
           >
             Cancel
           </Button>
-          <Button disabled={btnLoading === 'update'} variant='contained' onClick={handleSubmit(handleUpdateUser)}>
+          <Button
+            disabled={btnLoading === 'update'}
+            variant='contained'
+            type='submit'
+            onClick={handleSubmit(handleUpdateUser)}
+          >
             {btnLoading === 'update' ? (
               <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
             ) : (

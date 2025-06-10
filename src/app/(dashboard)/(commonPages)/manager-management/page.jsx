@@ -912,6 +912,7 @@ const AdminManagement = () => {
                   <Controller
                     name='password'
                     control={control}
+                    required={false}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}

@@ -864,7 +864,6 @@ const ProductManagement = () => {
                   <Controller
                     name='name'
                     control={control}
-                    rules={{ required: 'Product name is required' }}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -882,7 +881,6 @@ const ProductManagement = () => {
                     name='price'
                     control={control}
                     rules={{
-                      required: 'Price is required',
                       pattern: {
                         value: /^\d+(\.\d{1,2})?$/,
                         message: 'Please enter a valid price'
