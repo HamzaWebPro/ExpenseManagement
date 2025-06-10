@@ -334,7 +334,7 @@ const UserManagement = () => {
       designation: manager.designation,
       address: manager.address,
       telephone: manager.telephone,
-      dealycost: manager.dealycost || '',
+      delayCost: manager.delayCost || '',
       imageObj: manager.imageObj || []
     })
 
@@ -354,6 +354,7 @@ const UserManagement = () => {
     }
 
     try {
+      console.log('user update', updatedManager)
       const loginToken = await TokenManager.getLoginToken()
       const setTokenInJson = JSON.stringify({
         postToken: backendPostToken,
@@ -1069,7 +1070,7 @@ const UserManagement = () => {
                       fullWidth
                       type={isPasswordShown ? 'text' : 'password'}
                       label='Password'
-                      placeholder='Enter new password (leave blank to keep current)'
+                      placeholder='Enter new password'
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position='end'>
