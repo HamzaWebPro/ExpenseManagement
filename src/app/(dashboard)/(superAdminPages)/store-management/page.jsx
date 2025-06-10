@@ -887,7 +887,7 @@ const AdminManagement = () => {
                     name='email'
                     control={control}
                     rules={{
-                      // required: 'Email is required',
+                      required: false,
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                         message: 'Invalid email address'
