@@ -480,167 +480,164 @@ const ProductManagement = () => {
         />
 
         {/* Add Product Form */}
-        {showAddForm &&
-          role !=
-            'user'(
-              <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <Grid container spacing={4}>
-                    {role === 'superAdmin' && (
-                      <>
-                        <Grid item xs={12} sm={6}>
-                          <Controller
-                            name='store'
-                            control={control}
-                            defaultValue=''
-                            rules={{
-                              required: 'Store selection is required'
-                            }}
-                            render={({ field }) => (
-                              <CustomTextField
-                                {...field}
-                                select
-                                fullWidth
-                                label='Select Store'
-                                error={!!errors.store}
-                                helperText={errors.store?.message}
-                                onChange={e => {
-                                  const selectedStoreId = e.target.value
-                                  field.onChange(selectedStoreId)
-                                  const filteredManagers = managers.filter(
-                                    manager =>
-                                      manager.store?._id === selectedStoreId || manager.store === selectedStoreId
-                                  )
-                                  console.log(filteredManagers)
-                                  setSelectedManagers(filteredManagers)
-                                  setValue('addedBy', '')
-                                }}
-                              >
-                                <MenuItem value=''>Select Store</MenuItem>
-                                {stores.map(store => (
-                                  <MenuItem key={store._id} value={store._id}>
-                                    {store.uname}
-                                  </MenuItem>
-                                ))}
-                              </CustomTextField>
-                            )}
-                          />
-                        </Grid>
-
-                        {watch('store') && selectedManagers.length > 0 && (
-                          <Grid item xs={12} sm={6}>
-                            <Controller
-                              name='addedBy'
-                              control={control}
-                              rules={{ required: 'Manager selection is required' }}
-                              render={({ field }) => (
-                                <CustomTextField
-                                  {...field}
-                                  select
-                                  fullWidth
-                                  label='Select Manager'
-                                  error={!!errors.addedBy}
-                                  helperText={errors.addedBy?.message}
-                                >
-                                  <MenuItem value=''>Select Manager</MenuItem>
-                                  {selectedManagers.map(manager => (
-                                    <MenuItem key={manager._id} value={manager._id}>
-                                      {manager.uname}
-                                    </MenuItem>
-                                  ))}
-                                </CustomTextField>
-                              )}
-                            />
-                          </Grid>
-                        )}
-                      </>
-                    )}
-
-                    {/* Product Name */}
+        {showAddForm && role != 'user' && (
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={4}>
+                {role === 'superAdmin' && (
+                  <>
                     <Grid item xs={12} sm={6}>
                       <Controller
-                        name='name'
+                        name='store'
                         control={control}
-                        rules={{ required: 'Product name is required' }}
-                        render={({ field }) => (
-                          <CustomTextField
-                            {...field}
-                            fullWidth
-                            label='Product Name'
-                            placeholder='Enter product name'
-                            error={!!errors.name}
-                            helperText={errors.name?.message}
-                          />
-                        )}
-                      />
-                    </Grid>
-
-                    {/* Price */}
-                    <Grid item xs={12} sm={6}>
-                      <Controller
-                        name='price'
-                        control={control}
+                        defaultValue=''
                         rules={{
-                          required: 'Price is required',
-                          pattern: {
-                            value: /^\d+(\.\d{1,2})?$/,
-                            message: 'Please enter a valid price'
-                          }
+                          required: 'Store selection is required'
                         }}
                         render={({ field }) => (
                           <CustomTextField
                             {...field}
+                            select
                             fullWidth
-                            type='number'
-                            label='Price'
-                            placeholder='Enter price'
-                            InputProps={{
-                              startAdornment: <InputAdornment position='start'>$</InputAdornment>
-                            }}
-                            error={!!errors.price}
-                            helperText={errors.price?.message}
-                          />
-                        )}
-                      />
-                    </Grid>
-
-                    {/* Image Upload */}
-                    <Grid item xs={12} sm={6}>
-                      <Controller
-                        name='imageObj'
-                        control={control}
-                        render={({ field: { onChange } }) => (
-                          <CustomImageUploadField
-                            fullWidth
-                            label='Upload Product Image'
+                            label='Select Store'
+                            error={!!errors.store}
+                            helperText={errors.store?.message}
                             onChange={e => {
-                              const file = e.target.files[0]
-                              if (file) {
-                                const reader = new FileReader()
-                                reader.onloadend = () => {
-                                  const imageDataUrl = reader.result
-                                  setImagePreview(imageDataUrl)
-                                  onChange([imageDataUrl])
-                                }
-                                reader.readAsDataURL(file)
-                              }
+                              const selectedStoreId = e.target.value
+                              field.onChange(selectedStoreId)
+                              const filteredManagers = managers.filter(
+                                manager => manager.store?._id === selectedStoreId || manager.store === selectedStoreId
+                              )
+                              console.log(filteredManagers)
+                              setSelectedManagers(filteredManagers)
+                              setValue('addedBy', '')
                             }}
-                          />
+                          >
+                            <MenuItem value=''>Select Store</MenuItem>
+                            {stores.map(store => (
+                              <MenuItem key={store._id} value={store._id}>
+                                {store.uname}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
                         )}
                       />
-                      {imagePreview && (
-                        <Box mt={2}>
-                          <img
-                            src={imagePreview}
-                            alt='Preview'
-                            style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }}
-                          />
-                        </Box>
-                      )}
                     </Grid>
 
-                    {/* Status */}
-                    {/* <Grid item xs={12} sm={6}>
+                    {watch('store') && selectedManagers.length > 0 && (
+                      <Grid item xs={12} sm={6}>
+                        <Controller
+                          name='addedBy'
+                          control={control}
+                          rules={{ required: 'Manager selection is required' }}
+                          render={({ field }) => (
+                            <CustomTextField
+                              {...field}
+                              select
+                              fullWidth
+                              label='Select Manager'
+                              error={!!errors.addedBy}
+                              helperText={errors.addedBy?.message}
+                            >
+                              <MenuItem value=''>Select Manager</MenuItem>
+                              {selectedManagers.map(manager => (
+                                <MenuItem key={manager._id} value={manager._id}>
+                                  {manager.uname}
+                                </MenuItem>
+                              ))}
+                            </CustomTextField>
+                          )}
+                        />
+                      </Grid>
+                    )}
+                  </>
+                )}
+
+                {/* Product Name */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='name'
+                    control={control}
+                    rules={{ required: 'Product name is required' }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Product Name'
+                        placeholder='Enter product name'
+                        error={!!errors.name}
+                        helperText={errors.name?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Price */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='price'
+                    control={control}
+                    rules={{
+                      required: 'Price is required',
+                      pattern: {
+                        value: /^\d+(\.\d{1,2})?$/,
+                        message: 'Please enter a valid price'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        type='number'
+                        label='Price'
+                        placeholder='Enter price'
+                        InputProps={{
+                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        }}
+                        error={!!errors.price}
+                        helperText={errors.price?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Image Upload */}
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name='imageObj'
+                    control={control}
+                    render={({ field: { onChange } }) => (
+                      <CustomImageUploadField
+                        fullWidth
+                        label='Upload Product Image'
+                        onChange={e => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            const reader = new FileReader()
+                            reader.onloadend = () => {
+                              const imageDataUrl = reader.result
+                              setImagePreview(imageDataUrl)
+                              onChange([imageDataUrl])
+                            }
+                            reader.readAsDataURL(file)
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                  {imagePreview && (
+                    <Box mt={2}>
+                      <img
+                        src={imagePreview}
+                        alt='Preview'
+                        style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }}
+                      />
+                    </Box>
+                  )}
+                </Grid>
+
+                {/* Status */}
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
                     control={control}
@@ -663,51 +660,51 @@ const ProductManagement = () => {
                   />
                 </Grid>*/}
 
-                    {/* Description */}
-                    <Grid item xs={12}>
-                      <Controller
-                        name='description'
-                        control={control}
-                        rules={{ required: false }}
-                        render={({ field }) => (
-                          <CustomTextField
-                            {...field}
-                            fullWidth
-                            label='Description'
-                            placeholder='Enter product description'
-                            multiline
-                            rows={4}
-                            error={!!errors.description}
-                            helperText={errors.description?.message}
-                          />
-                        )}
+                {/* Description */}
+                <Grid item xs={12}>
+                  <Controller
+                    name='description'
+                    control={control}
+                    rules={{ required: false }}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        label='Description'
+                        placeholder='Enter product description'
+                        multiline
+                        rows={4}
+                        error={!!errors.description}
+                        helperText={errors.description?.message}
                       />
-                    </Grid>
+                    )}
+                  />
+                </Grid>
 
-                    {/* Buttons */}
-                    <Grid item xs={12} className='flex gap-4'>
-                      <Button variant='contained' disabled={btnLoading === 'submit'} type='submit'>
-                        {btnLoading === 'submit' ? (
-                          <DNA
-                            visible={true}
-                            // className='h-full w-auto'
-                            height={22}
-                            ariaLabel='dna-loading'
-                            wrapperStyle={{}}
-                            wrapperClass='dna-wrapper'
-                          />
-                        ) : (
-                          'Add Product'
-                        )}
-                      </Button>
-                      <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
-                        Reset
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </form>
-              </CardContent>
-            )}
+                {/* Buttons */}
+                <Grid item xs={12} className='flex gap-4'>
+                  <Button variant='contained' disabled={btnLoading === 'submit'} type='submit'>
+                    {btnLoading === 'submit' ? (
+                      <DNA
+                        visible={true}
+                        // className='h-full w-auto'
+                        height={22}
+                        ariaLabel='dna-loading'
+                        wrapperStyle={{}}
+                        wrapperClass='dna-wrapper'
+                      />
+                    ) : (
+                      'Add Product'
+                    )}
+                  </Button>
+                  <Button variant='tonal' color='secondary' type='reset' onClick={handleResetForm}>
+                    Reset
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          </CardContent>
+        )}
 
         {/* Product Table */}
         <div className='overflow-x-auto'>

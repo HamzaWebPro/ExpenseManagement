@@ -937,7 +937,7 @@ const AdminManagement = () => {
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='amount'
                     control={control}
@@ -954,7 +954,7 @@ const AdminManagement = () => {
                       />
                     )}
                   />
-                </Grid>
+                </Grid> */}
                 {/* <Grid item xs={12} sm={6}>
                   <Controller
                     name='status'
