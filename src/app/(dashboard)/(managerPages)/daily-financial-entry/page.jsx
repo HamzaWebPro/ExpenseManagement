@@ -399,6 +399,8 @@ const DailyFinancialEntry = () => {
 
   // Handle page change
   const handleChangePage = (event, newPage) => {
+    console.log(newPage)
+
     setPage(newPage)
   }
 
@@ -686,8 +688,8 @@ const DailyFinancialEntry = () => {
                   </TableHead>
                   <TableBody>
                     {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(entry => {
-                      const user = users.find(u => u._id === entry.userId._id)
-                      console.log('user', user)
+                      console.log('user', entry)
+                      const user = users.find(u => u._id === entry._id)
 
                       return (
                         <TableRow key={entry._id}>

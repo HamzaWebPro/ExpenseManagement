@@ -677,7 +677,7 @@ const UserManagement = () => {
                       {...field}
                       fullWidth
                       label='User Name'
-                      placeholder='Enter manager name'
+                      placeholder='Enter user name'
                       error={!!errors.uname}
                       helperText={errors.uname?.message}
                     />
@@ -792,7 +792,7 @@ const UserManagement = () => {
                       fullWidth
                       type='number'
                       label='Daily Cost ($)'
-                      placeholder='Enter delay cost'
+                      placeholder='Enter daily cost'
                       InputProps={{
                         startAdornment: <InputAdornment position='start'>$</InputAdornment>
                       }}

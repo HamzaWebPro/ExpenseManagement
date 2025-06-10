@@ -645,6 +645,7 @@ const ExpenseManagement = () => {
                   <Controller
                     name='description'
                     control={control}
+                    required={false}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
@@ -891,6 +892,7 @@ const ExpenseManagement = () => {
                   <Controller
                     name='description'
                     control={control}
+                    required={false}
                     render={({ field }) => (
                       <CustomTextField
                         {...field}
