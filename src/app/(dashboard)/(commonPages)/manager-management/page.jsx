@@ -696,7 +696,7 @@ const AdminManagement = () => {
 
                 {/* Buttons */}
                 <Grid item xs={12} className='flex gap-4'>
-                  <Button variant='contained' type='submit'>
+                  <Button variant='contained' disabled={btnLoading === 'submit'} type='submit'>
                     {btnLoading === 'submit' ? (
                       <DNA
                         visible={true}
@@ -919,7 +919,7 @@ const AdminManagement = () => {
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
                         label='Password'
-                        placeholder='Enter password'
+                        placeholder='Enter password (leave blank to keep current)'
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position='end'>
@@ -1038,7 +1038,7 @@ const AdminManagement = () => {
             >
               Cancel
             </Button>
-            <Button variant='contained' onClick={handleSubmit(handleUpdateManager)}>
+            <Button variant='contained' disabled={btnLoading === 'update'} onClick={handleSubmit(handleUpdateManager)}>
               {btnLoading === 'update' ? (
                 <DNA visible={true} height={22} ariaLabel='dna-loading' wrapperStyle={{}} wrapperClass='dna-wrapper' />
               ) : (
