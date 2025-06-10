@@ -579,7 +579,7 @@ const AdminManagement = () => {
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
                         label='Password'
-                        placeholder='Enter new password (leave blank to keep current)'
+                        placeholder='Enter new password'
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position='end'>
@@ -919,7 +919,7 @@ const AdminManagement = () => {
                         fullWidth
                         type={isPasswordShown ? 'text' : 'password'}
                         label='Password'
-                        placeholder='Enter new password'
+                        placeholder='Enter password'
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position='end'>
