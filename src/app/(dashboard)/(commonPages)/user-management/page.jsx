@@ -784,7 +784,8 @@ const UserManagement = () => {
                     min: {
                       value: 0,
                       message: 'Daily cost cannot be negative'
-                    }
+                    },
+                    required: true
                   }}
                   render={({ field }) => (
                     <CustomTextField
