@@ -756,7 +756,7 @@ const DailyFinancialEntry = () => {
               {/* Fixed Pagination and Export */}
               <Box display='flex' justifyContent='space-between' alignItems='center' mt={2}>
                 <CSVLink
-                  filename={`expenses_${new Date().toISOString()}.csv`}
+                  filename={`Entry ${new Date().toISOString()}.csv`}
                   data={filteredEntries}
                   style={{ textDecoration: 'none' }}
                 >

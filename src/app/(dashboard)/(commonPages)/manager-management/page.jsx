@@ -572,6 +572,13 @@ const AdminManagement = () => {
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name='password'
+                    rules={{
+                      required: 'Password is required',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters'
+                      }
+                    }}
                     control={control}
                     render={({ field }) => (
                       <CustomTextField
@@ -580,6 +587,8 @@ const AdminManagement = () => {
                         type={isPasswordShown ? 'text' : 'password'}
                         label='Password'
                         placeholder='Enter new password'
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position='end'>

@@ -172,23 +172,28 @@ const UserDashboard = () => {
                       {dashboardData.recentProducts.map((product, index) => (
                         <Grid item xs={12} sm={6} md={4} key={index}>
                           <Card
-                            onClick={() => router.push(`/all-products/${product._id}`)}
-                            sx={{
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s',
-                              '&:hover': {
-                                transform: 'translateY(-5px)',
-                                boxShadow: 6
-                              }
-                            }}
+                          // onClick={() => router.push(`/all-products/${product._id}`)}
+                          // sx={{
+                          //   cursor: 'pointer',
+                          //   transition: 'transform 0.2s',
+                          //   '&:hover': {
+                          //     transform: 'translateY(-5px)',
+                          //     boxShadow: 6
+                          //   }
+                          // }}
                           >
                             <CardContent className='flex flex-col items-center text-center'>
                               <Avatar
-                                src={product.photoUrl[0]}
+                                src={product.photoUrl?.[0] || '/images/avatars/product.jpg'}
                                 alt={product.name}
                                 variant='rounded'
                                 sx={{ width: 100, height: 100, mb: 2 }}
+                                onError={e => {
+                                  e.currentTarget.onerror = '/images/product.jpg'
+                                  e.currentTarget.src = '/images/product.jpg'
+                                }}
                               />
+
                               <Typography variant='subtitle1'>{product.name}</Typography>
                               <Typography variant='body1' color='primary' className='mt-1'>
                                 ${product.price.toFixed(2)}
