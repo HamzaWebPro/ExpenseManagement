@@ -757,7 +757,18 @@ const DailyFinancialEntry = () => {
               <Box display='flex' justifyContent='space-between' alignItems='center' mt={2}>
                 <CSVLink
                   filename={`Entry ${new Date().toISOString()}.csv`}
-                  data={filteredEntries}
+                  data={filteredEntries.map(entry => ({
+                    User: entry?.uname || entry?.userId?.uname || 'Unknown User',
+                    Store: entry.store?.uname || entry.addedBy?.store?.uname || 'Unknown Store',
+                    Date: new Date(entry.createdAt).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    }),
+                    Amount: `$${entry.amount.toFixed(2)}`,
+                    PaymentMethod: entry.paymentMethod,
+                    Description: entry.description || 'N/A'
+                  }))}
                   style={{ textDecoration: 'none' }}
                 >
                   <Button variant='contained'>Export {filteredEntries.length} Entry</Button>

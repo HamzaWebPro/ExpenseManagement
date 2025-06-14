@@ -744,7 +744,21 @@ const AdminManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename='all_admin' data={data}>
+              <CSVLink
+                filename='all_admin.csv'
+                data={data.map(admin => ({
+                  StoreName: admin.uname,
+                  Email: admin.email,
+                  FranchiseAmount: admin.amount,
+                  Telephone: admin.telephone,
+                  Address: admin.address,
+                  CreatedDate: new Date(admin.createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })
+                }))}
+              >
                 <Button variant='contained'>Export All Admin</Button>
               </CSVLink>
             </TablePaginationComponent>

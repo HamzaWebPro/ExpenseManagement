@@ -937,7 +937,22 @@ const UserManagement = () => {
       <TablePagination
         component={() => (
           <TablePaginationComponent table={table}>
-            <CSVLink filename='all_user' data={data}>
+            <CSVLink
+              filename='all_user'
+              data={
+                Array.isArray(data) && data.length > 0
+                  ? data.map(user => ({
+                      id: user._id || '',
+                      name: user.uname || '',
+                      email: user.email || '',
+                      role: user.role || '',
+                      store: user.store?.uname || '',
+                      createdAt: user.createdAt || '',
+                      addedBy: user.addedBy?.uname || ''
+                    }))
+                  : []
+              } // Ensure data is properly formatted
+            >
               <Button variant='contained'>Export All User</Button>
             </CSVLink>
           </TablePaginationComponent>

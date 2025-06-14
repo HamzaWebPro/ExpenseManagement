@@ -748,7 +748,16 @@ const ExpenseManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename={`expenses_${new Date().toISOString()}.csv`} data={filteredData}>
+              <CSVLink
+                filename={`expenses_${new Date().toISOString()}.csv`}
+                data={filteredData.map(expense => ({
+                  title: expense.title,
+                  amount: expense.amount,
+                  date: expense.date,
+                  description: expense.description,
+                  store: expense.store?.uname || expense.addedBy?.store?.uname || '-'
+                }))}
+              >
                 <Button variant='contained'>Export {filteredData.length} Expenses</Button>
               </CSVLink>
             </TablePaginationComponent>

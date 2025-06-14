@@ -782,9 +782,26 @@ const AdminManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename='all_manager' data={data}>
-                <Button variant='contained'>Export All Manager</Button>
-              </CSVLink>
+              {data && data.length > 0 ? (
+                <CSVLink
+                  filename='all_manager.csv'
+                  data={data.map(manager => ({
+                    uname: manager.uname,
+                    email: manager.email,
+                    telephone: manager.telephone,
+                    address: manager.address,
+                    createdAt: manager.createdAt,
+                    store: manager.store?.uname || '',
+                    addedBy: manager.addedBy?.uname || ''
+                  }))}
+                >
+                  <Button variant='contained'>Export All Manager</Button>
+                </CSVLink>
+              ) : (
+                <Button variant='contained' disabled>
+                  Export All Manager
+                </Button>
+              )}
             </TablePaginationComponent>
           )}
           count={table.getFilteredRowModel().rows.length}

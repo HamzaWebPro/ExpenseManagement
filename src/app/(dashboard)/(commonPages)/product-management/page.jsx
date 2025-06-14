@@ -763,7 +763,16 @@ const ProductManagement = () => {
         <TablePagination
           component={() => (
             <TablePaginationComponent table={table}>
-              <CSVLink filename='all_products' data={data}>
+              <CSVLink
+                filename='all_products.csv'
+                data={data.map(product => ({
+                  Name: product.name,
+                  Price: product.price,
+                  Description: product.description,
+                  CreatedDate: product.createdAt,
+                  AddedBy: role === 'superAdmin' || role === 'admin' ? product.addedBy?.uname || '-' : undefined
+                }))}
+              >
                 <Button variant='contained'>Export All Products</Button>
               </CSVLink>
             </TablePaginationComponent>
