@@ -244,7 +244,9 @@ const UserManagement = () => {
       applyToAll: false,
       allProductPercentage: '',
       percentage: '',
-      selectedProducts: []
+      selectedProducts: [],
+      dailyExpense: '',
+      dailySalary: ''
     }
   })
 
@@ -335,7 +337,9 @@ const UserManagement = () => {
       address: manager.address,
       telephone: manager.telephone,
       delayCost: manager.delayCost || '',
-      imageObj: manager.imageObj || []
+      imageObj: manager.imageObj || [],
+      dailyExpense: manager.dailyExpense,
+      dailySalary: manager.dailySalary
     })
 
     setImagePreview(manager.imageObj?.[0]?.url || '')
@@ -776,6 +780,58 @@ const UserManagement = () => {
                 />
               </Grid>
 
+              {/* Daily Salary */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name='dailySalary'
+                  control={control}
+                  rules={{
+                    min: { value: 0, message: 'Daily salary cannot be negative' },
+                    required: { value: true, message: 'Daily salary is required' }
+                  }}
+                  render={({ field }) => (
+                    <CustomTextField
+                      {...field}
+                      fullWidth
+                      type='number'
+                      label='Daily Salary (€)'
+                      placeholder='Enter daily salary'
+                      InputProps={{
+                        startAdornment: <InputAdornment position='start'>€</InputAdornment>
+                      }}
+                      error={!!errors.dailySalary}
+                      helperText={errors.dailySalary?.message}
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* Daily Expense */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name='dailyExpense'
+                  control={control}
+                  rules={{
+                    min: { value: 0, message: 'Daily expense cannot be negative' },
+                    required: { value: true, message: 'Daily expense is required' }
+                  }}
+                  render={({ field }) => (
+                    <CustomTextField
+                      {...field}
+                      fullWidth
+                      type='number'
+                      label='Daily Expense (€)'
+                      placeholder='Enter daily expense'
+                      InputProps={{
+                        startAdornment: <InputAdornment position='start'>€</InputAdornment>
+                      }}
+                      error={!!errors.dailyExpense}
+                      helperText={errors.dailyExpense?.message}
+                    />
+                  )}
+                />
+              </Grid>
+
               {/* Daily Cost */}
               <Grid item xs={12} sm={6}>
                 <Controller
@@ -796,10 +852,10 @@ const UserManagement = () => {
                       {...field}
                       fullWidth
                       type='number'
-                      label='Daily Cost ($)'
+                      label='Daily Cost (€)'
                       placeholder='Enter daily cost'
                       InputProps={{
-                        startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                        startAdornment: <InputAdornment position='start'>€</InputAdornment>
                       }}
                       error={!!errors.delayCost}
                       helperText={errors.delayCost?.message}
@@ -1114,6 +1170,63 @@ const UserManagement = () => {
                   )}
                 />
               </Grid>
+
+              {/* Daily salary */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name='salary'
+                  control={control}
+                  rules={{
+                    min: {
+                      value: 0,
+                      message: 'Daily salary cannot be negative'
+                    }
+                  }}
+                  render={({ field }) => (
+                    <CustomTextField
+                      {...field}
+                      fullWidth
+                      type='number'
+                      label='Daily Salary (€)'
+                      placeholder='Enter daily salary'
+                      InputProps={{
+                        startAdornment: <InputAdornment position='start'>€</InputAdornment>
+                      }}
+                      error={!!errors.salary}
+                      helperText={errors.salary?.message}
+                    />
+                  )}
+                />
+              </Grid>
+
+              {/* Daily Expense */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name='dailyExpense'
+                  control={control}
+                  rules={{
+                    min: {
+                      value: 0,
+                      message: 'Daily Expense cannot be negative'
+                    }
+                  }}
+                  render={({ field }) => (
+                    <CustomTextField
+                      {...field}
+                      fullWidth
+                      type='number'
+                      label='Daily Expense (€)'
+                      placeholder='Enter Expense cost'
+                      InputProps={{
+                        startAdornment: <InputAdornment position='start'>€</InputAdornment>
+                      }}
+                      error={!!errors.dailyExpense}
+                      helperText={errors.dailyExpense?.message}
+                    />
+                  )}
+                />
+              </Grid>
+
               <Grid item xs={12} sm={6}>
                 <Controller
                   name='delayCost'
@@ -1131,6 +1244,7 @@ const UserManagement = () => {
                   )}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <Controller
                   name='imageObj'
