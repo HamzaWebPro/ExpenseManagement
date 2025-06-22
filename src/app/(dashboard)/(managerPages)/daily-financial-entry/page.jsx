@@ -121,7 +121,7 @@ const DailyFinancialEntry = () => {
         setManagers(managersArr)
       }
       if (role === 'admin') {
-        console.log('check', response?.data?.success?.data)
+        // console.log('check', response?.data?.success?.data)
 
         setManagers([...usersArr])
       }
@@ -154,7 +154,7 @@ const DailyFinancialEntry = () => {
       })
 
       const productsArr = response?.data?.data || []
-      console.log('products', productsArr)
+      // console.log('products', productsArr)
 
       setProducts(productsArr)
     } catch (error) {
@@ -387,8 +387,9 @@ const DailyFinancialEntry = () => {
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
         }
       })
+      console.log(response)
 
-      if (response.data.message) {
+      if (response.data.data) {
         // Reset form after successful submission
         setFormData({
           userId: '',

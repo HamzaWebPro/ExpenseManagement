@@ -12,7 +12,8 @@ import {
   Paper,
   Grid,
   TextField,
-  Button
+  Button,
+  TableContainer
 } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -66,9 +67,9 @@ const IncomeReport = () => {
           maxBodyLength: Infinity
         }
       )
-      console.log(response)
+      console.log(response?.data)
 
-      setReportData(response.data)
+      setReportData(response?.data?.data?.reportRows)
     } catch (error) {
       console.error('Error fetching income report:', error)
     } finally {
@@ -124,10 +125,10 @@ const IncomeReport = () => {
                 {reportData.map(row => (
                   <TableRow key={row.date}>
                     <TableCell>{formatDate(row.date)}</TableCell>
-                    <TableCell>{row.totalSales.toFixed(2)}</TableCell>
-                    <TableCell>{row.totalExpenses.toFixed(2)}</TableCell>
-                    <TableCell>{row.totalPayroll.toFixed(2)}</TableCell>
-                    <TableCell>{(row.totalSales - row.totalExpenses - row.totalPayroll).toFixed(2)}</TableCell>
+                    <TableCell>{row?.sales.toFixed(2)}</TableCell>
+                    <TableCell>{row?.managerExpenses.toFixed(2)}</TableCell>
+                    <TableCell>{row?.payroll.toFixed(2)}</TableCell>
+                    <TableCell>{row?.netIncome.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

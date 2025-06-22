@@ -131,15 +131,16 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/expense-management' icon={<Icon icon='tabler-receipt' />}>
               Manage Expense
             </MenuItem>
-            <MenuItem href='/workday-register' icon={<Icon icon='tabler-receipt' />}>
-              workday
+            <MenuItem href='/workday-register' icon={<Icon icon='tabler-calendar-check' />}>
+              Workday Register
             </MenuItem>
-            <MenuItem href='/payroll-report' icon={<Icon icon='tabler-receipt' />}>
-              Payroll
+            <MenuItem href='/payroll-report' icon={<Icon icon='tabler-report' />}>
+              Payroll Report
             </MenuItem>
-            <MenuItem href='/income-report' icon={<Icon icon='tabler-receipt' />}>
-              income
+            <MenuItem href='/income-report' icon={<Icon icon='tabler-chart-bar' />}>
+              Income Report
             </MenuItem>
+
             <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
               Daily Financial Entry
             </MenuItem>

@@ -1,9 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react'
+
+import React, { useState } from 'react'
 import {
   Card,
   CardHeader,
   CardContent,
+  CardActions,
+  Button,
   Table,
   TableBody,
   TableCell,
@@ -11,17 +14,18 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Grid,
+  Box,
+  Typography,
   TextField,
-  Button,
-  Typography
+  CircularProgress
 } from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import axios from 'axios'
-import decryptDataObject from '@/@menu/utils/decrypt'
+// import { format } from 'date-fns'
+import { useSnackbar } from 'notistack'
 import Cookies from 'js-cookie'
+import decryptDataObject from '@/@menu/utils/decrypt'
+import axios from 'axios'
 
 const PayrollReport = () => {
   const baseUrl = process.env.NEXT_PUBLIC_VITE_API_BASE_URL
@@ -29,23 +33,17 @@ const PayrollReport = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
-  // Get current user role
-  const currentUser = sessionToken ? JSON.parse(decryptDataObject(sessionToken)) : null
-  const role = currentUser?.role || ''
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
+  const [report, setReport] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const { enqueueSnackbar } = useSnackbar()
 
-  const [reportData, setReportData] = useState([])
-  const [dateRange, setDateRange] = useState({
-    start: null,
-    end: null
-  })
-  const [loading, setLoading] = useState(false)
-  const fetchReport = async () => {
-    setLoading(true)
-
-    if (!dateRange.start || !dateRange.end) return
-
+  const handleGenerateReport = async () => {
     try {
+      setIsLoading(true)
       const decrypted = JSON.parse(decryptDataObject(sessionToken))?.tokens
+      console.log('ok', decrypted)
 
       const setTokenInJson = JSON.stringify({
         postToken: backendPostToken,
@@ -55,9 +53,9 @@ const PayrollReport = () => {
       const response = await axios.post(
         `${baseUrl}/backend/report/payroll`, // URL
         {
-          startDate: dateRange.start.toISOString(),
-          endDate: dateRange.end.toISOString()
-        }, // BODY (goes here for POST)
+          startDate,
+          endDate
+        },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -66,80 +64,129 @@ const PayrollReport = () => {
           maxBodyLength: Infinity
         }
       )
+      console.log(response.data)
 
-      console.log('response', response)
-      setReportData(response.data.data.payrollData)
+      setReport(response.data.data)
+      enqueueSnackbar('Payroll report generated successfully', { variant: 'success' })
     } catch (error) {
-      console.error('Error fetching payroll:', error)
+      console.log(error)
+
+      enqueueSnackbar('Failed to generate payroll report', { variant: 'error' })
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
+  // const handleGenerateReport = async () => {
+  //   try {
+  //     setIsLoading(true)
+  //     const response = await generatePayrollReport({
+  //       startDate: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+  //       endDate: endDate ? format(endDate, 'yyyy-MM-dd') : null
+  //     })
+  //     setReport(response.data)
+  //     enqueueSnackbar('Payroll report generated successfully', { variant: 'success' })
+  //   } catch (error) {
+  //     enqueueSnackbar('Failed to generate payroll report', { variant: 'error' })
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
 
   return (
     <Card>
       <CardHeader title='Payroll Report' />
       <CardContent>
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label='Start Date'
-                value={dateRange.start}
-                onChange={date => setDateRange({ ...dateRange, start: date })}
-                renderInput={params => <TextField {...params} fullWidth />}
-              />
-            </LocalizationProvider>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label='End Date'
-                value={dateRange.end}
-                onChange={date => setDateRange({ ...dateRange, end: date })}
-                renderInput={params => <TextField {...params} fullWidth />}
-              />
-            </LocalizationProvider>
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant='contained' onClick={fetchReport} disabled={!dateRange.start || !dateRange.end || loading}>
-              Generate Report
-            </Button>
-          </Grid>
-        </Grid>
+        <Box display='flex' gap={3} mb={3}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              label='Start Date'
+              value={startDate}
+              onChange={setStartDate}
+              renderInput={params => <TextField {...params} fullWidth />}
+            />
+            <DatePicker
+              label='End Date'
+              value={endDate}
+              onChange={setEndDate}
+              renderInput={params => <TextField {...params} fullWidth />}
+            />
+          </LocalizationProvider>
+          <Button variant='contained' onClick={handleGenerateReport} disabled={isLoading} sx={{ minWidth: 200 }}>
+            {isLoading ? <CircularProgress size={24} /> : 'Generate Report'}
+          </Button>
+        </Box>
 
-        {reportData.length > 0 && (
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>User</TableCell>
-                  <TableCell>Work Days</TableCell>
-                  <TableCell>Salary (€)</TableCell>
-                  <TableCell>Commission (€)</TableCell>
-                  <TableCell>Expense (€)</TableCell>
-                  <TableCell>Total (€)</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {reportData.map(
-                  row =>
-                    row?.workDays > 0 && (
-                      <TableRow key={row?.userId}>
-                        <TableCell>{row?.userName}</TableCell>
-                        <TableCell>{row?.workDays}</TableCell>
-                        <TableCell>{(row?.salary * row?.workDays || 0).toFixed(2)}</TableCell>
-                        <TableCell>{row?.commission.toFixed(2)}</TableCell>
-                        <TableCell>{(row?.expense * 7).toFixed(2)}</TableCell>
-                        <TableCell>
-                          {(row?.salary * row?.workDays + row?.commission - row?.expense).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    )
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        {report && (
+          <>
+            <Typography variant='h6' gutterBottom>
+              Report Period: {report.startDate} to {report.endDate}
+            </Typography>
+
+            <TableContainer component={Paper} sx={{ mb: 3 }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Employee</TableCell>
+                    <TableCell align='right'>Work Days</TableCell>
+                    <TableCell align='right'>Salary (€)</TableCell>
+                    <TableCell align='right'>Commission (€)</TableCell>
+                    <TableCell align='right'>Expense (€)</TableCell>
+                    <TableCell align='right'>Net Pay (€)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {report.payrollData.map(row => (
+                    <TableRow key={row.userId}>
+                      <TableCell>{row.userName}</TableCell>
+                      <TableCell align='right'>{row.workDays}</TableCell>
+                      <TableCell align='right'>{row.salary.toFixed(2)}</TableCell>
+                      <TableCell align='right'>{row.commission.toFixed(2)}</TableCell>
+                      <TableCell align='right'>{row.expense.toFixed(2)}</TableCell>
+                      <TableCell align='right'>{row.netPay.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Box display='flex' justifyContent='flex-end'>
+              <TableContainer component={Paper} sx={{ maxWidth: 500 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell colSpan={2}>
+                        <Typography variant='h6' align='center'>
+                          Totals
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Total Salary</TableCell>
+                      <TableCell align='right'>€{report.totals.salary.toFixed(2)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Total Commission</TableCell>
+                      <TableCell align='right'>€{report.totals.commission.toFixed(2)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Total Expense</TableCell>
+                      <TableCell align='right'>€{report.totals.expense.toFixed(2)}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography fontWeight='bold'>Net Total</Typography>
+                      </TableCell>
+                      <TableCell align='right'>
+                        <Typography fontWeight='bold'>€{report.totals.net.toFixed(2)}</Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </>
         )}
       </CardContent>
     </Card>

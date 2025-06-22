@@ -239,7 +239,7 @@ const UserManagement = () => {
       designation: '',
       address: '',
       telephone: '',
-      delayCost: '',
+      // delayCost: '',
       imageObj: [],
       applyToAll: false,
       allProductPercentage: '',
@@ -264,14 +264,16 @@ const UserManagement = () => {
           designation: '',
           address: '',
           telephone: '',
-          delayCost: '',
+          // delayCost: '',
           imageObj: [],
           applyToAll: false,
           allProductPercentage: '',
           percentage: '',
           selectedProducts: [],
           store: '',
-          addedBy: ''
+          addedBy: '',
+          dailyExpense: '',
+          dailySalary: ''
         })
       }
     }
@@ -833,7 +835,7 @@ const UserManagement = () => {
               </Grid>
 
               {/* Daily Cost */}
-              <Grid item xs={12} sm={6}>
+              {/* <Grid item xs={12} sm={6}>
                 <Controller
                   name='delayCost'
                   control={control}
@@ -862,7 +864,7 @@ const UserManagement = () => {
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
 
               {/* Image Upload */}
               <Grid item xs={12} sm={6}>
@@ -1042,13 +1044,33 @@ const UserManagement = () => {
                     <Typography variant='body1'>{selectedUser.email}</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
                     <Typography variant='subtitle2' color='textSecondary'>
                       Daily Cost
                     </Typography>
                     <Typography variant='body1'>
                       {selectedUser.delayCost ? `$${selectedUser.delayCost}` : '-'}
+                    </Typography>
+                  </Box>
+                </Grid> */}
+                <Grid item xs={12} sm={6}>
+                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                    <Typography variant='subtitle2' color='textSecondary'>
+                      Daily Salary
+                    </Typography>
+                    <Typography variant='body1'>
+                      {selectedUser.dailySalary ? `$${selectedUser.dailySalary}` : '-'}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                    <Typography variant='subtitle2' color='textSecondary'>
+                      Daily Expense
+                    </Typography>
+                    <Typography variant='body1'>
+                      {selectedUser.dailyExpense ? `$${selectedUser.dailyExpense}` : '-'}
                     </Typography>
                   </Box>
                 </Grid>
@@ -1174,7 +1196,7 @@ const UserManagement = () => {
               {/* Daily salary */}
               <Grid item xs={12} sm={6}>
                 <Controller
-                  name='salary'
+                  name='dailySalary'
                   control={control}
                   rules={{
                     min: {
@@ -1227,7 +1249,7 @@ const UserManagement = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              {/* <Grid item xs={12} sm={6}>
                 <Controller
                   name='delayCost'
                   control={control}
@@ -1243,7 +1265,7 @@ const UserManagement = () => {
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} sm={6}>
                 <Controller
