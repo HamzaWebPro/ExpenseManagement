@@ -505,9 +505,13 @@ const UserManagement = () => {
         cell: info => info.getValue(),
         header: 'Email'
       }),
-      columnHelper.accessor('delayCost', {
+      columnHelper.accessor('dailySalary', {
         cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
-        header: 'Daily Cost'
+        header: 'Daily Salary'
+      }),
+      columnHelper.accessor('dailyExpense', {
+        cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
+        header: 'Daily Expense'
       }),
       columnHelper.accessor('_id', {
         cell: info => <Button onClick={() => handleOpenPercentageDialog(info.row.original)}>Manage Percentage</Button>,

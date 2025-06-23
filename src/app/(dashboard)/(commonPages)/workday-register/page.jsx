@@ -50,37 +50,8 @@ const WorkdayRegister = () => {
   const { enqueueSnackbar } = useSnackbar()
 
   useEffect(() => {
-    fetchUsers()
     fetchTodayWorkers()
   }, [])
-
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true)
-      const loginToken = await TokenManager.getLoginToken(sessionToken)
-      const setTokenInJson = JSON.stringify({
-        getToken: backendGetToken,
-        loginToken: loginToken || ''
-      })
-      const response = await axios.get(`${baseUrl}/backend/authentication/all-users-main`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
-        },
-        maxBodyLength: Infinity
-      })
-      console.log('Fetched users:', response?.data)
-
-      const usersArr = response?.data?.success?.data || []
-      setUsers(usersArr)
-    } catch (error) {
-      console.log(error)
-
-      enqueueSnackbar('Failed to load users', { variant: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const fetchTodayWorkers = async () => {
     try {
@@ -102,9 +73,11 @@ const WorkdayRegister = () => {
           maxBodyLength: Infinity
         }
       )
-      console.log(response.data.data.entry)
+      console.log(response.data)
 
-      setTodayWorkers(response.data?.data?.records.presentUsers)
+      setUsers(response.data?.todayNotWorking)
+
+      setTodayWorkers(response.data?.todayWorking)
       setEntries(response.data?.data?.entry)
     } catch (error) {
       enqueueSnackbar('Failed to load today workers', { variant: 'error' })
@@ -182,18 +155,16 @@ const WorkdayRegister = () => {
               </Box>
             )}
           >
-            {users.map(
-              user =>
-                !todayWorkers.find(worker => worker.userId._id === user._id) && (
-                  <MenuItem key={user._id} value={user._id}>
-                    <Checkbox checked={selectedUsers.indexOf(user._id) > -1} />
-                    <ListItemText
-                      primary={user.uname}
-                      secondary={`Salary: €${user.dailySalary?.toFixed(2)} | Expense: €${user.dailyExpense?.toFixed(2)}`}
-                    />
-                  </MenuItem>
-                )
-            )}
+            {users.length > 0 &&
+              users.map(user => (
+                <MenuItem key={user._id} value={user._id}>
+                  <Checkbox checked={selectedUsers.indexOf(user._id) > -1} />
+                  <ListItemText
+                    primary={user.uname}
+                    secondary={`Salary: €${user.dailySalary?.toFixed(2)} | Expense: €${user.dailyExpense?.toFixed(2)}`}
+                  />
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
 
@@ -220,17 +191,19 @@ const WorkdayRegister = () => {
               <TableBody>
                 {todayWorkers.length > 0 ? (
                   todayWorkers.map(worker => {
-                    const entry = entries.reduce((amount, e) => {
-                      return e.userId === worker.userId._id ? amount + e.amount : amount
-                    }, 0)
-                    console.log(entries, worker, entry)
+                    // const entry = entries.reduce((amount, e) => {
+                    //   return e.userId === worker.userId._id ? amount + e.amount : amount
+                    // }, 0)
+                    // console.log()
 
                     return (
                       <TableRow key={worker._id}>
-                        <TableCell>{worker.userId?.uname || 'Unknown'}</TableCell>
-                        <TableCell>€{worker.userId?.dailySalary?.toFixed(2)}</TableCell>
-                        <TableCell>€{worker.userId?.dailyExpense?.toFixed(2)}</TableCell>
-                        <TableCell>€{entry.toFixed(2)}</TableCell>
+                        <TableCell>{worker?.uname || 'Unknown'}</TableCell>
+                        <TableCell>€{worker?.dailySalary?.toFixed(2)}</TableCell>
+                        <TableCell>€{worker?.dailyExpense?.toFixed(2)}</TableCell>
+                        <TableCell>
+                          €{worker?.financialEntries.reduce((am, entry) => am + entry.amount, 0).toFixed(2)}
+                        </TableCell>
                         <TableCell>
                           <Typography color={worker.isWorking ? 'success.main' : 'error.main'}>
                             {worker.isWorking ? 'Working' : 'Absent'}

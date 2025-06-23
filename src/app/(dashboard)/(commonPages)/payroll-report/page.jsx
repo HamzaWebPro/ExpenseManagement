@@ -5,7 +5,6 @@ import {
   Card,
   CardHeader,
   CardContent,
-  CardActions,
   Button,
   Table,
   TableBody,
@@ -33,8 +32,7 @@ const PayrollReport = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const [date, setDate] = useState(null)
   const [report, setReport] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const { enqueueSnackbar } = useSnackbar()
@@ -53,8 +51,8 @@ const PayrollReport = () => {
       const response = await axios.post(
         `${baseUrl}/backend/report/payroll`, // URL
         {
-          startDate,
-          endDate
+          // startDate,
+          date
         },
         {
           headers: {
@@ -66,7 +64,7 @@ const PayrollReport = () => {
       )
       console.log(response.data)
 
-      setReport(response.data.data)
+      setReport(response.data?.payroll)
       enqueueSnackbar('Payroll report generated successfully', { variant: 'success' })
     } catch (error) {
       console.log(error)
@@ -99,15 +97,9 @@ const PayrollReport = () => {
         <Box display='flex' gap={3} mb={3}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
-              label='Start Date'
-              value={startDate}
-              onChange={setStartDate}
-              renderInput={params => <TextField {...params} fullWidth />}
-            />
-            <DatePicker
               label='End Date'
-              value={endDate}
-              onChange={setEndDate}
+              value={date}
+              onChange={setDate}
               renderInput={params => <TextField {...params} fullWidth />}
             />
           </LocalizationProvider>
@@ -135,10 +127,10 @@ const PayrollReport = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {report.payrollData.map(row => (
+                  {report.map(row => (
                     <TableRow key={row.userId}>
-                      <TableCell>{row.userName}</TableCell>
-                      <TableCell align='right'>{row.workDays}</TableCell>
+                      <TableCell>{row.uname}</TableCell>
+                      <TableCell align='right'>{row.workedDaysCount}</TableCell>
                       <TableCell align='right'>{row.salary.toFixed(2)}</TableCell>
                       <TableCell align='right'>{row.commission.toFixed(2)}</TableCell>
                       <TableCell align='right'>{row.expense.toFixed(2)}</TableCell>
@@ -148,7 +140,7 @@ const PayrollReport = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-
+            {/* 
             <Box display='flex' justifyContent='flex-end'>
               <TableContainer component={Paper} sx={{ maxWidth: 500 }}>
                 <Table>
@@ -185,7 +177,7 @@ const PayrollReport = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
-            </Box>
+            </Box> */}
           </>
         )}
       </CardContent>
