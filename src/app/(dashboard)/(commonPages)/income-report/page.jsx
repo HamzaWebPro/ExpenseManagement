@@ -115,12 +115,12 @@ const IncomeReport = () => {
                   <TableCell align='right'>€{reportData?.totalSales.toFixed(2)}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Total Payrool</TableCell>
+                  <TableCell>Total Payroll</TableCell>
                   <TableCell align='right'>€{reportData?.totalPayroll.toFixed(2)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Total Expense</TableCell>
-                  <TableCell align='right'>€{reportData?.managerExpenses.toFixed(2)}</TableCell>
+                  <TableCell align='right'>€{reportData?.totalManagerExpenses.toFixed(2)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>
