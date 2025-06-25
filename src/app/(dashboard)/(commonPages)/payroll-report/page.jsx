@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Card,
   CardHeader,
@@ -37,6 +37,10 @@ const PayrollReport = () => {
   const [isLoading, setIsLoading] = useState(false)
   const { enqueueSnackbar } = useSnackbar()
 
+  useEffect(() => {
+    handleGenerateReport()
+  }, [])
+
   const handleGenerateReport = async () => {
     try {
       setIsLoading(true)
@@ -64,7 +68,7 @@ const PayrollReport = () => {
       )
       console.log(response.data)
 
-      setReport(response.data?.payroll)
+      setReport(response.data)
       enqueueSnackbar('Payroll report generated successfully', { variant: 'success' })
     } catch (error) {
       console.log(error)
@@ -108,7 +112,7 @@ const PayrollReport = () => {
           </Button>
         </Box>
 
-        {report && (
+        {report?.payroll.length > 0 && (
           <>
             <Typography variant='h6' gutterBottom>
               Report Period: {report.startDate} to {report.endDate}
@@ -127,7 +131,7 @@ const PayrollReport = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {report.map(row => (
+                  {report.payroll.map(row => (
                     <TableRow key={row.userId}>
                       <TableCell>{row.uname}</TableCell>
                       <TableCell align='right'>{row.workedDaysCount}</TableCell>
@@ -140,7 +144,7 @@ const PayrollReport = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            {/* 
+
             <Box display='flex' justifyContent='flex-end'>
               <TableContainer component={Paper} sx={{ maxWidth: 500 }}>
                 <Table>
@@ -156,28 +160,28 @@ const PayrollReport = () => {
                   <TableBody>
                     <TableRow>
                       <TableCell>Total Salary</TableCell>
-                      <TableCell align='right'>€{report.totals.salary.toFixed(2)}</TableCell>
+                      <TableCell align='right'>€{report.totalSalary.toFixed(2)}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>Total Commission</TableCell>
-                      <TableCell align='right'>€{report.totals.commission.toFixed(2)}</TableCell>
+                      <TableCell align='right'>€{report.totalCommission.toFixed(2)}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>Total Expense</TableCell>
-                      <TableCell align='right'>€{report.totals.expense.toFixed(2)}</TableCell>
+                      <TableCell align='right'>€{report.totalExpense.toFixed(2)}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>
                         <Typography fontWeight='bold'>Net Total</Typography>
                       </TableCell>
                       <TableCell align='right'>
-                        <Typography fontWeight='bold'>€{report.totals.net.toFixed(2)}</Typography>
+                        <Typography fontWeight='bold'>€{report.totalNetPay.toFixed(2)}</Typography>
                       </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
-            </Box> */}
+            </Box>
           </>
         )}
       </CardContent>
