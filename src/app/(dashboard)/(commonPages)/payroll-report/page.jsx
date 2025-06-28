@@ -32,7 +32,9 @@ const PayrollReport = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
-  const [date, setDate] = useState(null)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
+  // const [date, setDate] = useState(null)
   const [report, setReport] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const { enqueueSnackbar } = useSnackbar()
@@ -53,10 +55,10 @@ const PayrollReport = () => {
       })
 
       const response = await axios.post(
-        `${baseUrl}/backend/report/payroll`, // URL
+        `${baseUrl}/backend/report/payroll`,
         {
-          // startDate,
-          date
+          startDate,
+          endDate
         },
         {
           headers: {
@@ -101,9 +103,15 @@ const PayrollReport = () => {
         <Box display='flex' gap={3} mb={3}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
+              label='Start Date'
+              value={startDate}
+              onChange={setStartDate}
+              renderInput={params => <TextField {...params} fullWidth />}
+            />
+            <DatePicker
               label='End Date'
-              value={date}
-              onChange={setDate}
+              value={endDate}
+              onChange={setEndDate}
               renderInput={params => <TextField {...params} fullWidth />}
             />
           </LocalizationProvider>

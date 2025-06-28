@@ -560,7 +560,7 @@ const AdminManagement = () => {
                         fullWidth
                         type='email'
                         label='Manager Email'
-                        placeholder='Enter m email'
+                        placeholder='Enter manager email'
                         error={!!errors.email}
                         helperText={errors.email?.message}
                       />

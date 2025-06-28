@@ -800,7 +800,7 @@ const DailyFinancialEntry = () => {
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>User</Typography>
                   <Typography variant='body1'>
-                    {users.find(u => u._id === selectedEntry.userId._id)?.uname || 'Unknown User'}
+                    {users.find(u => u._id === selectedEntry?.userId?._id)?.uname || 'Unknown User'}
                   </Typography>
                 </Grid>
                 {role === 'superAdmin' && (
@@ -842,6 +842,7 @@ const DailyFinancialEntry = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>Product</TableCell>
+                          <TableCell>Percentage</TableCell>
                           <TableCell>Quantity</TableCell>
                           <TableCell>Price</TableCell>
                           <TableCell>Subtotal</TableCell>
@@ -856,6 +857,7 @@ const DailyFinancialEntry = () => {
                           return (
                             <TableRow key={index}>
                               <TableCell>{product?.name || 'Unknown Product'}</TableCell>
+                              <TableCell>{item?.commissionPercentage || 0}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>${price.toFixed(2)}</TableCell>
                               <TableCell>${subtotal.toFixed(2)}</TableCell>

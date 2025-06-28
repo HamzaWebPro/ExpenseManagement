@@ -45,7 +45,8 @@ const IncomeReport = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
 
   const [reportData, setReportData] = useState(null)
-  const [date, setDate] = useState(null)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -67,7 +68,8 @@ const IncomeReport = () => {
       const response = await axios.post(
         `${baseUrl}/backend/report/income`,
         {
-          date
+          startDate,
+          endDate
         },
         {
           headers: {
@@ -124,9 +126,15 @@ const IncomeReport = () => {
           <Grid item xs={12} sm={6}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                label='Report Date'
-                value={date}
-                onChange={setDate}
+                label='Start Date'
+                value={startDate}
+                onChange={setStartDate}
+                renderInput={params => <TextField {...params} fullWidth />}
+              />
+              <DatePicker
+                label='End Date'
+                value={endDate}
+                onChange={setEndDate}
                 renderInput={params => <TextField {...params} fullWidth />}
               />
             </LocalizationProvider>
@@ -168,7 +176,10 @@ const IncomeReport = () => {
                 INCOME REPORT
               </Typography>
               <Typography variant='body2' sx={{ color: '#808069' }}>
-                {date && `For: ${new Date(date).toLocaleDateString()}`}
+                {reportData.fromDate && `For: ${new Date(reportData.fromDate).toLocaleDateString()}`}
+              </Typography>
+              <Typography variant='body2' sx={{ color: '#808069' }}>
+                {reportData.toDate && `For: ${new Date(reportData.toDate).toLocaleDateString()}`}
               </Typography>
             </Box>
 
