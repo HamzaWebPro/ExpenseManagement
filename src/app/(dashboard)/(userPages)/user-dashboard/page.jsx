@@ -196,7 +196,7 @@ const UserDashboard = () => {
 
                               <Typography variant='subtitle1'>{product.name}</Typography>
                               <Typography variant='body1' color='primary' className='mt-1'>
-                                ${product.price.toFixed(2)}
+                                € {product.price.toFixed(2)}
                               </Typography>
                               <Chip
                                 label={product.status}

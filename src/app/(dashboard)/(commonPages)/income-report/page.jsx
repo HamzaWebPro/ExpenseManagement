@@ -230,6 +230,40 @@ const IncomeReport = () => {
                   €{reportData?.netIncome.toFixed(2)}
                 </Typography>
               </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#f0f0f0',
+                  p: 2,
+                  borderRadius: 1,
+                  mb: 2
+                }}
+              >
+                <Typography variant='h6' sx={{ color: '#333' }}>
+                  Total Card Payment:
+                </Typography>
+                <Typography variant='h6' fontWeight='bold' sx={{ color: '#333' }}>
+                  €{reportData?.totalCard.toFixed(2)}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#f0f0f0',
+                  p: 2,
+                  borderRadius: 1,
+                  mb: 2
+                }}
+              >
+                <Typography variant='h6' sx={{ color: '#333' }}>
+                  Total Cash Payment:
+                </Typography>
+                <Typography variant='h6' fontWeight='bold' sx={{ color: '#333' }}>
+                  €{reportData?.totalCash.toFixed(2)}
+                </Typography>
+              </Box>
               <Typography variant='body2' sx={{ color: '#333', mt: 3 }}>
                 Thank you for your business!
               </Typography>

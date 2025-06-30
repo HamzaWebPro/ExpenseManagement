@@ -187,7 +187,7 @@ const ManagerDashboard = () => {
     // },
     {
       title: 'Total Expenses',
-      value: `$${dashboardData.totalExpenses.toFixed(2)}`,
+      value: `€ ${dashboardData.totalExpenses.toFixed(2)}`,
       icon: 'tabler-currency-dollar',
       color: 'warning',
       action: () => router.push('/expense-management')
@@ -304,7 +304,7 @@ const ManagerDashboard = () => {
                             <div>
                               <Typography variant='subtitle1'>{product.name}</Typography>
                               <Typography variant='body2' color='text.secondary'>
-                                ${product.price.toFixed(2)}
+                                € {product.price.toFixed(2)}
                               </Typography>
                             </div>
                           </div>
@@ -330,7 +330,7 @@ const ManagerDashboard = () => {
           <Card className='mt-6'>
             <CardHeader
               title='Recent Expenses'
-              subheader={`Total: $${dashboardData.totalExpenses.toFixed(2)}`}
+              subheader={`Total: € ${dashboardData.totalExpenses.toFixed(2)}`}
               action={
                 <Button size='small' variant='contained' onClick={() => router.push('/expense-management')}>
                   View All
@@ -356,7 +356,7 @@ const ManagerDashboard = () => {
                         </div>
                       </div>
                       <div className='text-right'>
-                        <Typography variant='subtitle1'>${expense.amount.toFixed(2)}</Typography>
+                        <Typography variant='subtitle1'>€ {expense.amount.toFixed(2)}</Typography>
                         <Typography variant='caption' color='text.secondary'>
                           {formatDate(expense.date)}
                         </Typography>

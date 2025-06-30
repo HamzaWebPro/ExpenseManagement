@@ -376,7 +376,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                       <div className='text-right'>
-                        <Typography variant='subtitle1'>${expense.amount.toFixed(2)}</Typography>
+                        <Typography variant='subtitle1'>€{expense.amount.toFixed(2)}</Typography>
                         <Typography variant='caption' color='text.secondary'>
                           {formatDate(expense.date)}
                         </Typography>

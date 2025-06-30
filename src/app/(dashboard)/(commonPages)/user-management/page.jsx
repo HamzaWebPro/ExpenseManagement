@@ -506,11 +506,11 @@ const UserManagement = () => {
         header: 'Email'
       }),
       columnHelper.accessor('dailySalary', {
-        cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
+        cell: info => (info.getValue() ? `€ ${info.getValue()}` : '-'),
         header: 'Daily Salary'
       }),
       columnHelper.accessor('dailyExpense', {
-        cell: info => (info.getValue() ? `$${info.getValue()}` : '-'),
+        cell: info => (info.getValue() ? `€ ${info.getValue()}` : '-'),
         header: 'Daily Expense'
       }),
       columnHelper.accessor('_id', {
@@ -1064,7 +1064,7 @@ const UserManagement = () => {
                       Daily Salary
                     </Typography>
                     <Typography variant='body1'>
-                      {selectedUser.dailySalary ? `$${selectedUser.dailySalary}` : '-'}
+                      {selectedUser.dailySalary ? `€ ${selectedUser.dailySalary}` : '-'}
                     </Typography>
                   </Box>
                 </Grid>
@@ -1074,7 +1074,7 @@ const UserManagement = () => {
                       Daily Expense
                     </Typography>
                     <Typography variant='body1'>
-                      {selectedUser.dailyExpense ? `$${selectedUser.dailyExpense}` : '-'}
+                      {selectedUser.dailyExpense ? `€ ${selectedUser.dailyExpense}` : '-'}
                     </Typography>
                   </Box>
                 </Grid>

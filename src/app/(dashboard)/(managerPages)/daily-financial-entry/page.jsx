@@ -545,7 +545,7 @@ const DailyFinancialEntry = () => {
                                     <MenuItem value=''>Select a product</MenuItem>
                                     {products.map(prod => (
                                       <MenuItem key={prod._id} value={prod._id}>
-                                        {prod.name} (${prod.price.toFixed(2)})
+                                        {prod.name} (€{prod.price.toFixed(2)})
                                       </MenuItem>
                                     ))}
                                   </Select>
@@ -562,8 +562,8 @@ const DailyFinancialEntry = () => {
                                   fullWidth
                                 />
                               </TableCell>
-                              <TableCell>{selectedProduct ? `$${selectedProduct.price.toFixed(2)}` : '-'}</TableCell>
-                              <TableCell>${subtotal.toFixed(2)}</TableCell>
+                              <TableCell>{selectedProduct ? `€${selectedProduct.price.toFixed(2)}` : '-'}</TableCell>
+                              <TableCell>€{subtotal.toFixed(2)}</TableCell>
                               <TableCell>
                                 <IconButton
                                   onClick={() => removeProductRow(index)}
@@ -593,7 +593,7 @@ const DailyFinancialEntry = () => {
                 {/* Total Amount */}
                 <Grid item xs={12}>
                   <Typography variant='h6' align='right' gutterBottom>
-                    Total Amount: ${calculateTotal().toFixed(2)}
+                    Total Amount: €{calculateTotal().toFixed(2)}
                   </Typography>
                 </Grid>
 
@@ -740,7 +740,7 @@ const DailyFinancialEntry = () => {
                               year: 'numeric'
                             })}
                           </TableCell>
-                          <TableCell>${entry.amount.toFixed(2)}</TableCell>
+                          <TableCell>€{entry.amount.toFixed(2)}</TableCell>
                           <TableCell>{entry.paymentMethod}</TableCell>
                           <TableCell>
                             <IconButton onClick={() => handleViewEntry(entry)}>
@@ -766,7 +766,7 @@ const DailyFinancialEntry = () => {
                       month: '2-digit',
                       year: 'numeric'
                     }),
-                    Amount: `$${entry.amount.toFixed(2)}`,
+                    Amount: `€${entry.amount.toFixed(2)}`,
                     PaymentMethod: entry.paymentMethod,
                     Description: entry.description || 'N/A'
                   }))}
@@ -799,9 +799,7 @@ const DailyFinancialEntry = () => {
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>User</Typography>
-                  <Typography variant='body1'>
-                    {users.find(u => u._id === selectedEntry?.userId?._id)?.uname || 'Unknown User'}
-                  </Typography>
+                  <Typography variant='body1'>{selectedEntry.userId?.uname || 'Unknown User'}</Typography>
                 </Grid>
                 {role === 'superAdmin' && (
                   <Grid item xs={12} md={6}>
@@ -823,7 +821,7 @@ const DailyFinancialEntry = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>Amount</Typography>
-                  <Typography variant='body1'>${selectedEntry.amount.toFixed(2)}</Typography>
+                  <Typography variant='body1'>€{selectedEntry.amount.toFixed(2)}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography variant='subtitle1'>Payment Method</Typography>
@@ -859,8 +857,8 @@ const DailyFinancialEntry = () => {
                               <TableCell>{product?.name || 'Unknown Product'}</TableCell>
                               <TableCell>{item?.commissionPercentage || 0} %</TableCell>
                               <TableCell>{item.quantity}</TableCell>
-                              <TableCell>${price.toFixed(2)}</TableCell>
-                              <TableCell>${subtotal.toFixed(2)}</TableCell>
+                              <TableCell>€{price.toFixed(2)}</TableCell>
+                              <TableCell>€{subtotal.toFixed(2)}</TableCell>
                             </TableRow>
                           )
                         })}

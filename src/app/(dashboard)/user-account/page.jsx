@@ -575,7 +575,7 @@ const MyProfile = () => {
                   <strong>Added By:</strong> {user.addedBy?.uname || 'System'}
                 </Typography>
                 <Typography variant='body2'>
-                  <strong>Account Balance:</strong> ${user.amount.toFixed(2)}
+                  <strong>Account Balance:</strong> € {user.amount.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>

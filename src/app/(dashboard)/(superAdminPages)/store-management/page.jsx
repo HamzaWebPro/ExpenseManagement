@@ -813,7 +813,7 @@ const AdminManagement = () => {
                       <Typography variant='subtitle2' color='textSecondary'>
                         Franchise Amount
                       </Typography>
-                      <Typography variant='body1'>${selectedAdmin?.amount}</Typography>
+                      <Typography variant='body1'>€ {selectedAdmin?.amount}</Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6}>

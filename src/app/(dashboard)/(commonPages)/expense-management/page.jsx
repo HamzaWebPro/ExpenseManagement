@@ -381,7 +381,7 @@ const ExpenseManagement = () => {
         header: 'Expense Title'
       }),
       columnHelper.accessor('amount', {
-        cell: info => `$${info.getValue()}`,
+        cell: info => `€ ${info.getValue()}`,
         header: 'Amount'
       }),
       columnHelper.accessor('date', {
@@ -611,7 +611,7 @@ const ExpenseManagement = () => {
                         label='Amount'
                         placeholder='Enter amount'
                         InputProps={{
-                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                          startAdornment: <InputAdornment position='start'>€</InputAdornment>
                         }}
                         error={!!errors.amount}
                         helperText={errors.amount?.message}
@@ -788,7 +788,7 @@ const ExpenseManagement = () => {
                       <Typography variant='subtitle2' color='textSecondary'>
                         Amount
                       </Typography>
-                      <Typography variant='body1'>${selectedExpense.amount}</Typography>
+                      <Typography variant='body1'>€{selectedExpense.amount}</Typography>
                     </Box>
                   </Grid>
                   {role === 'superAdmin' && (
@@ -872,7 +872,7 @@ const ExpenseManagement = () => {
                         label='Amount'
                         placeholder='Enter amount'
                         InputProps={{
-                          startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                          startAdornment: <InputAdornment position='start'>€</InputAdornment>
                         }}
                         error={!!errors.amount}
                         helperText={errors.amount?.message}

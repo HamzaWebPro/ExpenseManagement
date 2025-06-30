@@ -137,7 +137,7 @@ const AllProducts = () => {
         header: 'Product Name'
       }),
       columnHelper.accessor('price', {
-        cell: info => `$${info.getValue()}`,
+        cell: info => `€${info.getValue()}`,
         header: 'Price'
       }),
       columnHelper.accessor('store.uname', {
@@ -209,7 +209,7 @@ const AllProducts = () => {
             <CSVLink
               data={data.map(product => ({
                 'Product Name': product.name,
-                Price: `$${product.price}`,
+                Price: `€${product.price}`,
                 'Shop Name': product.store?.uname || 'N/A',
                 'Added By': product.addedBy?.uname || 'N/A',
                 'Created Date': formatDate(product.createdAt),
@@ -303,7 +303,7 @@ const AllProducts = () => {
                     <Typography variant='subtitle2' color='textSecondary'>
                       Price
                     </Typography>
-                    <Typography variant='body1'>${selectedProduct.price}</Typography>
+                    <Typography variant='body1'>€{selectedProduct.price}</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
