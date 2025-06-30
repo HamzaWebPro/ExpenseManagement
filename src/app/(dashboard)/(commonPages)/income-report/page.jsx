@@ -79,6 +79,8 @@ const IncomeReport = () => {
           maxBodyLength: Infinity
         }
       )
+      console.log(response)
+
       setReportData(response?.data)
     } catch (error) {
       console.error('Error fetching income report:', error)
@@ -176,10 +178,10 @@ const IncomeReport = () => {
                 INCOME REPORT
               </Typography>
               <Typography variant='body2' sx={{ color: '#808069' }}>
-                {reportData.fromDate && `For: ${new Date(reportData.fromDate).toLocaleDateString()}`}
+                {reportData.fromDate && `From: ${new Date(reportData.fromDate).toLocaleDateString()}`}
               </Typography>
               <Typography variant='body2' sx={{ color: '#808069' }}>
-                {reportData.toDate && `For: ${new Date(reportData.toDate).toLocaleDateString()}`}
+                {reportData.toDate && `To: ${new Date(reportData.toDate).toLocaleDateString()}`}
               </Typography>
             </Box>
 

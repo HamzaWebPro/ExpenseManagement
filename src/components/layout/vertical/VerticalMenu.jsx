@@ -88,8 +88,8 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>
               Daily Financial Entry
             </MenuItem>
-            <MenuItem href='/total-report' icon={<Icon icon='tabler-report-money' />}>
-              Total-Report
+            <MenuItem href='/total-report' icon={<Icon icon='tabler-chart-bar' />}>
+              Income Reports
             </MenuItem>
           </MenuSection>
         )}
@@ -118,6 +118,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/all-products' icon={<Icon icon='tabler-package' />}>
               All Products
             </MenuItem>
+            <MenuItem href='/income-report' icon={<Icon icon='tabler-chart-bar' />}>
+              Income Report
+            </MenuItem>
           </MenuSection>
         )}
         {role === 'manager' && (
@@ -139,9 +142,6 @@ const VerticalMenu = ({ scrollMenu }) => {
             </MenuItem>
             <MenuItem href='/payroll-report' icon={<Icon icon='tabler-report' />}>
               Payroll Report
-            </MenuItem>
-            <MenuItem href='/income-report' icon={<Icon icon='tabler-chart-bar' />}>
-              Income Report
             </MenuItem>
 
             <MenuItem href='/daily-financial-entry' icon={<Icon icon='tabler-report-money' />}>

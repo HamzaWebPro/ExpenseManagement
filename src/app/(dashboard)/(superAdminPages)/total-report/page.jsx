@@ -167,19 +167,19 @@ const SuperAdminIncomeReports = () => {
       />
       <CardContent>
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={4}>
+          {/* <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <InputLabel>Store</InputLabel>
               <Select value={selectedStore} onChange={e => setSelectedStore(e.target.value)} label='Store'>
                 <MenuItem value=''>All Stores</MenuItem>
                 {stores.map(store => (
                   <MenuItem key={store._id} value={store._id}>
-                    {store.name}
+                    {store.uname}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={3}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
@@ -214,7 +214,7 @@ const SuperAdminIncomeReports = () => {
         </Grid>
 
         {summary && (
-          <Box sx={{ mb: 4, p: 3, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
+          <Box sx={{ mb: 4, p: 3, backgroundColor: '#808069', borderRadius: 2 }}>
             <Typography variant='h6' gutterBottom>
               Summary
             </Typography>
@@ -264,7 +264,7 @@ const SuperAdminIncomeReports = () => {
             <TableContainer component={Paper} sx={{ mb: 4 }}>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableRow sx={{ backgroundColor: 'primary' }}>
                     <TableCell>Store</TableCell>
                     <TableCell align='right'>Period</TableCell>
                     <TableCell align='right'>Sales</TableCell>

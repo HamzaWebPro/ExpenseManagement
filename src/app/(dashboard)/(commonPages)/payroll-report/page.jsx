@@ -123,7 +123,7 @@ const PayrollReport = () => {
         {report?.payroll.length > 0 && (
           <>
             <Typography variant='h6' gutterBottom>
-              Report Period: {report.startDate} to {report.endDate}
+              Report Period: {report.fromDate} to {report.toDate}
             </Typography>
 
             <TableContainer component={Paper} sx={{ mb: 3 }}>

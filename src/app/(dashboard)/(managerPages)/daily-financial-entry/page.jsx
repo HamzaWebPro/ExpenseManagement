@@ -857,7 +857,7 @@ const DailyFinancialEntry = () => {
                           return (
                             <TableRow key={index}>
                               <TableCell>{product?.name || 'Unknown Product'}</TableCell>
-                              <TableCell>{item?.commissionPercentage || 0}</TableCell>
+                              <TableCell>{item?.commissionPercentage || 0} %</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>${price.toFixed(2)}</TableCell>
                               <TableCell>${subtotal.toFixed(2)}</TableCell>
