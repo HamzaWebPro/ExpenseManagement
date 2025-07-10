@@ -528,6 +528,15 @@ const UserManagement = () => {
         },
         header: 'Created Date'
       }),
+      columnHelper.accessor('addedBy.uname', {
+        cell: info => (
+          <div className='flex items-center gap-2'>
+            {info.row.original?.isSuperAdminAdded ? <p>Super Admin</p> : <p>{info.getValue()}</p>}
+          </div>
+        ),
+        header: 'Added By',
+        size: 120
+      }),
       columnHelper.accessor('_id', {
         cell: info => (
           <div className='flex items-center gap-2'>
