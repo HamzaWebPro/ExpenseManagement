@@ -52,6 +52,7 @@ const DailyFinancialEntry = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
+
   // Get current user role
   const currentUser = sessionToken ? JSON.parse(decryptDataObject(sessionToken)) : null
   const role = currentUser?.role || ''
@@ -79,6 +80,7 @@ const DailyFinancialEntry = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
+
   // Filter states for super admin
   const [dateRange, setDateRange] = useState({
     startDate: null,
@@ -88,6 +90,12 @@ const DailyFinancialEntry = () => {
   const [selectedStore, setSelectedStore] = useState('')
   const [managers, setManagers] = useState([])
   const [selectedManager, setSelectedManager] = useState('')
+
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [entryToDelete, setEntryToDelete] = useState(null)
+  const [editFormData, setEditFormData] = useState(null)
 
   const fetchUser = async () => {
     try {
@@ -185,7 +193,7 @@ const DailyFinancialEntry = () => {
         maxBodyLength: Infinity
       })
 
-      console.log('entry', response)
+      // console.log('entry', response)
 
       const entriesArr = response?.data?.data || []
       setEntries(entriesArr)
@@ -266,8 +274,8 @@ const DailyFinancialEntry = () => {
 
     setFilteredEntries(filtered)
 
-    console.log('selectedManager', selectedManager)
-    console.log('filtered', filtered)
+    // console.log('selectedManager', selectedManager)
+    // console.log('filtered', filtered)
     setPage(0) // Reset to first page when filters change
   }
 
@@ -418,7 +426,7 @@ const DailyFinancialEntry = () => {
 
   // Handle page change
   const handleChangePage = (event, newPage) => {
-    console.log(newPage)
+    // console.log(newPage)
 
     setPage(newPage)
   }
@@ -427,6 +435,119 @@ const DailyFinancialEntry = () => {
   const handleChangeRowsPerPage = event => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
+  }
+
+  const handleEditEntry = (entry) => {
+    setEditFormData({
+      ...entry,
+      userId: entry.userId?._id || entry.userId,
+      products: entry.products.map(item => ({
+        productId: item.productId?._id || item.productId,
+        quantity: item.quantity,
+        commissionPercentage: item.commissionPercentage || 0
+      }))
+    })
+    setEditDialogOpen(true)
+  }
+
+  const handleDeleteClick = (entry) => {
+    setEntryToDelete(entry)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteEntry = async () => {
+    try {
+      setLoading(prev => ({ ...prev, submitting: true }))
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: token
+      })
+
+      const response = await axios.post(`${baseUrl}/backend/financial/delete`,{
+        id: entryToDelete._id
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        }
+      })
+
+      console.log(response);
+      
+
+      if (response.data.success) {
+        toast.success('Entry deleted successfully!')
+        fetchFinancialEntries()
+        setDeleteDialogOpen(false)
+      } else {
+        toast.error(response.data.message || 'Failed to delete entry')
+      }
+    } catch (error) {
+      console.error('Deletion error:', error)
+      toast.error(error.response?.data?.message || 'Failed to delete entry. Please try again.')
+    } finally {
+      setLoading(prev => ({ ...prev, submitting: false }))
+    }
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      setLoading(prev => ({ ...prev, submitting: true }))
+      let token = decryptDataObject(sessionToken)
+      token = JSON.parse(token)
+      token = token?.tokens
+
+      const submissionData = {
+        userId: editFormData.userId,
+        amount: editFormData.amount,
+        paymentMethod: editFormData.paymentMethod,
+        description: editFormData.description,
+        products: editFormData.products.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          commissionPercentage: item.commissionPercentage || 0
+        }))
+      }
+
+      const setTokenInJson = JSON.stringify({
+        postToken: backendPostToken,
+        loginToken: token
+      })
+
+      const response = await axios.post(
+        `${baseUrl}/backend/financial/update`,
+        {
+          id: editFormData._id,
+          ...submissionData
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          }
+        }
+      )
+      console.log(response);
+      
+
+      if (response.data.success) {
+        toast.success('Entry updated successfully!')
+        setEditDialogOpen(false)
+        fetchFinancialEntries()
+      } else {
+        toast.error(response.data.message || 'Failed to update entry')
+      }
+    } catch (error) {
+      console.error('Update error:', error)
+      toast.error(error.response?.data?.message || 'Failed to update entry. Please try again.')
+    } finally {
+      setLoading(prev => ({ ...prev, submitting: false }))
+    }
   }
 
   if (loading.users || loading.products) {
@@ -564,6 +685,7 @@ const DailyFinancialEntry = () => {
                               </TableCell>
                               <TableCell>{selectedProduct ? `€${selectedProduct.price.toFixed(2)}` : '-'}</TableCell>
                               <TableCell>€{subtotal.toFixed(2)}</TableCell>
+                        
                               <TableCell>
                                 <IconButton
                                   onClick={() => removeProductRow(index)}
@@ -678,7 +800,6 @@ const DailyFinancialEntry = () => {
                           {manager.uname}
                         </MenuItem>
                       ))}
-                    {managers.map(manager => console.log('manager', manager))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -719,9 +840,9 @@ const DailyFinancialEntry = () => {
                   </TableHead>
                   <TableBody>
                     {filteredEntries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(entry => {
-                      console.log('user', entry)
+                      // console.log('user', entry)
                       const user = users.find(u => u._id === entry._id)
-                      console.log('user', entry)
+                      // console.log('user', entry)
 
                       return (
                         <TableRow key={entry._id}>
@@ -743,10 +864,20 @@ const DailyFinancialEntry = () => {
                           <TableCell>€{entry.amount.toFixed(2)}</TableCell>
                           <TableCell>{entry.paymentMethod}</TableCell>
                           <TableCell>
-                            <IconButton onClick={() => handleViewEntry(entry)}>
-                              <IconEye />
-                            </IconButton>
-                          </TableCell>
+                                <IconButton onClick={() => handleViewEntry(entry)}>
+                                  <IconEye />
+                                </IconButton>
+                                {role === 'superAdmin' && (
+                                  <>
+                                    <IconButton onClick={() => handleEditEntry(entry)}>
+                                      <IconPencil />
+                                    </IconButton>
+                                    <IconButton onClick={() => handleDeleteClick(entry)}>
+                                      <IconTrash />
+                                    </IconButton>
+                                  </>
+                                )}
+                              </TableCell>
                         </TableRow>
                       )
                     })}
@@ -872,6 +1003,207 @@ const DailyFinancialEntry = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Entry</DialogTitle>
+        <DialogContent>
+          {editFormData && (
+            <Box component="form" onSubmit={handleEditSubmit} p={2}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>User</InputLabel>
+                    <Select
+                      name="userId"
+                      value={editFormData.userId}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, userId: e.target.value }))}
+                      required
+                    >
+                      {users.map(user => (
+                        <MenuItem key={user._id} value={user._id}>
+                          {user.uname}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl component="fieldset">
+                    <Typography component="legend">Payment Method</Typography>
+                    <RadioGroup
+                      row
+                      name="paymentMethod"
+                      value={editFormData.paymentMethod}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                    >
+                      <FormControlLabel value="cash" control={<Radio />} label="Cash" />
+                      <FormControlLabel value="card" control={<Radio />} label="Card" />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Description"
+                    name="description"
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                    multiline
+                    rows={3}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom>
+                    Products
+                  </Typography>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Product</TableCell>
+                          <TableCell>Percentage</TableCell>
+                          <TableCell>Quantity</TableCell>
+                          <TableCell>Price</TableCell>
+                          <TableCell>Subtotal</TableCell>
+                          <TableCell>Action</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {editFormData.products.map((product, index) => {
+                          const selectedProduct = products.find(p => p._id === product.productId)
+                          const subtotal = selectedProduct ? selectedProduct.price * product.quantity : 0
+
+                          return (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <FormControl fullWidth>
+                                  <Select
+                                    name="productId"
+                                    value={product.productId}
+                                    onChange={(e) => {
+                                      const updatedProducts = [...editFormData.products]
+                                      updatedProducts[index].productId = e.target.value
+                                      setEditFormData(prev => ({ ...prev, products: updatedProducts }))
+                                    }}
+                                    required
+                                  >
+                                    <MenuItem value="">Select a product</MenuItem>
+                                    {products.map(prod => (
+                                      <MenuItem key={prod._id} value={prod._id}>
+                                        {prod.name} (€{prod.price.toFixed(2)})
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              </TableCell>
+                              <TableCell>
+                                <TextField
+                                  type="number"
+                                  name="commissionPercentage"
+                                  value={product.commissionPercentage || 0}
+                                  onChange={(e) => {
+                                    const updatedProducts = [...editFormData.products]
+                                    updatedProducts[index].commissionPercentage = e.target.value
+                                    setEditFormData(prev => ({ ...prev, products: updatedProducts }))
+                                  }}
+                                  inputProps={{ min: 0, max: 100, step: 1 }}
+                                  fullWidth
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TextField
+                                  type="number"
+                                  name="quantity"
+                                  value={product.quantity}
+                                  onChange={(e) => {
+                                    const updatedProducts = [...editFormData.products]
+                                    updatedProducts[index].quantity = e.target.value
+                                    setEditFormData(prev => ({ ...prev, products: updatedProducts }))
+                                  }}
+                                  inputProps={{ min: 1, step: 1 }}
+                                  required
+                                  fullWidth
+                                />
+                              </TableCell>
+                              <TableCell>{selectedProduct ? `€${selectedProduct.price.toFixed(2)}` : '-'}</TableCell>
+                              <TableCell>€{subtotal.toFixed(2)}</TableCell>
+                              <TableCell>
+                                <IconButton
+                                  onClick={() => {
+                                    const updatedProducts = [...editFormData.products]
+                                    updatedProducts.splice(index, 1)
+                                    setEditFormData(prev => ({ ...prev, products: updatedProducts }))
+                                  }}
+                                  disabled={editFormData.products.length <= 1}
+                                >
+                                  <IconTrash />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <Button
+                    startIcon={<IconPlus />}
+                    onClick={() => {
+                      setEditFormData(prev => ({
+                        ...prev,
+                        products: [...prev.products, { productId: '', quantity: 1, commissionPercentage: 0 }]
+                      }))
+                    }}
+                    sx={{ mt: 2 }}
+                    variant="outlined"
+                  >
+                    Add Product
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="h6" align="right" gutterBottom>
+                    Total Amount: €{editFormData.amount.toFixed(2)}
+                  </Typography>
+                </Grid>
+              </Grid>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={loading.submitting}
+                >
+                  {loading.submitting ? <CircularProgress size={24} /> : 'Update Entry'}
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this entry?</Typography>
+          {entryToDelete && (
+            <Box mt={2}>
+              <Typography><strong>User:</strong> {entryToDelete.userId?.uname || 'Unknown User'}</Typography>
+              <Typography><strong>Amount:</strong> €{entryToDelete.amount.toFixed(2)}</Typography>
+              <Typography><strong>Date:</strong> {new Date(entryToDelete.createdAt).toLocaleDateString()}</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleDeleteEntry}
+            color="error"
+            disabled={loading.submitting}
+          >
+            {loading.submitting ? <CircularProgress size={24} /> : 'Delete'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
