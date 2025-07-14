@@ -59,6 +59,7 @@ const SuperAdminIncomeReports = () => {
   const [reports, setReports] = useState([])
   const [stores, setStores] = useState([])
   const [summary, setSummary] = useState(null)
+  const [totalSummary, setTotalSummary] = useState(null)
   const [selectedStore, setSelectedStore] = useState('')
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
@@ -96,7 +97,22 @@ const SuperAdminIncomeReports = () => {
           maxBodyLength: Infinity
         }
       )
-      console.log(response)
+      const response2 = await axios.post(
+        `${baseUrl}/backend/report/superadmin/income-report-totals`,
+        {
+          storeId: selectedStore || undefined,
+          startDate,
+          endDate
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          },
+          maxBodyLength: Infinity
+        }
+      )
+      setTotalSummary(response2?.data?.summary)
 
       setReports(response?.data?.reports || [])
       setStores(response?.data?.stores || [])
@@ -210,6 +226,11 @@ const SuperAdminIncomeReports = () => {
             >
               {loading ? 'Loading...' : 'Filter'}
             </Button>
+          </Grid>
+          <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant='h6' gutterBottom>
+              Total Net Income : {totalSummary?.totalNetIncome}
+            </Typography>
           </Grid>
         </Grid>
 
