@@ -242,7 +242,7 @@ const SuperAdminIncomeReports = () => {
           </Grid>
           <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant='h4' gutterBottom>
-            Total: {formatCurrency(totalSummary.totalNetIncome)}
+            Total: {formatCurrency(totalSummary?.totalNetIncome || 0)}
           </Typography>
           </Grid>
         </Grid>
@@ -317,26 +317,26 @@ const SuperAdminIncomeReports = () => {
                       sx={{ cursor: 'pointer' }}
                     >
                       <TableCell>
-                        <Typography fontWeight='bold'>{report.store?.uname || 'N/A'}</Typography>
+                        <Typography fontWeight='bold'>{report?.store?.uname || 'N/A'}</Typography>
                         <Typography variant='body2' color='textSecondary'>
-                          {report.store?.address || ''}
+                          {report?.store?.address || ''}
                         </Typography>
                       </TableCell>
                       <TableCell align='right'>
-                        {formatDate(report.fromDate)} - {formatDate(report.toDate)}
+                        {formatDate(report?.fromDate)} - {formatDate(report?.toDate)}
                       </TableCell>
-                      <TableCell align='right'>{formatCurrency(report.totalSales)}</TableCell>
-                      <TableCell align='right'>{formatCurrency(report.totalManagerExpenses)}</TableCell>
-                      <TableCell align='right'>{formatCurrency(report.totalPayroll)}</TableCell>
+                      <TableCell align='right'>{formatCurrency(report?.totalSales)}</TableCell>
+                      <TableCell align='right'>{formatCurrency(report?.totalManagerExpenses)}</TableCell>
+                      <TableCell align='right'>{formatCurrency(report?.totalPayroll)}</TableCell>
                       <TableCell align='right'>
-                        <Typography fontWeight='bold' color={report.netIncome >= 0 ? 'success.main' : 'error.main'}>
-                          {formatCurrency(report.netIncome)}
+                        <Typography fontWeight='bold' color={report?.netIncome >= 0 ? 'success.main' : 'error.main'}>
+                          {formatCurrency(report?.netIncome)}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={report.netIncome >= 0 ? 'Profitable' : 'Loss'}
-                          color={report.netIncome >= 0 ? 'success' : 'error'}
+                          label={report?.netIncome >= 0 ? 'Profitable' : 'Loss'}
+                          color={report?.netIncome >= 0 ? 'success' : 'error'}
                           size='small'
                         />
                       </TableCell>
