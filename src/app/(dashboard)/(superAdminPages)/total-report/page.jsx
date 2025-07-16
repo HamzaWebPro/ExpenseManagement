@@ -24,7 +24,11 @@ import {
   FormControl,
   InputLabel,
   CircularProgress,
-  Chip
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -32,6 +36,9 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import axios from 'axios'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import Cookies from 'js-cookie'
+import Close from '@/@menu/svg/Close'
+// import CloseIcon from '@mui/icons-material/Close'
+
 // SVG Icon Components
 const PrintIcon = () => (
   <svg width='24' height='24' viewBox='0 0 24 24' fill='currentColor'>
@@ -65,6 +72,8 @@ const SuperAdminIncomeReports = () => {
   const [endDate, setEndDate] = useState(null)
   const [loading, setLoading] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [openPopup, setOpenPopup] = useState(false)
+  const [selectedStoreData, setSelectedStoreData] = useState(null)
 
   useEffect(() => {
     fetchReports()
@@ -113,7 +122,6 @@ const SuperAdminIncomeReports = () => {
         }
       )
       setTotalSummary(response2?.data?.summary)
-
       setReports(response?.data?.reports || [])
       setStores(response?.data?.stores || [])
       setSummary(response?.data?.summary || null)
@@ -139,6 +147,11 @@ const SuperAdminIncomeReports = () => {
 
   const handlePrint = () => {
     window.print()
+  }
+
+  const handleStoreClick = (report) => {
+    setSelectedStoreData(report)
+    setOpenPopup(true)
   }
 
   const formatCurrency = amount => {
@@ -228,14 +241,14 @@ const SuperAdminIncomeReports = () => {
             </Button>
           </Grid>
           <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant='h6' gutterBottom>
-              Total Net Income : {totalSummary?.totalNetIncome}
-            </Typography>
+          <Typography variant='h4' gutterBottom>
+            Total: {formatCurrency(totalSummary.totalNetIncome)}
+          </Typography>
           </Grid>
         </Grid>
 
         {summary && (
-          <Box sx={{ mb: 4, p: 3, backgroundColor: '#808069', borderRadius: 2 }}>
+          <Box sx={{ mb: 4, p: 3, backgroundColor: "main", borderRadius: 2 }}>
             <Typography variant='h6' gutterBottom>
               Summary
             </Typography>
@@ -285,7 +298,7 @@ const SuperAdminIncomeReports = () => {
             <TableContainer component={Paper} sx={{ mb: 4 }}>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: 'primary' }}>
+                  <TableRow sx={{ backgroundColor: 'primary.main' }}>
                     <TableCell>Store</TableCell>
                     <TableCell align='right'>Period</TableCell>
                     <TableCell align='right'>Sales</TableCell>
@@ -296,8 +309,13 @@ const SuperAdminIncomeReports = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {reports.map(report => (
-                    <TableRow key={report._id} hover>
+                  {reports.map((report, index) => (
+                    <TableRow 
+                      key={index} 
+                      hover 
+                      onClick={() => handleStoreClick(report)}
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <TableCell>
                         <Typography fontWeight='bold'>{report.store?.uname || 'N/A'}</Typography>
                         <Typography variant='body2' color='textSecondary'>
@@ -347,6 +365,72 @@ const SuperAdminIncomeReports = () => {
             </Button>
           </Box>
         )}
+
+        {/* Manager Expenses Popup */}
+        <Dialog open={openPopup} onClose={() => setOpenPopup(false)} maxWidth="md" fullWidth>
+          <DialogTitle>
+            Manager Expenses for {selectedStoreData?.store?.uname || 'Store'}
+            <IconButton
+              onClick={() => setOpenPopup(false)}
+              sx={{ position: 'absolute', right: 8, top: 8 }}
+            >
+              <Close/>
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            {selectedStoreData?.managerExpenses?.length > 0 ? (
+              selectedStoreData.managerExpenses.map((managerData, index) => (
+                <Box key={index} sx={{ mb: 4 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Manager: {managerData.manager?.uname || 'Unknown'}
+                  </Typography>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Total Expenses: {formatCurrency(managerData.totalExpense)}
+                  </Typography>
+                  
+                  <TableContainer component={Paper} sx={{ mb: 3 }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Title</TableCell>
+                          <TableCell>Amount</TableCell>
+                          <TableCell>Date</TableCell>
+                          <TableCell>Description</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {managerData.expenses?.length > 0 ? (
+                          managerData.expenses.map((expense, expIndex) => (
+                            <TableRow key={expIndex}>
+                              <TableCell>{expense.title}</TableCell>
+                              <TableCell>{formatCurrency(expense.amount)}</TableCell>
+                              <TableCell>{formatDate(expense.date)}</TableCell>
+                              <TableCell>{expense.description || '-'}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center">
+                              No expenses found for this manager
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <Divider sx={{ my: 2 }} />
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body1" align="center" sx={{ py: 4 }}>
+                No manager expenses found for this store
+              </Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenPopup(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </CardContent>
     </Card>
   )
