@@ -202,7 +202,41 @@ const IncomeReport = () => {
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography sx={{ color: '#808069' }}>Total Expenses:</Typography>
+                <Typography fontWeight='bold' sx={{ color: '#808069' }}>
+                  Manager Expenses
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                {reportData?.managerExpense.length > 0 &&
+                  reportData.managerExpense.map(exp => (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
+                      <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                        €{exp?.amount.toFixed(2)}k
+                      </Typography>
+                    </Box>
+                  ))}
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography fontWeight='bold' sx={{ color: '#808069' }}>
+                  Your Expenses
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                {reportData?.storeExpense.length > 0 &&
+                  reportData.storeExpense.map(exp => (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
+                      <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                        €{exp?.amount.toFixed(2)}k
+                      </Typography>
+                    </Box>
+                  ))}
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography fontWeight='bold' sx={{ color: '#808069' }}>
+                  Total Expenses:
+                </Typography>
                 <Typography fontWeight='bold' sx={{ color: '#333' }}>
                   €{reportData?.totalManagerExpenses.toFixed(2)}
                 </Typography>

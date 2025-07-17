@@ -19,10 +19,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   CircularProgress,
   Chip,
   Dialog,
@@ -37,7 +33,6 @@ import axios from 'axios'
 import decryptDataObject from '@/@menu/utils/decrypt'
 import Cookies from 'js-cookie'
 import Close from '@/@menu/svg/Close'
-// import CloseIcon from '@mui/icons-material/Close'
 
 // SVG Icon Components
 const PrintIcon = () => (
@@ -74,6 +69,8 @@ const SuperAdminIncomeReports = () => {
   const [exporting, setExporting] = useState(false)
   const [openPopup, setOpenPopup] = useState(false)
   const [selectedStoreData, setSelectedStoreData] = useState(null)
+  const [incomeReportData, setIncomeReportData] = useState(null)
+  const [incomeReportLoading, setIncomeReportLoading] = useState(false)
 
   useEffect(() => {
     fetchReports()
@@ -135,8 +132,6 @@ const SuperAdminIncomeReports = () => {
   const handleExport = async format => {
     try {
       setExporting(true)
-      // Implement export logic here (PDF, CSV, etc.)
-      // This would typically call a backend endpoint that generates the file
       console.log(`Exporting to ${format}...`)
     } catch (error) {
       console.error('Export failed:', error)
@@ -149,9 +144,44 @@ const SuperAdminIncomeReports = () => {
     window.print()
   }
 
-  const handleStoreClick = (report) => {
-    setSelectedStoreData(report)
-    setOpenPopup(true)
+  const handleStoreClick = async report => {
+    let token = decryptDataObject(sessionToken)
+    token = JSON.parse(token)
+    token = token?.tokens
+
+    const setTokenInJson = JSON.stringify({
+      postToken: backendPostToken,
+      loginToken: token
+    })
+
+    try {
+      setIncomeReportLoading(true)
+      setSelectedStoreData(report)
+
+      const response = await axios.post(
+        `${baseUrl}/backend/report/income`,
+        {
+          storeId: report.store.id,
+          startDate: report.fromDate,
+          endDate: report.toDate
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+          },
+          maxBodyLength: Infinity
+        }
+      )
+      console.log(response.data)
+
+      setIncomeReportData(response?.data)
+      setOpenPopup(true)
+    } catch (error) {
+      console.error('Error fetching income report:', error)
+    } finally {
+      setIncomeReportLoading(false)
+    }
   }
 
   const formatCurrency = amount => {
@@ -196,19 +226,6 @@ const SuperAdminIncomeReports = () => {
       />
       <CardContent>
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* <Grid item xs={12} sm={4}>
-            <FormControl fullWidth>
-              <InputLabel>Store</InputLabel>
-              <Select value={selectedStore} onChange={e => setSelectedStore(e.target.value)} label='Store'>
-                <MenuItem value=''>All Stores</MenuItem>
-                {stores.map(store => (
-                  <MenuItem key={store._id} value={store._id}>
-                    {store.uname}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid> */}
           <Grid item xs={12} sm={3}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
@@ -241,14 +258,14 @@ const SuperAdminIncomeReports = () => {
             </Button>
           </Grid>
           <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant='h4' gutterBottom>
-            Total: {formatCurrency(totalSummary?.totalNetIncome || 0)}
-          </Typography>
+            <Typography variant='h4' gutterBottom>
+              Total: {formatCurrency(totalSummary?.totalNetIncome || 0)}
+            </Typography>
           </Grid>
         </Grid>
 
         {summary && (
-          <Box sx={{ mb: 4, p: 3, backgroundColor: "main", borderRadius: 2 }}>
+          <Box sx={{ mb: 4, p: 3, backgroundColor: 'main', borderRadius: 2 }}>
             <Typography variant='h6' gutterBottom>
               Summary
             </Typography>
@@ -310,12 +327,7 @@ const SuperAdminIncomeReports = () => {
                 </TableHead>
                 <TableBody>
                   {reports.map((report, index) => (
-                    <TableRow 
-                      key={index} 
-                      hover 
-                      onClick={() => handleStoreClick(report)}
-                      sx={{ cursor: 'pointer' }}
-                    >
+                    <TableRow key={index} hover onClick={() => handleStoreClick(report)} sx={{ cursor: 'pointer' }}>
                       <TableCell>
                         <Typography fontWeight='bold'>{report?.store?.uname || 'N/A'}</Typography>
                         <Typography variant='body2' color='textSecondary'>
@@ -366,64 +378,179 @@ const SuperAdminIncomeReports = () => {
           </Box>
         )}
 
-        {/* Manager Expenses Popup */}
-        <Dialog open={openPopup} onClose={() => setOpenPopup(false)} maxWidth="md" fullWidth>
+        {/* Income Report Popup */}
+        <Dialog open={openPopup} onClose={() => setOpenPopup(false)} maxWidth='md' fullWidth>
           <DialogTitle>
-            Manager Expenses for {selectedStoreData?.store?.uname || 'Store'}
-            <IconButton
-              onClick={() => setOpenPopup(false)}
-              sx={{ position: 'absolute', right: 8, top: 8 }}
-            >
-              <Close/>
+            Income Report for {selectedStoreData?.store?.uname || 'Store'}
+            <IconButton onClick={() => setOpenPopup(false)} sx={{ position: 'absolute', right: 8, top: 8 }}>
+              <Close />
             </IconButton>
           </DialogTitle>
           <DialogContent>
-            {selectedStoreData?.managerExpenses?.length > 0 ? (
-              selectedStoreData.managerExpenses.map((managerData, index) => (
-                <Box key={index} sx={{ mb: 4 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Manager: {managerData.manager?.uname || 'Unknown'}
+            {incomeReportLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : incomeReportData ? (
+              <Box
+                sx={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 1,
+                  p: 4,
+                  backgroundColor: '#f9f9f9',
+                  margin: 'auto',
+                  boxShadow: '0px 0px 10px rgba(0,0,0,0.05)'
+                }}
+              >
+                {/* Receipt Header */}
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <Typography variant='h5' gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
+                    {selectedStoreData.store?.uname}
                   </Typography>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Total Expenses: {formatCurrency(managerData.totalExpense)}
+                  <Typography variant='body2' sx={{ color: '#808069' }}>
+                    {incomeReportData.storeId?.address}
                   </Typography>
-                  
-                  <TableContainer component={Paper} sx={{ mb: 3 }}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Title</TableCell>
-                          <TableCell>Amount</TableCell>
-                          <TableCell>Date</TableCell>
-                          <TableCell>Description</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {managerData.expenses?.length > 0 ? (
-                          managerData.expenses.map((expense, expIndex) => (
-                            <TableRow key={expIndex}>
-                              <TableCell>{expense.title}</TableCell>
-                              <TableCell>{formatCurrency(expense.amount)}</TableCell>
-                              <TableCell>{formatDate(expense.date)}</TableCell>
-                              <TableCell>{expense.description || '-'}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={4} align="center">
-                              No expenses found for this manager
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                  <Divider sx={{ my: 2 }} />
+                  <Typography variant='body2' sx={{ color: '#808069' }}>
+                    {`Phone: ${incomeReportData?.storeId?.telephone}`}
+                  </Typography>
+                  <Typography variant='body2' gutterBottom sx={{ color: '#808069' }}>
+                    {new Date().toLocaleDateString()}
+                  </Typography>
+                  <Typography variant='h6' sx={{ mt: 2, fontWeight: 'bold', color: '#333' }}>
+                    INCOME REPORT
+                  </Typography>
+                  <Typography variant='body2' sx={{ color: '#808069' }}>
+                    {incomeReportData.fromDate && `From: ${formatDate(incomeReportData.fromDate)}`}
+                  </Typography>
+                  <Typography variant='body2' sx={{ color: '#808069' }}>
+                    {incomeReportData.toDate && `To: ${formatDate(incomeReportData.toDate)}`}
+                  </Typography>
                 </Box>
-              ))
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Receipt Body */}
+                <Box sx={{ mb: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography sx={{ color: '#808069' }}>Total Sales:</Typography>
+                    <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                      {formatCurrency(incomeReportData?.totalSales)}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography sx={{ color: '#808069' }}>Total Payroll:</Typography>
+                    <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                      {formatCurrency(incomeReportData?.totalPayroll)}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography fontWeight='bold' sx={{ color: '#808069' }}>
+                      Manager Expenses
+                    </Typography>
+                  </Box>
+                  <Box sx={{ mb: 3 }}>
+                    {incomeReportData?.managerExpense.length > 0 &&
+                      incomeReportData.managerExpense.map(exp => (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
+                          <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                            €{exp?.amount.toFixed(2)}k
+                          </Typography>
+                        </Box>
+                      ))}
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography fontWeight='bold' sx={{ color: '#808069' }}>
+                      Your Expenses
+                    </Typography>
+                  </Box>
+                  <Box sx={{ mb: 3 }}>
+                    {incomeReportData?.storeExpense.length > 0 &&
+                      incomeReportData.storeExpense.map(exp => (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
+                          <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                            €{exp?.amount.toFixed(2)}k
+                          </Typography>
+                        </Box>
+                      ))}
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography fontWeight='bold' sx={{ color: '#808069' }}>
+                      Total Expenses:
+                    </Typography>
+                    <Typography fontWeight='bold' sx={{ color: '#333' }}>
+                      {formatCurrency(incomeReportData?.totalManagerExpenses)}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Divider sx={{ my: 2, borderStyle: 'dashed' }} />
+
+                {/* Receipt Footer */}
+                <Box sx={{ textAlign: 'center', mt: 3 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#f0f0f0',
+                      p: 2,
+                      borderRadius: 1,
+                      mb: 2
+                    }}
+                  >
+                    <Typography variant='h6' sx={{ color: '#333' }}>
+                      NET INCOME:
+                    </Typography>
+                    <Typography variant='h6' fontWeight='bold' sx={{ color: '#333' }}>
+                      {formatCurrency(incomeReportData?.netIncome)}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#f0f0f0',
+                      p: 2,
+                      borderRadius: 1,
+                      mb: 2
+                    }}
+                  >
+                    <Typography variant='h6' sx={{ color: '#333' }}>
+                      Total Card Payment:
+                    </Typography>
+                    <Typography variant='h6' fontWeight='bold' sx={{ color: '#333' }}>
+                      {formatCurrency(incomeReportData?.totalCard)}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#f0f0f0',
+                      p: 2,
+                      borderRadius: 1,
+                      mb: 2
+                    }}
+                  >
+                    <Typography variant='h6' sx={{ color: '#333' }}>
+                      Total Cash Payment:
+                    </Typography>
+                    <Typography variant='h6' fontWeight='bold' sx={{ color: '#333' }}>
+                      {formatCurrency(incomeReportData?.totalCash)}
+                    </Typography>
+                  </Box>
+                  <Typography variant='body2' sx={{ color: '#333', mt: 3 }}>
+                    Thank you for your business!
+                  </Typography>
+                  <Typography variant='caption' sx={{ color: '#333' }}>
+                    Report generated at: {new Date().toLocaleString()}
+                  </Typography>
+                </Box>
+              </Box>
             ) : (
-              <Typography variant="body1" align="center" sx={{ py: 4 }}>
-                No manager expenses found for this store
+              <Typography variant='body1' align='center' sx={{ py: 4 }}>
+                No income report data available
               </Typography>
             )}
           </DialogContent>
