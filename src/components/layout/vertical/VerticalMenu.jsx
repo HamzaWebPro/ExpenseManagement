@@ -97,6 +97,9 @@ const VerticalMenu = ({ scrollMenu }) => {
             <MenuItem href='/notifications' icon={<Icon icon='tabler-report' />}>
               Notifications
             </MenuItem>
+            <MenuItem href='/workday-register' icon={<Icon icon='tabler-calendar-check' />}>
+              Workday Register
+            </MenuItem>
           </MenuSection>
         )}
         {/* for fix error  */}

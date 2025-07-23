@@ -102,6 +102,8 @@ const ExpenseManagement = () => {
   })
   const [stores, setStores] = useState([])
   const [selectedStore, setSelectedStore] = useState('')
+  const [managers, setManagers] = useState([])
+  const [selectedManagers, setSelectedManagers] = useState([])
 
   // Get current user role
   const currentUser = sessionToken ? JSON.parse(decryptDataObject(sessionToken)) : null
@@ -159,10 +161,34 @@ const ExpenseManagement = () => {
     }
   }
 
+  const fetchManagers = async () => {
+    try {
+      const loginToken = await TokenManager.getLoginToken()
+      const setTokenInJson = JSON.stringify({
+        getToken: backendGetToken,
+        loginToken: loginToken || ''
+      })
+
+      const response = await axios.get(`${baseUrl}/backend/authentication/all-manager`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
+        },
+        maxBodyLength: Infinity
+      })
+
+      const managersArr = response?.data?.success?.data || []
+      setManagers(managersArr)
+    } catch (error) {
+      console.error('Error fetching managers:', error)
+    }
+  }
+
   useEffect(() => {
     fetchExpenses()
     if (role === 'superAdmin') {
       fetchStores()
+      fetchManagers()
     }
   }, [role])
 
@@ -209,7 +235,6 @@ const ExpenseManagement = () => {
         })
       }
     }
-    console.log(filtered)
 
     setFilteredData(filtered)
   }
@@ -243,15 +268,28 @@ const ExpenseManagement = () => {
     reset,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: {
       title: '',
       amount: '',
       date: new Date(),
-      description: ''
+      description: '',
+      store: '',
+      addedBy: ''
     }
   })
+
+  const storeId = watch('store')
+
+  useEffect(() => {
+    if (storeId) {
+      const filteredManagers = managers.filter(manager => manager.store?._id === storeId || manager.store === storeId)
+      setSelectedManagers(filteredManagers)
+      setValue('addedBy', '')
+    }
+  }, [storeId])
 
   // Form Submit Handler
   const onSubmit = async formData => {
@@ -270,6 +308,8 @@ const ExpenseManagement = () => {
         },
         maxBodyLength: Infinity
       })
+
+      console.log('response', response)
 
       toast.success('Expense Added Successfully!')
       fetchExpenses()
@@ -370,7 +410,14 @@ const ExpenseManagement = () => {
 
   // Reset Form
   const handleResetForm = () => {
-    reset()
+    reset({
+      title: '',
+      amount: '',
+      date: new Date(),
+      description: '',
+      store: '',
+      addedBy: ''
+    })
   }
 
   // Table Columns
@@ -501,11 +548,10 @@ const ExpenseManagement = () => {
                 placeholder='Search expenses...'
                 className='min-is-[200px]'
               />
-              {role != 'superAdmin' ? (
-                <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
-                  {showAddForm ? 'Hide Form' : 'Add Expense'}
-                </Button>
-              ) : (
+              <Button variant='contained' onClick={() => setShowAddForm(!showAddForm)}>
+                {showAddForm ? 'Hide Form' : 'Add Expense'}
+              </Button>
+              {role === 'superAdmin' && (
                 <CardHeader
                   title='Total Expenses'
                   subheader={`Total: ${filteredData.reduce((value, item) => value + item.amount, 0).toFixed(2)}`}
@@ -572,6 +618,70 @@ const ExpenseManagement = () => {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={4}>
+                {/* For superAdmin - Store and Manager selection */}
+                {role === 'superAdmin' && (
+                  <>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='store'
+                        control={control}
+                        render={({ field }) => (
+                          <CustomTextField
+                            {...field}
+                            select
+                            fullWidth
+                            label='Select Store'
+                            error={!!errors.store}
+                            helperText={errors.store?.message}
+                            onChange={e => {
+                              const selectedStoreId = e.target.value
+                              field.onChange(selectedStoreId)
+                              const filteredManagers = managers.filter(
+                                manager => manager.store?._id === selectedStoreId || manager.store === selectedStoreId
+                              )
+                              setSelectedManagers(filteredManagers)
+                              setValue('addedBy', '')
+                            }}
+                          >
+                            <MenuItem value=''>Select Store</MenuItem>
+                            {stores.map(store => (
+                              <MenuItem key={store._id} value={store._id}>
+                                {store.uname}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+
+                    {storeId && selectedManagers.length > 0 && (
+                      <Grid item xs={12} sm={6}>
+                        <Controller
+                          name='addedBy'
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTextField
+                              {...field}
+                              select
+                              fullWidth
+                              label='Select Manager'
+                              error={!!errors.addedBy}
+                              helperText={errors.addedBy?.message}
+                            >
+                              <MenuItem value=''>Select Manager</MenuItem>
+                              {selectedManagers.map(manager => (
+                                <MenuItem key={manager._id} value={manager._id}>
+                                  {manager.uname}
+                                </MenuItem>
+                              ))}
+                            </CustomTextField>
+                          )}
+                        />
+                      </Grid>
+                    )}
+                  </>
+                )}
+
                 {/* Expense Title */}
                 <Grid item xs={12} sm={6}>
                   <Controller
@@ -792,16 +902,26 @@ const ExpenseManagement = () => {
                     </Box>
                   </Grid>
                   {role === 'superAdmin' && (
-                    <Grid item xs={12} sm={6}>
-                      <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
-                        <Typography variant='subtitle2' color='textSecondary'>
-                          Store
-                        </Typography>
-                        <Typography variant='body1'>
-                          {selectedExpense.store?.uname || selectedExpense.addedBy?.store?.uname || '-'}
-                        </Typography>
-                      </Box>
-                    </Grid>
+                    <>
+                      <Grid item xs={12} sm={6}>
+                        <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                          <Typography variant='subtitle2' color='textSecondary'>
+                            Store
+                          </Typography>
+                          <Typography variant='body1'>
+                            {selectedExpense.store?.uname || selectedExpense.addedBy?.store?.uname || '-'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>
+                          <Typography variant='subtitle2' color='textSecondary'>
+                            Added By
+                          </Typography>
+                          <Typography variant='body1'>{selectedExpense.addedBy?.uname || 'Super Admin'}</Typography>
+                        </Box>
+                      </Grid>
+                    </>
                   )}
                   <Grid item xs={12} sm={6}>
                     <Box p={2} borderRadius={2} boxShadow={1} bgcolor='background.paper'>

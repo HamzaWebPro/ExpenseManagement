@@ -369,7 +369,7 @@ const AdminDashboard = () => {
                           <Icon icon='tabler-currency-dollar' color='warning.main' />
                         </Avatar>
                         <div>
-                          <Typography variant='subtitle1'>{expense.description}</Typography>
+                          <Typography variant='subtitle1'>{expense.title}</Typography>
                           <Typography variant='body2' color='text.secondary'>
                             {expense.category}
                           </Typography>
