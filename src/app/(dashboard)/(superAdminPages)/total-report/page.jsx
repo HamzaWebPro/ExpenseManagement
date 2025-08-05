@@ -118,6 +118,9 @@ const SuperAdminIncomeReports = () => {
           maxBodyLength: Infinity
         }
       )
+
+      console.log(response.data)
+      console.log(response2.data)
       setTotalSummary(response2?.data?.summary)
       setReports(response?.data?.reports || [])
       setStores(response?.data?.stores || [])
@@ -326,34 +329,38 @@ const SuperAdminIncomeReports = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {reports.map((report, index) => (
-                    <TableRow key={index} hover onClick={() => handleStoreClick(report)} sx={{ cursor: 'pointer' }}>
-                      <TableCell>
-                        <Typography fontWeight='bold'>{report?.store?.uname || 'N/A'}</Typography>
-                        <Typography variant='body2' color='textSecondary'>
-                          {report?.store?.address || ''}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align='right'>
-                        {formatDate(report?.fromDate)} - {formatDate(report?.toDate)}
-                      </TableCell>
-                      <TableCell align='right'>{formatCurrency(report?.totalSales)}</TableCell>
-                      <TableCell align='right'>{formatCurrency(report?.totalManagerExpenses)}</TableCell>
-                      <TableCell align='right'>{formatCurrency(report?.totalPayroll)}</TableCell>
-                      <TableCell align='right'>
-                        <Typography fontWeight='bold' color={report?.netIncome >= 0 ? 'success.main' : 'error.main'}>
-                          {formatCurrency(report?.netIncome)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={report?.netIncome >= 0 ? 'Profitable' : 'Loss'}
-                          color={report?.netIncome >= 0 ? 'success' : 'error'}
-                          size='small'
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {reports.map((report, index) => {
+                    console.log('report', report)
+
+                    return (
+                      <TableRow key={index} hover onClick={() => handleStoreClick(report)} sx={{ cursor: 'pointer' }}>
+                        <TableCell>
+                          <Typography fontWeight='bold'>{report?.store?.uname || 'N/A'}</Typography>
+                          <Typography variant='body2' color='textSecondary'>
+                            {report?.store?.address || ''}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align='right'>
+                          {formatDate(report?.fromDate)} - {formatDate(report?.toDate)}
+                        </TableCell>
+                        <TableCell align='right'>{formatCurrency(report?.totalSales)}</TableCell>
+                        <TableCell align='right'>{formatCurrency(report?.totalManagerExpenses)}</TableCell>
+                        <TableCell align='right'>{formatCurrency(report?.totalPayroll)}</TableCell>
+                        <TableCell align='right'>
+                          <Typography fontWeight='bold' color={report?.netIncome >= 0 ? 'success.main' : 'error.main'}>
+                            {formatCurrency(report?.netIncome)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={report?.netIncome >= 0 ? 'Profitable' : 'Loss'}
+                            color={report?.netIncome >= 0 ? 'success' : 'error'}
+                            size='small'
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -454,7 +461,7 @@ const SuperAdminIncomeReports = () => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                           <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
                           <Typography fontWeight='bold' sx={{ color: '#333' }}>
-                            €{exp?.amount.toFixed(2)}k
+                            €{exp?.amount.toFixed(2)}
                           </Typography>
                         </Box>
                       ))}
@@ -470,7 +477,7 @@ const SuperAdminIncomeReports = () => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                           <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
                           <Typography fontWeight='bold' sx={{ color: '#333' }}>
-                            €{exp?.amount.toFixed(2)}k
+                            €{exp?.amount.toFixed(2)}
                           </Typography>
                         </Box>
                       ))}
