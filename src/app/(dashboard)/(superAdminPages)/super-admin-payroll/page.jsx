@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import {
   Card,
   CardHeader,
@@ -35,6 +35,9 @@ const SuperAdminPayrollReport = () => {
   const backendPostToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_POST_TOKEN
   const backendGetToken = process.env.NEXT_PUBLIC_VITE_API_BACKEND_GET_TOKEN
 
+  const decodedUser = JSON.parse(decryptDataObject(sessionToken))
+  const userRole = decodedUser?.role || ''
+
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
   const [report, setReport] = useState(null)
@@ -54,7 +57,12 @@ const SuperAdminPayrollReport = () => {
         loginToken: decrypted || ''
       })
 
-      const response = await axios.get(`${baseUrl}/backend/authentication/all-user`, {
+      console.log('ok', decrypted)
+      const url =
+        userRole === 'superAdmin'
+          ? `${baseUrl}/backend/authentication/all-user`
+          : `${baseUrl}/backend/authentication/all-added-user`
+      const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${btoa(`user:${setTokenInJson}`)}`
@@ -62,26 +70,34 @@ const SuperAdminPayrollReport = () => {
         maxBodyLength: Infinity
       })
 
-      const users = response?.data?.success?.data || []
+      console.log('response', response.data.success.data, userRole)
 
       // Reset data arrays
       setStores([])
       setManagers([])
+      const users = response?.data?.success?.data || []
+      if (userRole === 'superAdmin') {
+        // Categorize users by role
+        users.forEach(user => {
+          const userRole = user?.role?.toLowerCase()
+          switch (userRole) {
+            case 'admin':
+              setStores(prev => [...prev, user])
+              break
+            case 'manager':
+              setManagers(prev => [...prev, user])
+              break
+            default:
+              break
+          }
+        })
+      } else {
+        console.log('Without superAdmin role, users:', users)
 
-      // Categorize users by role
-      users.forEach(user => {
-        const userRole = user?.role?.toLowerCase()
-        switch (userRole) {
-          case 'admin':
-            setStores(prev => [...prev, user])
-            break
-          case 'manager':
-            setManagers(prev => [...prev, user])
-            break
-          default:
-            break
-        }
-      })
+        console.log('users', users)
+
+        setManagers([...users])
+      }
     } catch (error) {
       console.error('Error fetching users:', error)
       enqueueSnackbar('Failed to fetch stores and managers', { variant: 'error' })
@@ -111,8 +127,8 @@ const SuperAdminPayrollReport = () => {
 
   const handleGenerateReport = async () => {
     try {
-      if (!selectedStore || !selectedManager) {
-        enqueueSnackbar('Please select both store and manager', { variant: 'warning' })
+      if (!selectedManager) {
+        enqueueSnackbar('Please select a manager', { variant: 'warning' })
         return
       }
 
@@ -141,6 +157,7 @@ const SuperAdminPayrollReport = () => {
         }
       )
 
+      console.log('Generating report with:', response)
       setReport(response.data)
       enqueueSnackbar('Payroll report generated successfully', { variant: 'success' })
     } catch (error) {
@@ -175,25 +192,80 @@ const SuperAdminPayrollReport = () => {
               renderInput={params => <TextField {...params} fullWidth />}
             />
           </LocalizationProvider>
+          {userRole === 'superAdmin' && (
+            <FormControl fullWidth>
+              <InputLabel>Store</InputLabel>
+              <Select value={selectedStore} onChange={e => setSelectedStore(e.target.value)} label='Store'>
+                {stores.map(store => (
+                  <MenuItem key={store._id} value={store._id}>
+                    {store.uname}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
-          <FormControl fullWidth>
-            <InputLabel>Store</InputLabel>
-            <Select value={selectedStore} onChange={e => setSelectedStore(e.target.value)} label='Store'>
-              {stores.map(store => (
-                <MenuItem key={store._id} value={store._id}>
-                  {store.uname}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
+          {userRole === 'superAdmin' ? (
+            <>
+              <FormControl fullWidth>
+                <InputLabel>Manager</InputLabel>
+                <Select
+                  value={selectedManager}
+                  onChange={e => setSelectedManager(e.target.value)}
+                  label='Manager'
+                  disabled={!selectedStore || getStoreManagers().length === 0}
+                >
+                  {getStoreManagers().map(manager => (
+                    <MenuItem key={manager._id} value={manager._id}>
+                      {manager.uname}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button
+                variant='contained'
+                onClick={handleGenerateReport}
+                disabled={isLoading || !selectedStore || !selectedManager}
+                sx={{ minWidth: 200 }}
+              >
+                {isLoading ? <CircularProgress size={24} /> : 'Generate Report'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <FormControl fullWidth>
+                <InputLabel>Manager</InputLabel>
+                <Select
+                  value={selectedManager}
+                  onChange={e => setSelectedManager(e.target.value)}
+                  label='Manager'
+                  // disabled={getStoreManagers().length === 0}
+                >
+                  {managers.map(manager => (
+                    <MenuItem key={manager._id} value={manager._id}>
+                      {manager.uname}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button
+                variant='contained'
+                onClick={handleGenerateReport}
+                disabled={isLoading || !selectedManager}
+                sx={{ minWidth: 200 }}
+              >
+                {isLoading ? <CircularProgress size={24} /> : 'Generate Report'}
+              </Button>
+            </>
+          )}
+          {/* 
           <FormControl fullWidth>
             <InputLabel>Manager</InputLabel>
             <Select
               value={selectedManager}
               onChange={e => setSelectedManager(e.target.value)}
               label='Manager'
-              disabled={!selectedStore || getStoreManagers().length === 0}
+              disabled={getStoreManagers().length === 0}
             >
               {getStoreManagers().map(manager => (
                 <MenuItem key={manager._id} value={manager._id}>
@@ -201,16 +273,7 @@ const SuperAdminPayrollReport = () => {
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
-
-          <Button
-            variant='contained'
-            onClick={handleGenerateReport}
-            disabled={isLoading || !selectedStore || !selectedManager}
-            sx={{ minWidth: 200 }}
-          >
-            {isLoading ? <CircularProgress size={24} /> : 'Generate Report'}
-          </Button>
+          </FormControl> */}
         </Box>
 
         {report?.payroll?.length > 0 && (
