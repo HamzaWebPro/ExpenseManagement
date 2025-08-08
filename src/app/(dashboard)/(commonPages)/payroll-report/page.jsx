@@ -131,22 +131,22 @@ const PayrollReport = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Employee</TableCell>
-                    <TableCell align='right'>Work Days</TableCell>
+                    {/* <TableCell align='right'>Work Days</TableCell> */}
                     <TableCell align='right'>Salary (€)</TableCell>
-                    <TableCell align='right'>Commission (€)</TableCell>
+                    {/* <TableCell align='right'>Commission (€)</TableCell>
                     <TableCell align='right'>Expense (€)</TableCell>
-                    <TableCell align='right'>Net Pay (€)</TableCell>
+                    <TableCell align='right'>Net Pay (€)</TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {report.payroll.map(row => (
                     <TableRow key={row.userId}>
                       <TableCell>{row.uname}</TableCell>
-                      <TableCell align='right'>{row.workedDaysCount}</TableCell>
+                      {/* <TableCell align='right'>{row.workedDaysCount}</TableCell> */}
                       <TableCell align='right'>{row.salary.toFixed(2)}</TableCell>
-                      <TableCell align='right'>{row.commission.toFixed(2)}</TableCell>
+                      {/* <TableCell align='right'>{row.commission.toFixed(2)}</TableCell>
                       <TableCell align='right'>{row.expense.toFixed(2)}</TableCell>
-                      <TableCell align='right'>{row.netPay.toFixed(2)}</TableCell>
+                      <TableCell align='right'>{row.netPay.toFixed(2)}</TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -170,7 +170,7 @@ const PayrollReport = () => {
                       <TableCell>Total Salary</TableCell>
                       <TableCell align='right'>€{report.totalSalary.toFixed(2)}</TableCell>
                     </TableRow>
-                    <TableRow>
+                    {/* <TableRow>
                       <TableCell>Total Commission</TableCell>
                       <TableCell align='right'>€{report.totalCommission.toFixed(2)}</TableCell>
                     </TableRow>
@@ -185,7 +185,7 @@ const PayrollReport = () => {
                       <TableCell align='right'>
                         <Typography fontWeight='bold'>€{report.totalNetPay.toFixed(2)}</Typography>
                       </TableCell>
-                    </TableRow>
+                    </TableRow> */}
                   </TableBody>
                 </Table>
               </TableContainer>
