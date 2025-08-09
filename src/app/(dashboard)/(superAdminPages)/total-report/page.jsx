@@ -121,10 +121,11 @@ const SuperAdminIncomeReports = () => {
 
       console.log(response.data)
       console.log(response2.data)
+
       setTotalSummary(response2?.data?.summary)
       setReports(response?.data?.reports || [])
       setStores(response?.data?.stores || [])
-      setSummary(response?.data?.summary || null)
+      setSummary(response2?.data?.summary || null)
     } catch (error) {
       console.error('Error fetching income reports:', error)
     } finally {
@@ -301,7 +302,7 @@ const SuperAdminIncomeReports = () => {
                 <Card variant='outlined'>
                   <CardContent>
                     <Typography color='textSecondary'>Avg. Net Income</Typography>
-                    <Typography variant='h5'>{formatCurrency(summary.averageNetIncome)}</Typography>
+                    <Typography variant='h5'>{summary.averageNetIncome}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
