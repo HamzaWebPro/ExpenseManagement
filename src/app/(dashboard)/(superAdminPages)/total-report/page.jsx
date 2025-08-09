@@ -123,9 +123,9 @@ const SuperAdminIncomeReports = () => {
       console.log(response2.data)
 
       setTotalSummary(response2?.data?.summary)
-      setReports(response?.data?.reports || [])
+      setReports(response2?.data?.reports || [])
       setStores(response?.data?.stores || [])
-      setSummary(response2?.data?.summary || null)
+      setSummary(response?.data?.summary || null)
     } catch (error) {
       console.error('Error fetching income reports:', error)
     } finally {
@@ -177,7 +177,7 @@ const SuperAdminIncomeReports = () => {
           maxBodyLength: Infinity
         }
       )
-      console.log(response.data)
+      console.log('Income Report Data:', response.data)
 
       setIncomeReportData(response?.data)
       setOpenPopup(true)
