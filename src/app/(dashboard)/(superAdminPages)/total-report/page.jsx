@@ -122,8 +122,8 @@ const SuperAdminIncomeReports = () => {
       console.log(response.data)
       console.log(response2.data)
 
-      setTotalSummary(response2?.data?.summary)
-      setReports(response2?.data?.reports || [])
+      setTotalSummary(response?.data?.summary)
+      setReports(response?.data?.reports || [])
       setStores(response?.data?.stores || [])
       setSummary(response?.data?.summary || null)
     } catch (error) {
@@ -149,6 +149,8 @@ const SuperAdminIncomeReports = () => {
   }
 
   const handleStoreClick = async report => {
+    console.log('handleStoreClick report', report.storeId)
+
     let token = decryptDataObject(sessionToken)
     token = JSON.parse(token)
     token = token?.tokens
@@ -165,7 +167,7 @@ const SuperAdminIncomeReports = () => {
       const response = await axios.post(
         `${baseUrl}/backend/report/income`,
         {
-          storeId: report.store.id,
+          storeId: report.storeId,
           startDate: report.fromDate,
           endDate: report.toDate
         },
@@ -278,7 +280,7 @@ const SuperAdminIncomeReports = () => {
                 <Card variant='outlined'>
                   <CardContent>
                     <Typography color='textSecondary'>Total Reports</Typography>
-                    <Typography variant='h5'>{summary.count}</Typography>
+                    <Typography variant='h5'>{summary.totalReports}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
@@ -302,7 +304,7 @@ const SuperAdminIncomeReports = () => {
                 <Card variant='outlined'>
                   <CardContent>
                     <Typography color='textSecondary'>Avg. Net Income</Typography>
-                    <Typography variant='h5'>{summary.averageNetIncome}</Typography>
+                    <Typography variant='h5'>{summary.avgNetIncome}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
@@ -336,14 +338,12 @@ const SuperAdminIncomeReports = () => {
                     return (
                       <TableRow key={index} hover onClick={() => handleStoreClick(report)} sx={{ cursor: 'pointer' }}>
                         <TableCell>
-                          <Typography fontWeight='bold'>{report?.store?.uname || 'N/A'}</Typography>
+                          <Typography fontWeight='bold'>{report?.storeName || 'N/A'}</Typography>
                           <Typography variant='body2' color='textSecondary'>
                             {report?.store?.address || ''}
                           </Typography>
                         </TableCell>
-                        <TableCell align='right'>
-                          {formatDate(report?.fromDate)} - {formatDate(report?.toDate)}
-                        </TableCell>
+                        <TableCell align='right'>{report?.period}</TableCell>
                         <TableCell align='right'>{formatCurrency(report?.totalSales)}</TableCell>
                         <TableCell align='right'>{formatCurrency(report?.totalManagerExpenses)}</TableCell>
                         <TableCell align='right'>{formatCurrency(report?.totalPayroll)}</TableCell>
