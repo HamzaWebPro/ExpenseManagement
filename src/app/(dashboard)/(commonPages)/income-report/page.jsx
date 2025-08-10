@@ -79,7 +79,6 @@ const IncomeReport = () => {
           maxBodyLength: Infinity
         }
       )
-      console.log(response)
 
       setReportData(response?.data)
     } catch (error) {
@@ -212,7 +211,7 @@ const IncomeReport = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
                       <Typography fontWeight='bold' sx={{ color: '#333' }}>
-                        €{exp?.amount.toFixed(2)}k
+                        €{exp?.amount.toFixed(2)}
                       </Typography>
                     </Box>
                   ))}
@@ -228,7 +227,7 @@ const IncomeReport = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ color: '#808069' }}>{exp.addedBy.uname}</Typography>
                       <Typography fontWeight='bold' sx={{ color: '#333' }}>
-                        €{exp?.amount.toFixed(2)}k
+                        €{exp?.amount.toFixed(2)}
                       </Typography>
                     </Box>
                   ))}
