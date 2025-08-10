@@ -304,7 +304,7 @@ const SuperAdminIncomeReports = () => {
                 <Card variant='outlined'>
                   <CardContent>
                     <Typography color='textSecondary'>Avg. Net Income</Typography>
-                    <Typography variant='h5'>{summary.avgNetIncome}</Typography>
+                    <Typography variant='h5'>{formatCurrency(summary.avgNetIncome)}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
